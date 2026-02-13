@@ -1,0 +1,3911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a237e">
+    <meta name="description" content="ProjectLink Construction Intelligence System - Advanced site reporting and collaboration platform">
+    <title>PLCIS - ProjectLink Construction Intelligence System</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places,drawing,geometry"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --primary-dark: #0d1642;
+            --accent: #ff6f00;
+            --accent-light: #ff9e40;
+            --success: #2e7d32;
+            --warning: #f9a825;
+            --danger: #c62828;
+            --info: #0277bd;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+            --border: #e0e0e0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* App Container */
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .role-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* Navigation */
+        .nav-container {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            position: sticky;
+            top: 60px;
+            z-index: 999;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tabs {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-width: max-content;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary);
+            background: rgba(26, 35, 126, 0.05);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .nav-tab .badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 10px;
+            margin-left: 0.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Grid System */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--danger);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group .form-input {
+            flex: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #e65100;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px;
+        }
+
+        /* GPS Status */
+        .gps-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+        }
+
+        .gps-status.accurate {
+            background: #e8f5e9;
+            color: var(--success);
+            border-left-color: var(--success);
+        }
+
+        .gps-status.inaccurate {
+            background: #fff3e0;
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .gps-status.error {
+            background: #ffebee;
+            color: var(--danger);
+            border-left-color: var(--danger);
+        }
+
+        .gps-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .gps-status.accurate .gps-dot { background: var(--success); }
+        .gps-status.inaccurate .gps-dot { background: var(--accent); }
+        .gps-status.error .gps-dot { background: var(--danger); animation: none; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+        }
+
+        /* Coordinate Display */
+        .coord-display {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coord-display::before {
+            content: '📍';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 2rem;
+            opacity: 0.1;
+        }
+
+        .coord-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+
+        .coord-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .coord-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .coord-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Map Container */
+        .map-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .map-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .map-toggle button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+        }
+
+        .map-toggle button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .map-toggle button:first-child {
+            border-right: 1px solid var(--border);
+        }
+
+        /* Drawing/Plan Container */
+        .drawing-wrapper {
+            position: relative;
+            width: 100%;
+            background: #fafafa;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px dashed #ccc;
+            min-height: 400px;
+        }
+
+        .drawing-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0 0.5rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .tool-group:last-child {
+            border-right: none;
+        }
+
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            border-color: var(--primary);
+            background: rgba(26, 35, 126, 0.1);
+            color: var(--primary);
+        }
+
+        .drawing-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: auto;
+            background: #e0e0e0;
+        }
+
+        #drawingCanvas {
+            display: block;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .pin-legend {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .legend-item:hover {
+            background: var(--bg);
+        }
+
+        .legend-item.active {
+            background: rgba(26, 35, 126, 0.1);
+            font-weight: 600;
+        }
+
+        .legend-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Photo Management */
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f0f0;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .photo-item img, .photo-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 50%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.75rem;
+        }
+
+        .photo-item:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        .photo-badge {
+            align-self: flex-start;
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .photo-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-self: flex-end;
+        }
+
+        .photo-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .photo-action-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .photo-gps-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Voice Recording */
+        .voice-recorder {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .record-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: var(--danger);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+        }
+
+        .record-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .record-btn.recording {
+            animation: recordingPulse 1.5s infinite;
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(198, 40, 40, 0); }
+        }
+
+        .recording-wave {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            height: 30px;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: var(--danger);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 30px; }
+        }
+
+        /* Team Collaboration */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .team-member:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-role {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .role-tag {
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-engineer { background: #e3f2fd; color: var(--info); }
+        .role-supervisor { background: #fff3e0; color: var(--accent); }
+        .role-client { background: #e8f5e9; color: var(--success); }
+        .role-rto { background: #f3e5f5; color: #7b1fa2; }
+        .role-re { background: #fce4ec; color: #c2185b; }
+        .role-pm { background: #e0f2f1; color: #00695c; }
+
+        .member-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .member-status.offline {
+            background: var(--text-secondary);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .activity-item:hover {
+            background: var(--bg);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-text strong {
+            color: var(--primary);
+        }
+
+        .activity-time {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Reports List */
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .report-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+        .report-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .report-item.status-pending {
+            border-left-color: var(--warning);
+        }
+
+        .report-item.status-approved {
+            border-left-color: var(--success);
+        }
+
+        .report-item.status-rejected {
+            border-left-color: var(--danger);
+        }
+
+        .report-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            flex-wrap: wrap;
+        }
+
+        .report-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-draft { background: #e0e0e0; color: #616161; }
+        .status-pending { background: #fff3e0; color: var(--accent); }
+        .status-approved { background: #e8f5e9; color: var(--success); }
+        .status-rejected { background: #ffebee; color: var(--danger); }
+
+        /* Modal System */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            padding: 1rem;
+            overflow-y: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalSlide 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-lg {
+            max-width: 1200px;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(0,0,0,0.1);
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            background: var(--bg);
+        }
+
+        /* Sketch Canvas */
+        .sketch-container {
+            position: relative;
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+        }
+
+        #sketchCanvas {
+            width: 100%;
+            height: 400px;
+            cursor: crosshair;
+        }
+
+        .sketch-tools {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: var(--text);
+            transform: scale(1.15);
+        }
+
+        /* Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.95);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e0e0e0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 4000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: #333;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--accent); }
+        .toast.info { background: var(--info); }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* A4 Print Preview */
+        .a4-preview {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .a4-header {
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .a4-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .a4-meta {
+            text-align: right;
+            font-size: 0.875rem;
+        }
+
+        .a4-content {
+            font-size: 11pt;
+            line-height: 1.6;
+        }
+
+        .a4-footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            border-top: 1px solid #ccc;
+            padding-top: 0.5rem;
+            font-size: 9pt;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .brand-title {
+                font-size: 0.9rem;
+            }
+            
+            .brand-subtitle {
+                display: none;
+            }
+            
+            .a4-preview {
+                width: 100%;
+                padding: 10mm;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .w-full { width: 100%; }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Pin List */
+        .pin-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .pin-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pin-item:hover {
+            background: #e0e0e0;
+            transform: translateX(4px);
+        }
+
+        .pin-item.active {
+            background: rgba(26, 35, 126, 0.1);
+            border: 2px solid var(--primary);
+        }
+
+        .pin-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .pin-info {
+            flex: 1;
+        }
+
+        .pin-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .pin-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .pin-delete {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .pin-item:hover .pin-delete {
+            opacity: 1;
+        }
+
+        /* Signature Pad */
+        .signature-pad {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        #signatureCanvas {
+            width: 100%;
+            height: 200px;
+            cursor: crosshair;
+        }
+
+        /* QR Code */
+        .qr-display {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        #qrcode {
+            margin: 0 auto;
+            padding: 1rem;
+            background: white;
+            display: inline-block;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s;
+        }
+
+        /* Offline Indicator */
+        .offline-banner {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .offline-banner.active {
+            display: block;
+        }
+
+        /* Sync Status */
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .sync-status.syncing {
+            color: var(--info);
+        }
+
+        .sync-status.synced {
+            color: var(--success);
+        }
+
+        .sync-status.error {
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Offline Banner -->
+    <div id="offlineBanner" class="offline-banner">
+        ⚠️ You are offline. Changes will sync when connection is restored.
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="logo-icon">🏗️</div>
+                    <div class="brand-text">
+                        <div class="brand-title">PLCIS</div>
+                        <div class="brand-subtitle">ProjectLink Construction Intelligence System</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="sync-status" id="syncStatus">
+                        <span>☁️</span>
+                        <span>Synced</span>
+                    </div>
+                    <div class="user-badge">
+                        <div class="role-indicator"></div>
+                        <span id="currentUserName">Engineer</span>
+                        <span id="currentUserRole" style="opacity: 0.8; font-size: 0.8rem;">(Engineer)</span>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="showUserSwitcher()">Switch Role</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('dashboard')">
+                    📊 Dashboard
+                </button>
+                <button class="nav-tab" onclick="switchTab('new')">
+                    📝 New Report
+                </button>
+                <button class="nav-tab" onclick="switchTab('drawing')">
+                    📐 Site Plan
+                    <span class="badge" id="pinCount" style="display: none;">0</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('photos')">
+                    📸 Photos
+                    <span class="badge" id="photoCount" style="display: none;">0</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('team')">
+                    👥 Team
+                    <span class="badge" id="teamCount">5</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('reports')">
+                    📋 Reports
+                </button>
+                <button class="nav-tab" onclick="switchTab('analytics')">
+                    📈 Analytics
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active">
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📊 Project Overview</h2>
+                        </div>
+                        <div style="text-align: center; padding: 2rem;">
+                            <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">12</div>
+                            <div style="color: var(--text-secondary);">Active Reports</div>
+                            <div class="progress-bar mt-2">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">75% Completion Rate</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">⚡ Quick Actions</h2>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <button class="btn btn-primary" onclick="switchTab('new')">
+                                ➕ Create New Report
+                            </button>
+                            <button class="btn btn-outline" onclick="document.getElementById('quickPhoto').click()">
+                                📷 Quick Photo Capture
+                            </button>
+                            <button class="btn btn-outline" onclick="switchTab('drawing')">
+                                📍 Update Site Plan
+                            </button>
+                            <input type="file" id="quickPhoto" class="hidden" accept="image/*" capture="camera" onchange="handleQuickPhoto(this)">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">🌤️ Site Conditions</h2>
+                        </div>
+                        <div id="weatherWidget" style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">⛅</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">31°C</div>
+                            <div style="color: var(--text-secondary);">Partly Cloudy</div>
+                            <div style="font-size: 0.875rem; margin-top: 0.5rem; color: var(--text-secondary);">
+                                Humidity: 78% | Wind: 12 km/h
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📈 Recent Activity</h2>
+                        </div>
+                        <div class="activity-feed" id="activityFeed">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📋 Pending Approvals</h2>
+                        </div>
+                        <div id="pendingApprovals">
+                            <div class="empty-state">
+                                <div class="empty-icon">✅</div>
+                                <p>No pending approvals</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New Report Section -->
+            <section id="new-section" class="section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📋 Project Information</h2>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">Project Name</label>
+                            <input type="text" class="form-input" id="projectName" placeholder="Enter project name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Contract No. / WO No.</label>
+                            <input type="text" class="form-input" id="contractNo" placeholder="e.g., CON-2024-001">
+                        </div>
+
+                        <div class="grid-2" style="gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label required">Report Date</label>
+                                <input type="date" class="form-input" id="reportDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Time</label>
+                                <input type="time" class="form-input" id="reportTime">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Site Location</label>
+                            <div class="input-group">
+                                <input type="text" class="form-input" id="siteLocation" placeholder="Enter site address">
+                                <button class="btn btn-primary" onclick="geocodeAddress()">📍 Locate</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Weather Conditions</label>
+                            <select class="form-select" id="weather">
+                                <option value="Clear">☀️ Clear Sky</option>
+                                <option value="Cloudy">☁️ Cloudy</option>
+                                <option value="Rainy">🌧️ Rainy</option>
+                                <option value="Windy">💨 Windy</option>
+                                <option value="Foggy">🌫️ Foggy</option>
+                                <option value="Thunderstorm">⛈️ Thunderstorm</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📍 GPS Coordinates</h2>
+                        </div>
+                        
+                        <div id="gpsStatus" class="gps-status error">
+                            <div class="gps-dot"></div>
+                            <div>
+                                <div style="font-weight: 700;">GPS Not Active</div>
+                                <div style="font-size: 0.875rem; opacity: 0.9;">Click below to get coordinates</div>
+                            </div>
+                        </div>
+
+                        <div class="coord-display" id="coordDisplay" style="display: none;">
+                            <div class="coord-row">
+                                <span class="coord-label">Latitude (WGS84):</span>
+                                <span class="coord-value" id="latValue">--</span>
+                            </div>
+                            <div class="coord-row">
+                                <span class="coord-label">Longitude (WGS84):</span>
+                                <span class="coord-value" id="lngValue">--</span>
+                            </div>
+                            <div class="coord-row">
+                                <span class="coord-label">SVY21 X:</span>
+                                <span class="coord-value" id="svy21X">--</span>
+                            </div>
+                            <div class="coord-row">
+                                <span class="coord-label">SVY21 Y:</span>
+                                <span class="coord-value" id="svy21Y">--</span>
+                            </div>
+                            <div class="coord-row">
+                                <span class="coord-label">Accuracy:</span>
+                                <span class="coord-value" id="accValue">--</span>
+                            </div>
+                            <div class="coord-row">
+                                <span class="coord-label">Timestamp:</span>
+                                <span class="coord-value" id="timeValue">--</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-full mb-2" onclick="getCurrentLocation()">
+                            📡 Get Current GPS Coordinates
+                        </button>
+                        
+                        <button class="btn btn-outline w-full" onclick="openMapPicker()">
+                            🗺️ Pick from Map (Google/OneMap)
+                        </button>
+
+                        <div class="map-wrapper mt-2" style="height: 250px; display: none;" id="miniMap">
+                            <div id="miniMapContainer" class="map-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🎙️ Voice Notes</h2>
+                        <span class="card-subtitle">Dictate observations hands-free</span>
+                    </div>
+                    
+                    <div class="voice-recorder">
+                        <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                            🎤
+                        </button>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 0.25rem;">Tap to Record</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                Record voice memos that will be transcribed to text
+                            </div>
+                        </div>
+                        <div class="recording-wave" id="recordingWave" style="display: none;">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                    </div>
+
+                    <div id="voiceNotesList"></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📝 Work Description</h2>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Activities Performed</label>
+                            <textarea class="form-textarea" id="activities" placeholder="Describe the work activities performed at site today..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Work Progress (%)</label>
+                            <input type="range" class="form-input" id="workProgress" min="0" max="100" value="0" oninput="updateProgressValue(this.value)">
+                            <div style="text-align: center; font-weight: 700; color: var(--primary);" id="progressValue">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">⚠️ Issues & Next Steps</h2>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Issues / Delays / Observations</label>
+                            <textarea class="form-textarea" id="issues" placeholder="Any issues, delays, safety observations, or NCR items..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Next Steps / Recommendations</label>
+                            <textarea class="form-textarea" id="nextSteps" placeholder="Planned activities for next visit, follow-up actions..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Priority Level</label>
+                            <select class="form-select" id="priorityLevel">
+                                <option value="low">🟢 Low - Routine</option>
+                                <option value="medium" selected>🟡 Medium - Attention Required</option>
+                                <option value="high">🔴 High - Urgent Action</option>
+                                <option value="critical">🚨 Critical - Immediate Stop Work</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">✍️ Digital Signature</h2>
+                        <span class="card-subtitle">Sign to certify report accuracy</span>
+                    </div>
+                    
+                    <div class="signature-pad">
+                        <canvas id="signatureCanvas"></canvas>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="clearSignature()">Clear</button>
+                        <button class="btn btn-secondary btn-sm" onclick="saveSignature()">Save Signature</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="btn btn-success btn-lg" onclick="saveReport()" style="flex: 2;">
+                        💾 Save Site Report
+                    </button>
+                    <button class="btn btn-accent btn-lg" onclick="previewA4()" style="flex: 1;">
+                        📄 A4 Preview
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="submitForApproval()" style="flex: 1;">
+                        📤 Submit for Approval
+                    </button>
+                </div>
+            </section>
+
+            <!-- Drawing/Site Plan Section -->
+            <section id="drawing-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📐 Site Plan Annotation</h2>
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-secondary" onclick="calibrateScale()">📏 Calibrate Scale</button>
+                            <button class="btn btn-sm btn-accent" onclick="exportAnnotatedPlan()">💾 Export Plan</button>
+                        </div>
+                    </div>
+
+                    <div class="drawing-toolbar">
+                        <div class="tool-group">
+                            <button class="tool-btn active" onclick="setTool('select')" title="Select/Move">↖️</button>
+                            <button class="tool-btn" onclick="setTool('pin')" title="Add Pin">📍</button>
+                            <button class="tool-btn" onclick="setTool('measure')" title="Measure">📏</button>
+                            <button class="tool-btn" onclick="setTool('draw')" title="Free Draw">✏️</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="tool-btn" onclick="zoomIn()" title="Zoom In">🔍+</button>
+                            <button class="tool-btn" onclick="zoomOut()" title="Zoom Out">🔍-</button>
+                            <button class="tool-btn" onclick="resetView()" title="Reset View">⟲</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="tool-btn" onclick="clearPins()" title="Clear All Pins">🗑️</button>
+                            <button class="tool-btn" onclick="undoLast()" title="Undo">↩️</button>
+                        </div>
+                        <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('planInput').click()">
+                                📤 Upload Plan (Image/PDF)
+                            </button>
+                            <input type="file" id="planInput" class="hidden" accept="image/*,.pdf" onchange="loadPlanFile(this)">
+                        </div>
+                    </div>
+
+                    <div class="drawing-wrapper" id="drawingWrapper">
+                        <div class="drawing-canvas-container" id="canvasContainer">
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); flex-direction: column;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📐</div>
+                                <p>Upload site plan drawing or PDF</p>
+                                <p style="font-size: 0.875rem; margin-top: 0.5rem;">Supported: JPG, PNG, PDF</p>
+                                <button class="btn btn-outline mt-2" onclick="document.getElementById('planInput').click()">
+                                    Select File
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pin-legend">
+                        <span style="font-weight: 600; margin-right: 0.5rem;">Pin Types:</span>
+                        <div class="legend-item active" onclick="setPinType('photo')">
+                            <div class="legend-icon" style="background: #2196f3;">📷</div>
+                            <span>Photo Location</span>
+                        </div>
+                        <div class="legend-item" onclick="setPinType('issue')">
+                            <div class="legend-icon" style="background: #f44336;">⚠️</div>
+                            <span>Issue/NCR</span>
+                        </div>
+                        <div class="legend-item" onclick="setPinType('completed')">
+                            <div class="legend-icon" style="background: #4caf50;">✓</div>
+                            <span>Completed</span>
+                        </div>
+                        <div class="legend-item" onclick="setPinType('inspection')">
+                            <div class="legend-icon" style="background: #ff9800;">👁</div>
+                            <span>Inspection</span>
+                        </div>
+                        <div class="legend-item" onclick="setPinType('material')">
+                            <div class="legend-icon" style="background: #9c27b0;">📦</div>
+                            <span>Material</span>
+                        </div>
+                        <div class="legend-item" onclick="setPinType('safety')">
+                            <div class="legend-icon" style="background: #ff5722;">🦺</div>
+                            <span>Safety</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📍 Placed Pins</h2>
+                            <span class="card-subtitle" id="totalPins">0 pins</span>
+                        </div>
+                        <div class="pin-list" id="pinList">
+                            <div class="empty-state">
+                                <div class="empty-icon">📍</div>
+                                <p>No pins placed yet. Click on the plan to add pins.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📏 Measurements</h2>
+                        </div>
+                        <div id="measurementsList">
+                            <div class="empty-state">
+                                <div class="empty-icon">📐</div>
+                                <p>Use the measure tool to calculate distances and areas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photos Section -->
+            <section id="photos-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📸 Site Photo Documentation</h2>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary" onclick="document.getElementById('cameraInput').click()">
+                                📷 Take Photo
+                            </button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('galleryInput').click()">
+                                🖼️ Gallery
+                            </button>
+                            <button class="btn btn-accent" onclick="document.getElementById('videoInput').click()">
+                                🎥 Video
+                            </button>
+                        </div>
+                        <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="camera" onchange="handlePhoto(this, 'camera')">
+                        <input type="file" id="galleryInput" class="hidden" accept="image/*" onchange="handlePhoto(this, 'gallery')">
+                        <input type="file" id="videoInput" class="hidden" accept="video/*" capture="camcorder" onchange="handleVideo(this)">
+                    </div>
+
+                    <div class="photo-gallery" id="photoGallery">
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📷</div>
+                            <p>No photos yet. Capture site conditions, work progress, or issues.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🎨 Photo Sketch & Annotation</h2>
+                    </div>
+                    <div class="sketch-container">
+                        <div class="sketch-tools">
+                            <div class="color-picker">
+                                <div class="color-option active" style="background: #ff0000;" onclick="setSketchColor('#ff0000')"></div>
+                                <div class="color-option" style="background: #00ff00;" onclick="setSketchColor('#00ff00')"></div>
+                                <div class="color-option" style="background: #0000ff;" onclick="setSketchColor('#0000ff')"></div>
+                                <div class="color-option" style="background: #ffff00;" onclick="setSketchColor('#ffff00')"></div>
+                                <div class="color-option" style="background: #000000;" onclick="setSketchColor('#000000')"></div>
+                            </div>
+                            <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-secondary" onclick="clearSketch()">Clear</button>
+                                <button class="btn btn-sm btn-primary" onclick="saveSketch()">Save to Report</button>
+                            </div>
+                        </div>
+                        <canvas id="sketchCanvas"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team Section -->
+            <section id="team-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">👥 Project Team</h2>
+                        <button class="btn btn-primary btn-sm" onclick="inviteTeamMember()">➕ Invite Member</button>
+                    </div>
+                    
+                    <div class="team-grid" id="teamGrid">
+                        <!-- Engineer -->
+                        <div class="team-member">
+                            <div class="member-avatar">EN</div>
+                            <div class="member-info">
+                                <div class="member-name">Engineer Name</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-engineer">Engineer</span>
+                                    <span>Site Engineer</span>
+                                </div>
+                            </div>
+                            <div class="member-status"></div>
+                        </div>
+
+                        <!-- Supervisor -->
+                        <div class="team-member">
+                            <div class="member-avatar">SV</div>
+                            <div class="member-info">
+                                <div class="member-name">Supervisor Name</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-supervisor">Supervisor</span>
+                                    <span>Site Supervisor</span>
+                                </div>
+                            </div>
+                            <div class="member-status"></div>
+                        </div>
+
+                        <!-- Client -->
+                        <div class="team-member">
+                            <div class="member-avatar">CL</div>
+                            <div class="member-info">
+                                <div class="member-name">Client Representative</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-client">Client</span>
+                                    <span>Project Owner</span>
+                                </div>
+                            </div>
+                            <div class="member-status offline"></div>
+                        </div>
+
+                        <!-- RTO -->
+                        <div class="team-member">
+                            <div class="member-avatar">RT</div>
+                            <div class="member-info">
+                                <div class="member-name">RTO Officer</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-rto">RTO</span>
+                                    <span>Registered Topic Officer</span>
+                                </div>
+                            </div>
+                            <div class="member-status"></div>
+                        </div>
+
+                        <!-- RE -->
+                        <div class="team-member">
+                            <div class="member-avatar">RE</div>
+                            <div class="member-info">
+                                <div class="member-name">Resident Engineer</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-re">RE</span>
+                                    <span>Resident Engineer</span>
+                                </div>
+                            </div>
+                            <div class="member-status offline"></div>
+                        </div>
+
+                        <!-- PM -->
+                        <div class="team-member">
+                            <div class="member-avatar">PM</div>
+                            <div class="member-info">
+                                <div class="member-name">Project Manager</div>
+                                <div class="member-role">
+                                    <span class="role-tag role-pm">PM</span>
+                                    <span>Project Manager</span>
+                                </div>
+                            </div>
+                            <div class="member-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">💬 Team Communication</h2>
+                    </div>
+                    <div id="teamChat" style="height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                            Select a team member to start conversation
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-input" placeholder="Type a message..." id="chatInput">
+                        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📋 Site Reports Archive</h2>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input" placeholder="Search reports..." style="width: 200px;" id="searchReports" onkeyup="filterReports()">
+                            <select class="form-select" style="width: 150px;" id="filterStatus" onchange="filterReports()">
+                                <option value="all">All Status</option>
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="report-list" id="reportsList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📊 Progress Overview</h2>
+                        </div>
+                        <canvas id="progressChart" style="max-height: 300px;"></canvas>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">⚠️ Issue Categories</h2>
+                        </div>
+                        <canvas id="issuesChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🗺️ Site Activity Heatmap</h2>
+                    </div>
+                    <div class="map-wrapper" style="height: 400px;">
+                        <div id="heatmapContainer" class="map-container"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Map Picker Modal -->
+    <div id="mapModal" class="modal-overlay">
+        <div class="modal-container modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">🗺️ Select Location</h3>
+                <button class="modal-close" onclick="closeMapModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="map-toggle">
+                    <button class="active" onclick="switchMapType('google')" id="googleMapBtn">Google Maps</button>
+                    <button onclick="switchMapType('onemap')" id="onemapBtn">OneMap (Singapore)</button>
+                </div>
+                <div id="mapPickerContainer" style="width: 100%; height: 500px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeMapModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmMapLocation()">Confirm Location</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Preview Modal -->
+    <div id="photoModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Photo Details</h3>
+                <button class="modal-close" onclick="closePhotoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" style="width: 100%; border-radius: 8px; margin-bottom: 1rem;" src="" alt="">
+                <div class="coord-display" style="margin-bottom: 1rem;">
+                    <div class="coord-row">
+                        <span class="coord-label">Coordinates:</span>
+                        <span class="coord-value" id="modalCoords">--</span>
+                    </div>
+                    <div class="coord-row">
+                        <span class="coord-label">Captured:</span>
+                        <span class="coord-value" id="modalTime">--</span>
+                    </div>
+                    <div class="coord-row">
+                        <span class="coord-label">Source:</span>
+                        <span class="coord-value" id="modalSource">--</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="photoDescription" placeholder="Describe what this photo shows..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Link to Pin</label>
+                    <select class="form-select" id="linkToPin">
+                        <option value="">-- Not linked --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="deleteCurrentPhoto()">Delete</button>
+                <button class="btn btn-secondary" onclick="closePhotoModal()">Close</button>
+                <button class="btn btn-primary" onclick="savePhotoDetails()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- A4 Preview Modal -->
+    <div id="a4Modal" class="modal-overlay">
+        <div class="modal-container modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">📄 A4 Print Preview</h3>
+                <button class="modal-close" onclick="closeA4Modal()">&times;</button>
+            </div>
+            <div class="modal-body" style="background: #525659; padding: 2rem; overflow-y: auto;">
+                <div class="a4-preview" id="a4Content">
+                    <!-- A4 Content Generated Here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeA4Modal()">Close</button>
+                <button class="btn btn-primary" onclick="printA4()">🖨️ Print / Save PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Switcher Modal -->
+    <div id="userModal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">👤 Switch User Role</h3>
+                <button class="modal-close" onclick="closeUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--text-secondary);">Select your role to access appropriate permissions:</p>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <button class="btn btn-outline" onclick="switchUser('engineer')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">👷</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">Site Engineer</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">Create and edit reports</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchUser('supervisor')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">👷‍♂️</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">Site Supervisor</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">Review and approve reports</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchUser('client')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">🏢</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">Client</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">View reports and progress</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchUser('rto')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">📋</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">RTO (Registered Topic Officer)</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">Technical oversight</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchUser('re')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">🎓</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">Resident Engineer</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">Engineering review and approval</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchUser('pm')" style="justify-content: flex-start; padding: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.75rem;">📊</span>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 700;">Project Manager</div>
+                            <div style="font-size: 0.875rem; opacity: 0.8;">Full project oversight</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing...</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Global State
+        const PLCIS = {
+            currentUser: {
+                role: 'engineer',
+                name: 'Site Engineer',
+                permissions: ['create', 'edit', 'view']
+            },
+            currentReport: {
+                id: null,
+                projectName: '',
+                contractNo: '',
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toTimeString().slice(0, 5),
+                location: '',
+                coordinates: null,
+                weather: 'Clear',
+                activities: '',
+                issues: '',
+                nextSteps: '',
+                progress: 0,
+                priority: 'medium',
+                photos: [],
+                pins: [],
+                measurements: [],
+                voiceNotes: [],
+                signature: null,
+                status: 'draft',
+                createdBy: null,
+                createdAt: null,
+                updatedAt: null
+            },
+            reports: [],
+            team: [
+                { id: 1, name: 'Engineer Name', role: 'engineer', title: 'Site Engineer', online: true },
+                { id: 2, name: 'Supervisor Name', role: 'supervisor', title: 'Site Supervisor', online: true },
+                { id: 3, name: 'Client Representative', role: 'client', title: 'Project Owner', online: false },
+                { id: 4, name: 'RTO Officer', role: 'rto', title: 'Registered Topic Officer', online: true },
+                { id: 5, name: 'Resident Engineer', role: 're', title: 'Resident Engineer', online: false },
+                { id: 6, name: 'Project Manager', role: 'pm', title: 'Project Manager', online: true }
+            ],
+            map: null,
+            mapPicker: null,
+            currentMapType: 'google',
+            fabricCanvas: null,
+            signaturePad: null,
+            sketchPad: null,
+            currentTool: 'select',
+            currentPinType: 'photo',
+            scaleCalibration: null,
+            isRecording: false,
+            mediaRecorder: null,
+            audioChunks: []
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            checkOnlineStatus();
+            loadReports();
+            initializeCharts();
+            updateActivityFeed();
+        });
+
+        function initializeApp() {
+            // Set default date/time
+            document.getElementById('reportDate').value = PLCIS.currentReport.date;
+            document.getElementById('reportTime').value = PLCIS.currentReport.time;
+            
+            // Initialize Fabric.js canvas for drawing
+            initializeFabricCanvas();
+            
+            // Initialize Signature Pad
+            initializeSignaturePad();
+            
+            // Initialize Sketch Pad
+            initializeSketchPad();
+            
+            // Setup offline detection
+            window.addEventListener('online', () => updateOnlineStatus(true));
+            window.addEventListener('offline', () => updateOnlineStatus(false));
+        }
+
+        function setupEventListeners() {
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveReport();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            previewA4();
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tab + '-section').classList.add('active');
+            
+            // Update active tab in nav
+            const tabButtons = document.querySelectorAll('.nav-tab');
+            const tabIndex = ['dashboard', 'new', 'drawing', 'photos', 'team', 'reports', 'analytics'].indexOf(tab);
+            if (tabButtons[tabIndex]) tabButtons[tabIndex].classList.add('active');
+            
+            // Special initializations
+            if (tab === 'drawing' && !PLCIS.fabricCanvas) {
+                setTimeout(initializeFabricCanvas, 100);
+            }
+            if (tab === 'analytics') {
+                setTimeout(updateAnalytics, 100);
+            }
+        }
+
+        // User Management
+        function showUserSwitcher() {
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        function switchUser(role) {
+            const roleNames = {
+                engineer: 'Site Engineer',
+                supervisor: 'Site Supervisor',
+                client: 'Client Representative',
+                rto: 'RTO Officer',
+                re: 'Resident Engineer',
+                pm: 'Project Manager'
+            };
+            
+            const rolePermissions = {
+                engineer: ['create', 'edit', 'view', 'photos', 'drawings'],
+                supervisor: ['view', 'approve', 'reject', 'comment'],
+                client: ['view', 'comment'],
+                rto: ['view', 'approve', 'reject', 'technical-review'],
+                re: ['view', 'approve', 'reject', 'engineering-review'],
+                pm: ['view', 'edit', 'approve', 'reject', 'admin']
+            };
+            
+            PLCIS.currentUser.role = role;
+            PLCIS.currentUser.name = roleNames[role];
+            PLCIS.currentUser.permissions = rolePermissions[role];
+            
+            document.getElementById('currentUserName').textContent = roleNames[role];
+            document.getElementById('currentUserRole').textContent = `(${roleNames[role]})`;
+            
+            showToast(`Switched to ${roleNames[role]}`, 'success');
+            closeUserModal();
+            updateUIForRole();
+        }
+
+        function updateUIForRole() {
+            // Show/hide elements based on role permissions
+            const canCreate = PLCIS.currentUser.permissions.includes('create');
+            const canApprove = PLCIS.currentUser.permissions.includes('approve');
+            
+            // Update visibility of action buttons
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                if (btn.textContent.includes('Create') && !canCreate) {
+                    btn.style.display = 'none';
+                }
+            });
+        }
+
+        // GPS and Maps
+        function getCurrentLocation() {
+            showLoading(true);
+            
+            if (!navigator.geolocation) {
+                showToast('Geolocation not supported', 'error');
+                showLoading(false);
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const coords = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date().toLocaleString()
+                    };
+                    
+                    // Convert to SVY21 for Singapore
+                    const svy21 = convertWGS84toSVY21(coords.lat, coords.lng);
+                    
+                    PLCIS.currentReport.coordinates = {
+                        ...coords,
+                        svy21: svy21
+                    };
+                    
+                    updateGPSDisplay(coords, svy21);
+                    showLoading(false);
+                    showToast('GPS coordinates captured!', 'success');
+                    
+                    // Show mini map
+                    showMiniMap(coords.lat, coords.lng);
+                },
+                (error) => {
+                    showLoading(false);
+                    handleGPSError(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function updateGPSDisplay(coords, svy21) {
+            const statusEl = document.getElementById('gpsStatus');
+            const displayEl = document.getElementById('coordDisplay');
+            
+            document.getElementById('latValue').textContent = coords.lat.toFixed(6);
+            document.getElementById('lngValue').textContent = coords.lng.toFixed(6);
+            document.getElementById('svy21X').textContent = svy21 ? svy21.x.toFixed(3) : '--';
+            document.getElementById('svy21Y').textContent = svy21 ? svy21.y.toFixed(3) : '--';
+            document.getElementById('accValue').textContent = `±${coords.accuracy.toFixed(1)}m`;
+            document.getElementById('timeValue').textContent = coords.timestamp;
+            
+            displayEl.style.display = 'block';
+            
+            if (coords.accuracy < 10) {
+                statusEl.className = 'gps-status accurate';
+                statusEl.innerHTML = '<div class="gps-dot"></div><div><div style="font-weight: 700;">High Accuracy GPS Lock</div><div style="font-size: 0.875rem; opacity: 0.9;">Ready for precision work</div></div>';
+            } else if (coords.accuracy < 50) {
+                statusEl.className = 'gps-status accurate';
+                statusEl.innerHTML = '<div class="gps-dot"></div><div><div style="font-weight: 700;">GPS Signal Good</div><div style="font-size: 0.875rem; opacity: 0.9;">Suitable for site documentation</div></div>';
+            } else {
+                statusEl.className = 'gps-status inaccurate';
+                statusEl.innerHTML = '<div class="gps-dot"></div><div><div style="font-weight: 700;">Low Accuracy</div><div style="font-size: 0.875rem; opacity: 0.9;">Move to open area for better signal</div></div>';
+            }
+        }
+
+        function convertWGS84toSVY21(lat, lng) {
+            // Simplified conversion - in production use proper library
+            // This is approximate for demonstration
+            const x = lng * 100000; // Placeholder
+            const y = lat * 100000;  // Placeholder
+            return { x, y };
+        }
+
+        function openMapPicker() {
+            document.getElementById('mapModal').classList.add('active');
+            setTimeout(initMapPicker, 100);
+        }
+
+        function closeMapModal() {
+            document.getElementById('mapModal').classList.remove('active');
+        }
+
+        function initMapPicker() {
+            const container = document.getElementById('mapPickerContainer');
+            
+            if (PLCIS.currentMapType === 'google') {
+                PLCIS.mapPicker = new google.maps.Map(container, {
+                    center: { lat: 1.3521, lng: 103.8198 }, // Singapore default
+                    zoom: 12,
+                    mapTypeId: 'satellite'
+                });
+                
+                let marker = null;
+                
+                PLCIS.mapPicker.addListener('click', (e) => {
+                    if (marker) marker.setMap(null);
+                    marker = new google.maps.Marker({
+                        position: e.latLng,
+                        map: PLCIS.mapPicker,
+                        animation: google.maps.Animation.DROP
+                    });
+                    PLCIS.selectedMapLocation = {
+                        lat: e.latLng.lat(),
+                        lng: e.latLng.lng()
+                    };
+                });
+            } else {
+                // OneMap initialization would go here
+                // Requires OneMap API integration
+                container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;"><div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div><p>OneMap Singapore</p><p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">Click anywhere to select location</p></div>';
+                container.onclick = (e) => {
+                    const rect = container.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    // Convert to coordinates (simplified)
+                    PLCIS.selectedMapLocation = {
+                        lat: 1.3521 + (y - rect.height/2) * 0.0001,
+                        lng: 103.8198 + (x - rect.width/2) * 0.0001
+                    };
+                    showToast('Location selected on OneMap', 'success');
+                };
+            }
+        }
+
+        function switchMapType(type) {
+            PLCIS.currentMapType = type;
+            document.getElementById('googleMapBtn').classList.toggle('active', type === 'google');
+            document.getElementById('onemapBtn').classList.toggle('active', type === 'onemap');
+            initMapPicker();
+        }
+
+        function confirmMapLocation() {
+            if (PLCIS.selectedMapLocation) {
+                const coords = {
+                    ...PLCIS.selectedMapLocation,
+                    accuracy: 5,
+                    timestamp: new Date().toLocaleString()
+                };
+                const svy21 = convertWGS84toSVY21(coords.lat, coords.lng);
+                PLCIS.currentReport.coordinates = { ...coords, svy21 };
+                updateGPSDisplay(coords, svy21);
+                showMiniMap(coords.lat, coords.lng);
+                closeMapModal();
+                showToast('Location confirmed from map', 'success');
+            }
+        }
+
+        function showMiniMap(lat, lng) {
+            const container = document.getElementById('miniMap');
+            const mapDiv = document.getElementById('miniMapContainer');
+            container.style.display = 'block';
+            
+            const map = new google.maps.Map(mapDiv, {
+                center: { lat, lng },
+                zoom: 16,
+                mapTypeId: 'hybrid',
+                disableDefaultUI: true
+            });
+            
+            new google.maps.Marker({
+                position: { lat, lng },
+                map: map,
+                title: 'Site Location'
+            });
+        }
+
+        // Drawing and Plan Annotation
+        function initializeFabricCanvas() {
+            const container = document.getElementById('canvasContainer');
+            if (!container || container.querySelector('canvas')) return;
+            
+            PLCIS.fabricCanvas = new fabric.Canvas('drawingCanvas', {
+                width: container.clientWidth,
+                height: 600,
+                backgroundColor: '#f0f0f0'
+            });
+            
+            PLCIS.fabricCanvas.on('mouse:down', handleCanvasClick);
+        }
+
+        function loadPlanFile(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const fileType = file.type;
+            
+            showLoading(true);
+            
+            if (fileType === 'application/pdf') {
+                loadPDF(file);
+            } else {
+                loadImage(file);
+            }
+        }
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                fabric.Image.fromURL(e.target.result, (img) => {
+                    const container = document.getElementById('canvasContainer');
+                    const scale = Math.min(
+                        container.clientWidth / img.width,
+                        600 / img.height
+                    );
+                    
+                    img.scale(scale);
+                    img.set({
+                        left: 0,
+                        top: 0,
+                        selectable: false,
+                        evented: false
+                    });
+                    
+                    PLCIS.fabricCanvas.clear();
+                    PLCIS.fabricCanvas.setWidth(img.width * scale);
+                    PLCIS.fabricCanvas.setHeight(img.height * scale);
+                    PLCIS.fabricCanvas.setBackgroundImage(img, PLCIS.fabricCanvas.renderAll.bind(PLCIS.fabricCanvas));
+                    
+                    document.querySelector('.drawing-wrapper .empty-state')?.remove();
+                    showLoading(false);
+                    showToast('Plan loaded successfully', 'success');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadPDF(file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+                const page = await pdf.getPage(1);
+                
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                const imageData = canvas.toDataURL();
+                loadImageFromDataURL(imageData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadImageFromDataURL(dataURL) {
+            fabric.Image.fromURL(dataURL, (img) => {
+                const container = document.getElementById('canvasContainer');
+                const scale = Math.min(
+                    container.clientWidth / img.width,
+                    800 / img.height
+                );
+                
+                img.scale(scale);
+                PLCIS.fabricCanvas.clear();
+                PLCIS.fabricCanvas.setWidth(img.width * scale);
+                PLCIS.fabricCanvas.setHeight(img.height * scale);
+                PLCIS.fabricCanvas.setBackgroundImage(img, PLCIS.fabricCanvas.renderAll.bind(PLCIS.fabricCanvas));
+                
+                showLoading(false);
+                showToast('PDF loaded successfully', 'success');
+            });
+        }
+
+        function handleCanvasClick(e) {
+            if (PLCIS.currentTool !== 'pin') return;
+            
+            const pointer = PLCIS.fabricCanvas.getPointer(e.e);
+            addPin(pointer.x, pointer.y);
+        }
+
+        function addPin(x, y) {
+            const pinColors = {
+                photo: '#2196f3',
+                issue: '#f44336',
+                completed: '#4caf50',
+                inspection: '#ff9800',
+                material: '#9c27b0',
+                safety: '#ff5722'
+            };
+            
+            const pinIcons = {
+                photo: '📷',
+                issue: '⚠️',
+                completed: '✓',
+                inspection: '👁',
+                material: '📦',
+                safety: '🦺'
+            };
+            
+            const circle = new fabric.Circle({
+                radius: 12,
+                fill: pinColors[PLCIS.currentPinType],
+                left: x - 12,
+                top: y - 12,
+                stroke: 'white',
+                strokeWidth: 2,
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0,0,0,0.3)',
+                    blur: 5,
+                    offsetX: 2,
+                    offsetY: 2
+                })
+            });
+            
+            const text = new fabric.Text(String(PLCIS.currentReport.pins.length + 1), {
+                left: x,
+                top: y,
+                fontSize: 12,
+                fill: 'white',
+                fontWeight: 'bold',
+                originX: 'center',
+                originY: 'center'
+            });
+            
+            const group = new fabric.Group([circle, text], {
+                left: x - 12,
+                top: y - 12,
+                selectable: true,
+                hasControls: false,
+                hasBorders: false,
+                data: {
+                    type: PLCIS.currentPinType,
+                    id: Date.now(),
+                    realCoords: PLCIS.currentReport.coordinates,
+                    description: ''
+                }
+            });
+            
+            PLCIS.fabricCanvas.add(group);
+            PLCIS.fabricCanvas.renderAll();
+            
+            const pinData = {
+                id: group.data.id,
+                number: PLCIS.currentReport.pins.length + 1,
+                type: PLCIS.currentPinType,
+                x: x,
+                y: y,
+                canvasX: x,
+                canvasY: y,
+                color: pinColors[PLCIS.currentPinType],
+                icon: pinIcons[PLCIS.currentPinType],
+                realCoords: PLCIS.currentReport.coordinates,
+                description: '',
+                linkedPhotos: []
+            };
+            
+            PLCIS.currentReport.pins.push(pinData);
+            updatePinList();
+            updatePinCount();
+            
+            // Show description prompt
+            setTimeout(() => {
+                const desc = prompt(`Enter description for Pin ${pinData.number} (${PLCIS.currentPinType}):`);
+                if (desc) {
+                    pinData.description = desc;
+                    group.data.description = desc;
+                    updatePinList();
+                }
+            }, 100);
+        }
+
+        function updatePinList() {
+            const list = document.getElementById('pinList');
+            const totalEl = document.getElementById('totalPins');
+            
+            totalEl.textContent = `${PLCIS.currentReport.pins.length} pins`;
+            
+            if (PLCIS.currentReport.pins.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state" style="padding: 2rem;">
+                        <div class="empty-icon">📍</div>
+                        <p>No pins placed yet. Click on the plan to add pins.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = PLCIS.currentReport.pins.map((pin, idx) => `
+                <div class="pin-item" onclick="focusOnPin(${pin.id})">
+                    <div class="pin-number" style="background: ${pin.color};">${pin.number}</div>
+                    <div class="pin-info">
+                        <div class="pin-title">${pin.type.toUpperCase()} ${pin.icon}</div>
+                        <div class="pin-desc">${pin.description || 'No description'}</div>
+                        ${pin.realCoords ? `<div style="font-size: 0.75rem; color: var(--success);">📍 GPS Tagged</div>` : ''}
+                    </div>
+                    <button class="pin-delete btn btn-sm btn-danger" onclick="event.stopPropagation(); deletePin(${pin.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function setTool(tool) {
+            PLCIS.currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (PLCIS.fabricCanvas) {
+                PLCIS.fabricCanvas.isDrawingMode = (tool === 'draw');
+                PLCIS.fabricCanvas.selection = (tool === 'select');
+            }
+        }
+
+        function setPinType(type) {
+            PLCIS.currentPinType = type;
+            document.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Auto-switch to pin tool
+            setTool('pin');
+        }
+
+        function deletePin(id) {
+            if (!confirm('Delete this pin?')) return;
+            
+            const idx = PLCIS.currentReport.pins.findIndex(p => p.id === id);
+            if (idx > -1) {
+                PLCIS.currentReport.pins.splice(idx, 1);
+                
+                // Renumber remaining pins
+                PLCIS.currentReport.pins.forEach((pin, i) => {
+                    pin.number = i + 1;
+                });
+                
+                // Clear and redraw canvas
+                redrawCanvas();
+                updatePinList();
+                updatePinCount();
+                showToast('Pin deleted', 'success');
+            }
+        }
+
+        function redrawCanvas() {
+            if (!PLCIS.fabricCanvas) return;
+            
+            PLCIS.fabricCanvas.clear();
+            const bg = PLCIS.fabricCanvas.backgroundImage;
+            if (bg) {
+                PLCIS.fabricCanvas.setBackgroundImage(bg, PLCIS.fabricCanvas.renderAll.bind(PLCIS.fabricCanvas));
+            }
+            
+            // Redraw all pins
+            PLCIS.currentReport.pins.forEach(pin => {
+                // Recreate pin objects on canvas
+                // Simplified for demo
+            });
+        }
+
+        function updatePinCount() {
+            const badge = document.getElementById('pinCount');
+            badge.textContent = PLCIS.currentReport.pins.length;
+            badge.style.display = PLCIS.currentReport.pins.length > 0 ? 'inline' : 'none';
+        }
+
+        function exportAnnotatedPlan() {
+            if (!PLCIS.fabricCanvas) {
+                showToast('No plan to export', 'error');
+                return;
+            }
+            
+            const dataURL = PLCIS.fabricCanvas.toDataURL({
+                format: 'png',
+                quality: 1.0
+            });
+            
+            const link = document.createElement('a');
+            link.download = `SitePlan_${PLCIS.currentReport.projectName || 'Annotated'}_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = dataURL;
+            link.click();
+            
+            showToast('Annotated plan exported!', 'success');
+        }
+
+        // Photo Management
+        function handlePhoto(input, source) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const photo = {
+                    id: Date.now(),
+                    src: e.target.result,
+                    type: 'image',
+                    timestamp: new Date().toLocaleString(),
+                    coordinates: PLCIS.currentReport.coordinates ? {...PLCIS.currentReport.coordinates} : null,
+                    description: '',
+                    source: source,
+                    linkedPin: null
+                };
+                
+                PLCIS.currentReport.photos.push(photo);
+                renderPhotos();
+                updatePhotoCount();
+                showToast('Photo added successfully!', 'success');
+            };
+            
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+
+        function handleVideo(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const url = URL.createObjectURL(file);
+            
+            const video = {
+                id: Date.now(),
+                src: url,
+                type: 'video',
+                timestamp: new Date().toLocaleString(),
+                coordinates: PLCIS.currentReport.coordinates ? {...PLCIS.currentReport.coordinates} : null,
+                description: '',
+                source: 'video'
+            };
+            
+            PLCIS.currentReport.photos.push(video);
+            renderPhotos();
+            updatePhotoCount();
+            showToast('Video added successfully!', 'success');
+            input.value = '';
+        }
+
+        function renderPhotos() {
+            const gallery = document.getElementById('photoGallery');
+            
+            if (PLCIS.currentReport.photos.length === 0) {
+                gallery.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">📷</div>
+                        <p>No photos yet. Capture site conditions, work progress, or issues.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            gallery.innerHTML = PLCIS.currentReport.photos.map((media, idx) => `
+                <div class="photo-item" onclick="openPhotoModal(${idx})">
+                    ${media.type === 'video' 
+                        ? `<video src="${media.src}" preload="metadata"></video>`
+                        : `<img src="${media.src}" alt="Site photo ${idx + 1}">`
+                    }
+                    <div class="photo-gps-badge" style="display: ${media.coordinates ? 'flex' : 'none'};">
+                        📍 GPS
+                    </div>
+                    <div class="photo-overlay">
+                        <span class="photo-badge">${media.type === 'video' ? '🎥' : '📷'} ${idx + 1}</span>
+                        <div class="photo-actions">
+                            <button class="photo-action-btn" onclick="event.stopPropagation(); editPhoto(${idx})">✏️</button>
+                            <button class="photo-action-btn" onclick="event.stopPropagation(); deletePhoto(${idx})">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openPhotoModal(index) {
+            PLCIS.currentPhotoIndex = index;
+            const photo = PLCIS.currentReport.photos[index];
+            
+            document.getElementById('modalImage').src = photo.type === 'video' ? '' : photo.src;
+            document.getElementById('modalCoords').textContent = photo.coordinates 
+                ? `${photo.coordinates.lat.toFixed(6)}, ${photo.coordinates.lng.toFixed(6)}`
+                : 'No GPS data';
+            document.getElementById('modalTime').textContent = photo.timestamp;
+            document.getElementById('modalSource').textContent = photo.source || 'Unknown';
+            document.getElementById('photoDescription').value = photo.description || '';
+            
+            // Populate pin dropdown
+            const pinSelect = document.getElementById('linkToPin');
+            pinSelect.innerHTML = '<option value="">-- Not linked --</option>' +
+                PLCIS.currentReport.pins.map(p => 
+                    `<option value="${p.id}" ${photo.linkedPin == p.id ? 'selected' : ''}>Pin ${p.number}: ${p.type}</option>`
+                ).join('');
+            
+            document.getElementById('photoModal').classList.add('active');
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photoModal').classList.remove('active');
+        }
+
+        function savePhotoDetails() {
+            if (PLCIS.currentPhotoIndex === null) return;
+            
+            const photo = PLCIS.currentReport.photos[PLCIS.currentPhotoIndex];
+            photo.description = document.getElementById('photoDescription').value;
+            photo.linkedPin = document.getElementById('linkToPin').value || null;
+            
+            closePhotoModal();
+            showToast('Photo details saved', 'success');
+        }
+
+        function deletePhoto(index) {
+            if (!confirm('Delete this photo?')) return;
+            PLCIS.currentReport.photos.splice(index, 1);
+            renderPhotos();
+            updatePhotoCount();
+            showToast('Photo deleted', 'success');
+        }
+
+        function updatePhotoCount() {
+            const badge = document.getElementById('photoCount');
+            badge.textContent = PLCIS.currentReport.photos.length;
+            badge.style.display = PLCIS.currentReport.photos.length > 0 ? 'inline' : 'none';
+        }
+
+        // Voice Recording
+        function toggleRecording() {
+            if (!PLCIS.isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                PLCIS.mediaRecorder = new MediaRecorder(stream);
+                PLCIS.audioChunks = [];
+                
+                PLCIS.mediaRecorder.ondataavailable = (e) => {
+                    PLCIS.audioChunks.push(e.data);
+                };
+                
+                PLCIS.mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(PLCIS.audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    addVoiceNote(audioUrl);
+                };
+                
+                PLCIS.mediaRecorder.start();
+                PLCIS.isRecording = true;
+                
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('recordingWave').style.display = 'flex';
+                
+            } catch (err) {
+                showToast('Microphone access denied', 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (PLCIS.mediaRecorder && PLCIS.isRecording) {
+                PLCIS.mediaRecorder.stop();
+                PLCIS.isRecording = false;
+                document.getElementById('recordBtn').classList.remove('recording');
+                document.getElementById('recordingWave').style.display = 'none';
+                
+                // Stop all tracks
+                PLCIS.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function addVoiceNote(audioUrl) {
+            const note = {
+                id: Date.now(),
+                url: audioUrl,
+                timestamp: new Date().toLocaleString(),
+                transcript: 'Voice note recorded (transcription pending...)'
+            };
+            
+            PLCIS.currentReport.voiceNotes.push(note);
+            renderVoiceNotes();
+            showToast('Voice note saved', 'success');
+        }
+
+        function renderVoiceNotes() {
+            const container = document.getElementById('voiceNotesList');
+            if (PLCIS.currentReport.voiceNotes.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = PLCIS.currentReport.voiceNotes.map(note => `
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #f5f5f5; border-radius: 8px; margin-bottom: 0.5rem;">
+                    <audio controls src="${note.url}" style="flex: 1; height: 40px;"></audio>
+                    <button class="btn btn-sm btn-danger" onclick="deleteVoiceNote(${note.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Signature Pad
+        function initializeSignaturePad() {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
+            
+            PLCIS.signaturePad = canvas;
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+            
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+            
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                isDrawing = true;
+                [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+                [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+            });
+            
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        function clearSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveSignature() {
+            const canvas = document.getElementById('signatureCanvas');
+            PLCIS.currentReport.signature = canvas.toDataURL();
+            showToast('Signature saved', 'success');
+        }
+
+        // Sketch Pad
+        function initializeSketchPad() {
+            const canvas = document.getElementById('sketchCanvas');
+            if (!canvas) return;
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 400;
+            
+            PLCIS.sketchPad = canvas;
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            const startDraw = (e) => {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                [lastX, lastY] = [x, y];
+            };
+            
+            const draw = (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = PLCIS.sketchColor || '#ff0000';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                [lastX, lastY] = [x, y];
+            };
+            
+            const stopDraw = () => isDrawing = false;
+            
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseout', stopDraw);
+            
+            canvas.addEventListener('touchstart', startDraw);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        function setSketchColor(color) {
+            PLCIS.sketchColor = color;
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function clearSketch() {
+            const canvas = document.getElementById('sketchCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveSketch() {
+            const canvas = document.getElementById('sketchCanvas');
+            const sketch = {
+                id: Date.now(),
+                src: canvas.toDataURL(),
+                timestamp: new Date().toLocaleString()
+            };
+            
+            // Add as photo
+            PLCIS.currentReport.photos.push({
+                ...sketch,
+                type: 'sketch',
+                description: 'Annotated sketch'
+            });
+            
+            renderPhotos();
+            updatePhotoCount();
+            clearSketch();
+            showToast('Sketch saved to report', 'success');
+        }
+
+        // Report Management
+        function saveReport() {
+            // Validation
+            const projectName = document.getElementById('projectName').value.trim();
+            const contractNo = document.getElementById('contractNo').value.trim();
+            const location = document.getElementById('siteLocation').value.trim();
+            
+            if (!projectName || !contractNo || !location) {
+                showToast('Please fill in required fields (Project, Contract No., Location)', 'error');
+                return;
+            }
+            
+            // Update report object
+            PLCIS.currentReport.projectName = projectName;
+            PLCIS.currentReport.contractNo = contractNo;
+            PLCIS.currentReport.date = document.getElementById('reportDate').value;
+            PLCIS.currentReport.time = document.getElementById('reportTime').value;
+            PLCIS.currentReport.location = location;
+            PLCIS.currentReport.weather = document.getElementById('weather').value;
+            PLCIS.currentReport.activities = document.getElementById('activities').value;
+            PLCIS.currentReport.issues = document.getElementById('issues').value;
+            PLCIS.currentReport.nextSteps = document.getElementById('nextSteps').value;
+            PLCIS.currentReport.progress = document.getElementById('workProgress').value;
+            PLCIS.currentReport.priority = document.getElementById('priorityLevel').value;
+            PLCIS.currentReport.updatedAt = new Date().toISOString();
+            
+            if (!PLCIS.currentReport.id) {
+                PLCIS.currentReport.id = Date.now();
+                PLCIS.currentReport.createdBy = PLCIS.currentUser.name;
+                PLCIS.currentReport.createdAt = new Date().toISOString();
+                PLCIS.reports.push({...PLCIS.currentReport});
+            } else {
+                const idx = PLCIS.reports.findIndex(r => r.id === PLCIS.currentReport.id);
+                if (idx > -1) PLCIS.reports[idx] = {...PLCIS.currentReport};
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('plcis_reports', JSON.stringify(PLCIS.reports));
+            
+            showToast('Report saved successfully!', 'success');
+            updateActivityFeed();
+            
+            // Sync if online
+            if (navigator.onLine) syncWithCloud();
+        }
+
+        function submitForApproval() {
+            PLCIS.currentReport.status = 'pending';
+            saveReport();
+            showToast('Report submitted for approval', 'success');
+            
+            // Notify team (simulated)
+            addActivity(`${PLCIS.currentUser.name} submitted report for approval`, 'pending');
+        }
+
+        function loadReports() {
+            const saved = localStorage.getItem('plcis_reports');
+            if (saved) {
+                PLCIS.reports = JSON.parse(saved);
+                renderReportsList();
+            }
+        }
+
+        function renderReportsList() {
+            const container = document.getElementById('reportsList');
+            
+            if (PLCIS.reports.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No reports saved yet.</p>
+                        <button class="btn btn-primary mt-2" onclick="switchTab('new')">Create First Report</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = PLCIS.reports.sort((a, b) => b.id - a.id).map(report => `
+                <div class="report-item status-${report.status}">
+                    <div class="report-info">
+                        <h3>${report.projectName}</h3>
+                        <div class="report-meta">
+                            <span>📄 ${report.contractNo}</span>
+                            <span>📍 ${report.location}</span>
+                            <span>📅 ${report.date}</span>
+                            <span class="status-badge status-${report.status}">${report.status}</span>
+                        </div>
+                        <div class="report-meta" style="margin-top: 0.5rem;">
+                            <span>👤 ${report.createdBy || 'Unknown'}</span>
+                            <span>📸 ${report.photos?.length || 0} photos</span>
+                            <span>📍 ${report.pins?.length || 0} pins</span>
+                            <span>📊 ${report.progress || 0}% complete</span>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="viewReport(${report.id})">View</button>
+                        <button class="btn btn-sm btn-primary" onclick="editReport(${report.id})">Edit</button>
+                        ${report.status === 'pending' && PLCIS.currentUser.permissions.includes('approve') ? 
+                            `<button class="btn btn-sm btn-success" onclick="approveReport(${report.id})">Approve</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewReport(id) {
+            const report = PLCIS.reports.find(r => r.id === id);
+            if (!report) return;
+            generateA4Preview(report);
+            document.getElementById('a4Modal').classList.add('active');
+        }
+
+        function editReport(id) {
+            const report = PLCIS.reports.find(r => r.id === id);
+            if (!report) return;
+            
+            PLCIS.currentReport = {...report};
+            
+            // Populate form
+            document.getElementById('projectName').value = report.projectName;
+            document.getElementById('contractNo').value = report.contractNo || '';
+            document.getElementById('reportDate').value = report.date;
+            document.getElementById('reportTime').value = report.time || '';
+            document.getElementById('siteLocation').value = report.location;
+            document.getElementById('weather').value = report.weather;
+            document.getElementById('activities').value = report.activities || '';
+            document.getElementById('issues').value = report.issues || '';
+            document.getElementById('nextSteps').value = report.nextSteps || '';
+            document.getElementById('workProgress').value = report.progress || 0;
+            document.getElementById('progressValue').textContent = (report.progress || 0) + '%';
+            document.getElementById('priorityLevel').value = report.priority || 'medium';
+            
+            if (report.coordinates) {
+                updateGPSDisplay(report.coordinates, report.coordinates.svy21);
+            }
+            
+            renderPhotos();
+            updatePinList();
+            switchTab('new');
+        }
+
+        function approveReport(id) {
+            const report = PLCIS.reports.find(r => r.id === id);
+            if (report) {
+                report.status = 'approved';
+                report.approvedBy = PLCIS.currentUser.name;
+                report.approvedAt = new Date().toISOString();
+                localStorage.setItem('plcis_reports', JSON.stringify(PLCIS.reports));
+                renderReportsList();
+                showToast('Report approved', 'success');
+                addActivity(`${PLCIS.currentUser.name} approved report for ${report.projectName}`, 'approved');
+            }
+        }
+
+        // A4 Preview and Print
+        function previewA4() {
+            saveReport(); // Auto-save before preview
+            generateA4Preview(PLCIS.currentReport);
+            document.getElementById('a4Modal').classList.add('active');
+        }
+
+        function closeA4Modal() {
+            document.getElementById('a4Modal').classList.remove('active');
+        }
+
+        function generateA4Preview(report) {
+            const container = document.getElementById('a4Content');
+            
+            const photosHtml = report.photos.map((photo, idx) => `
+                <div style="margin-bottom: 15px; break-inside: avoid;">
+                    <img src="${photo.src}" style="max-width: 100%; max-height: 200px; border: 1px solid #ccc;">
+                    <p style="font-size: 9pt; margin: 5px 0;"><strong>Photo ${idx + 1}:</strong> ${photo.description || 'No description'}</p>
+                    ${photo.coordinates ? `<p style="font-size: 8pt; color: #666;">GPS: ${photo.coordinates.lat.toFixed(6)}, ${photo.coordinates.lng.toFixed(6)}</p>` : ''}
+                </div>
+            `).join('');
+            
+            const pinsHtml = report.pins?.length ? `
+                <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px; margin-top: 20px;">Site Plan Annotations</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 15px;">
+                    <tr style="background: #f0f0f0;">
+                        <th style="border: 1px solid #ccc; padding: 5px;">Pin</th>
+                        <th style="border: 1px solid #ccc; padding: 5px;">Type</th>
+                        <th style="border: 1px solid #ccc; padding: 5px;">Description</th>
+                        <th style="border: 1px solid #ccc; padding: 5px;">Coordinates</th>
+                    </tr>
+                    ${report.pins.map((pin, idx) => `
+                        <tr>
+                            <td style="border: 1px solid #ccc; padding: 5px; text-align: center;">${pin.number}</td>
+                            <td style="border: 1px solid #ccc; padding: 5px;">${pin.type}</td>
+                            <td style="border: 1px solid #ccc; padding: 5px;">${pin.description}</td>
+                            <td style="border: 1px solid #ccc; padding: 5px; font-size: 8pt;">
+                                ${pin.realCoords ? `${pin.realCoords.lat.toFixed(6)}, ${pin.realCoords.lng.toFixed(6)}` : 'N/A'}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+            ` : '';
+            
+            container.innerHTML = `
+                <div class="a4-header">
+                    <div>
+                        <div class="a4-logo">PLCIS</div>
+                        <div style="font-size: 10pt; color: #666;">ProjectLink Construction Intelligence System</div>
+                    </div>
+                    <div class="a4-meta">
+                        <div style="font-weight: bold; font-size: 12pt;">SITE WORK REPORT</div>
+                        <div>Report No: ${report.contractNo || 'N/A'}</div>
+                        <div>Date: ${report.date} ${report.time || ''}</div>
+                    </div>
+                </div>
+                
+                <div class="a4-content">
+                    <table style="width: 100%; font-size: 10pt; margin-bottom: 15px;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top;">
+                                <strong>Project:</strong> ${report.projectName}<br>
+                                <strong>Contract No:</strong> ${report.contractNo || 'N/A'}<br>
+                                <strong>Location:</strong> ${report.location}
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <strong>Engineer:</strong> ${report.createdBy || 'N/A'}<br>
+                                <strong>Weather:</strong> ${report.weather}<br>
+                                <strong>Progress:</strong> ${report.progress || 0}%
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    ${report.coordinates ? `
+                    <div style="background: #f5f5f5; padding: 10px; border-left: 4px solid #1a237e; margin-bottom: 15px; font-size: 9pt;">
+                        <strong>GPS Coordinates (WGS84):</strong> ${report.coordinates.lat.toFixed(6)}, ${report.coordinates.lng.toFixed(6)}<br>
+                        <strong>SVY21:</strong> X: ${report.coordinates.svy21?.x.toFixed(3) || 'N/A'}, Y: ${report.coordinates.svy21?.y.toFixed(3) || 'N/A'}<br>
+                        <strong>Accuracy:</strong> ±${report.coordinates.accuracy}m | <strong>Time:</strong> ${report.coordinates.timestamp}
+                    </div>
+                    ` : ''}
+                    
+                    <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px;">Work Activities</h3>
+                    <p style="margin-bottom: 15px; text-align: justify;">${report.activities || 'No activities recorded.'}</p>
+                    
+                    <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px;">Issues & Observations</h3>
+                    <p style="margin-bottom: 15px; text-align: justify; ${report.priority === 'critical' ? 'color: #c62828; font-weight: bold;' : ''}">
+                        ${report.issues || 'No issues reported.'}
+                    </p>
+                    
+                    <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px;">Next Steps</h3>
+                    <p style="margin-bottom: 20px; text-align: justify;">${report.nextSteps || 'No next steps defined.'}</p>
+                    
+                    ${pinsHtml}
+                    
+                    <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px; margin-top: 20px;">Photographic Documentation (${report.photos.length})</h3>
+                    <div style="column-count: 2; column-gap: 15px;">
+                        ${photosHtml || '<p>No photos attached.</p>'}
+                    </div>
+                    
+                    ${report.signature ? `
+                    <div style="margin-top: 30px; page-break-inside: avoid;">
+                        <h3 style="color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px;">Certification</h3>
+                        <p style="font-size: 9pt; margin-bottom: 10px;">I hereby certify that the information provided in this report is accurate to the best of my knowledge.</p>
+                        <img src="${report.signature}" style="max-width: 200px; border-bottom: 1px solid #000;">
+                        <p style="margin-top: 5px;"><strong>${report.createdBy || 'Engineer'}</strong><br>
+                        <span style="font-size: 9pt;">${report.date}</span></p>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <div class="a4-footer">
+                    <span>PLCIS - ProjectLink Construction Intelligence System</span>
+                    <span>Page 1 of 1 | Generated: ${new Date().toLocaleString()}</span>
+                </div>
+            `;
+        }
+
+        function printA4() {
+            window.print();
+        }
+
+        // Analytics
+        function initializeCharts() {
+            // Progress Chart
+            const progressCtx = document.getElementById('progressChart');
+            if (progressCtx) {
+                new Chart(progressCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'Progress %',
+                            data: [25, 45, 60, 75],
+                            borderColor: '#1a237e',
+                            backgroundColor: 'rgba(26, 35, 126, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+            
+            // Issues Chart
+            const issuesCtx = document.getElementById('issuesChart');
+            if (issuesCtx) {
+                new Chart(issuesCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Safety', 'Quality', 'Delay', 'Material'],
+                        datasets: [{
+                            data: [3, 5, 2, 4],
+                            backgroundColor: ['#f44336', '#ff9800', '#2196f3', '#4caf50']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function updateAnalytics() {
+            // Update charts with real data
+        }
+
+        // Activity Feed
+        function updateActivityFeed() {
+            const feed = document.getElementById('activityFeed');
+            const activities = JSON.parse(localStorage.getItem('plcis_activities') || '[]');
+            
+            if (activities.length === 0) {
+                feed.innerHTML = '<div style="text-align: center; color: #999; padding: 2rem;">No recent activity</div>';
+                return;
+            }
+            
+            feed.innerHTML = activities.slice(-10).reverse().map(act => `
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: ${getActivityColor(act.type)}20; color: ${getActivityColor(act.type)};">
+                        ${getActivityIcon(act.type)}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${act.text}</div>
+                        <div class="activity-time">${act.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addActivity(text, type = 'info') {
+            const activities = JSON.parse(localStorage.getItem('plcis_activities') || '[]');
+            activities.push({
+                text,
+                type,
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem('plcis_activities', JSON.stringify(activities));
+            updateActivityFeed();
+        }
+
+        function getActivityColor(type) {
+            const colors = {
+                success: '#2e7d32',
+                pending: '#f9a825',
+                error: '#c62828',
+                info: '#0277bd',
+                approved: '#2e7d32'
+            };
+            return colors[type] || colors.info;
+        }
+
+        function getActivityIcon(type) {
+            const icons = {
+                success: '✓',
+                pending: '⏳',
+                error: '✕',
+                info: 'ℹ',
+                approved: '✓'
+            };
+            return icons[type] || '•';
+        }
+
+        // Utilities
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function checkOnlineStatus() {
+            updateOnlineStatus(navigator.onLine);
+        }
+
+        function updateOnlineStatus(online) {
+            const banner = document.getElementById('offlineBanner');
+            const status = document.getElementById('syncStatus');
+            
+            if (online) {
+                banner.classList.remove('active');
+                status.className = 'sync-status synced';
+                status.innerHTML = '<span>☁️</span><span>Synced</span>';
+                syncWithCloud();
+            } else {
+                banner.classList.add('active');
+                status.className = 'sync-status error';
+                status.innerHTML = '<span>⚠️</span><span>Offline</span>';
+            }
+        }
+
+        function syncWithCloud() {
+            // Simulate cloud sync
+            const status = document.getElementById('syncStatus');
+            status.className = 'sync-status syncing';
+            status.innerHTML = '<span>🔄</span><span>Syncing...</span>';
+            
+            setTimeout(() => {
+                status.className = 'sync-status synced';
+                status.innerHTML = '<span>☁️</span><span>Synced</span>';
+            }, 1500);
+        }
+
+        function filterReports() {
+            const search = document.getElementById('searchReports').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+            
+            const filtered = PLCIS.reports.filter(r => {
+                const matchesSearch = !search || 
+                    r.projectName.toLowerCase().includes(search) ||
+                    r.contractNo?.toLowerCase().includes(search);
+                const matchesStatus = status === 'all' || r.status === status;
+                return matchesSearch && matchesStatus;
+            });
+            
+            // Re-render with filtered data
+            const container = document.getElementById('reportsList');
+            // ... (render logic)
+        }
+
+        function updateProgressValue(val) {
+            document.getElementById('progressValue').textContent = val + '%';
+        }
+
+        function geocodeAddress() {
+            // Implement geocoding
+            showToast('Geocoding feature requires Google Maps API key', 'warning');
+        }
+
+        function calibrateScale() {
+            const scale = prompt('Enter scale (e.g., 1:100) or real-world distance in meters:');
+            if (scale) {
+                PLCIS.scaleCalibration = scale;
+                showToast(`Scale set to ${scale}`, 'success');
+            }
+        }
+
+        function zoomIn() {
+            if (PLCIS.fabricCanvas) {
+                const zoom = PLCIS.fabricCanvas.getZoom() * 1.1;
+                PLCIS.fabricCanvas.setZoom(zoom);
+            }
+        }
+
+        function zoomOut() {
+            if (PLCIS.fabricCanvas) {
+                const zoom = PLCIS.fabricCanvas.getZoom() * 0.9;
+                PLCIS.fabricCanvas.setZoom(zoom);
+            }
+        }
+
+        function resetView() {
+            if (PLCIS.fabricCanvas) {
+                PLCIS.fabricCanvas.setZoom(1);
+                PLCIS.fabricCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+            }
+        }
+
+        function undoLast() {
+            if (PLCIS.fabricCanvas && PLCIS.fabricCanvas._objects.length > 0) {
+                PLCIS.fabricCanvas._objects.pop();
+                PLCIS.fabricCanvas.renderAll();
+            }
+        }
+
+        function handleQuickPhoto(input) {
+            handlePhoto(input, 'quick');
+            showToast('Quick photo saved! Access it in the Photos tab.', 'success');
+        }
+
+        function inviteTeamMember() {
+            const email = prompt('Enter email address to invite:');
+            if (email) {
+                showToast(`Invitation sent to ${email}`, 'success');
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message) {
+                const chat = document.getElementById('teamChat');
+                chat.innerHTML += `
+                    <div style="margin-bottom: 0.75rem; text-align: right;">
+                        <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 12px 12px 0 12px; display: inline-block; max-width: 80%;">
+                            ${message}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">Just now</div>
+                    </div>
+                `;
+                chat.scrollTop = chat.scrollHeight;
+                input.value = '';
+            }
+        }
+
+        // Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+                self.addEventListener('install', e => {
+                    e.waitUntil(self.skipWaiting());
+                });
+                self.addEventListener('activate', e => {
+                    e.waitUntil(self.clients.claim());
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(fetch(e.request).catch(() => {
+                        return new Response('Offline mode');
+                    }));
+                });
+            `)).catch(() => console.log('SW registration skipped'));
+        }
+    </script>
+</body>
+</html>
