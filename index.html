@@ -5,10 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1e3a8a">
     <title>ProjectLink Construction Intelligence System (PLCIS) - Enhanced</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    
+    <!-- Google Maps API - Now loaded with async and callback -->
+    <script>
+        // Global callback function for Google Maps
+        function initGoogleMaps() {
+            console.log('Google Maps API loaded successfully');
+            // Map will be initialized when needed
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKeyForDemo&libraries=places&callback=initGoogleMaps"></script>
+    
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* [All previous CSS styles remain exactly the same] */
         * {
             margin: 0;
             padding: 0;
@@ -1714,6 +1729,30 @@
             height: 12px;
             border-radius: 50%;
         }
+
+        /* Map Error Message */
+        .map-error {
+            padding: 2rem;
+            text-align: center;
+            color: var(--danger);
+            background: #fee2e2;
+            border-radius: 8px;
+            margin: 1rem;
+        }
+
+        .map-error i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* OneMap Container */
+        .onemap-container {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -2225,7 +2264,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal -->
+    <!-- Map Picker Modal - FIXED -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2244,10 +2283,12 @@
             
             <div class="map-container-full">
                 <div id="googleMapPanel" class="map-panel active">
-                    <div id="mapPicker" style="width: 100%; height: 100%; min-height: 500px;"></div>
+                    <div id="mapPicker" style="width: 100%; height: 100%; min-height: 500px;">
+                        <!-- Map will be initialized here -->
+                    </div>
                 </div>
                 <div id="oneMapPanel" class="map-panel">
-                    <iframe id="oneMapFrame" width="100%" height="100%" frameborder="0"></iframe>
+                    <!-- OneMap will be loaded here -->
                 </div>
             </div>
             
@@ -2332,6 +2373,7 @@
         let planImageObj = null;
         let canvasScale = 1;
         let pendingPin = null; // For photo linking workflow
+        let googleMapsLoaded = false; // Track if Google Maps API is loaded
 
         // Role Configuration
         const roleConfig = {
@@ -2509,7 +2551,7 @@
             showToast(message);
         }
 
-        // Map Picker
+        // Map Picker - FIXED VERSION
         function openMapPicker(type) {
             if (type === 'manual') {
                 const lat = prompt('Enter Latitude:');
@@ -2532,35 +2574,60 @@
             document.getElementById('mapModal').classList.add('active');
             
             if (type === 'google' || type === 'onemap') {
-                setTimeout(() => initGoogleMaps(), 100);
+                // Initialize Google Maps immediately if not already done
+                if (type === 'google') {
+                    setTimeout(() => initGoogleMaps(), 100);
+                } else {
+                    setTimeout(() => initOneMap(), 100);
+                }
             }
         }
 
+        // FIXED: Initialize Google Maps properly
         function initGoogleMaps() {
-            if (!mapPicker && document.getElementById('mapPicker')) {
-                // Default to Singapore coordinates
-                const defaultLat = 1.3521;
-                const defaultLng = 103.8198;
-                
-                mapPicker = new google.maps.Map(document.getElementById('mapPicker'), {
+            const mapContainer = document.getElementById('mapPicker');
+            
+            // Check if Google Maps API is loaded
+            if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                mapContainer.innerHTML = `
+                    <div class="map-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Google Maps API not loaded</strong><br>
+                        Please check your API key or internet connection.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Default to Singapore coordinates
+            const defaultLat = 1.3521;
+            const defaultLng = 103.8198;
+            
+            try {
+                mapPicker = new google.maps.Map(mapContainer, {
                     center: { lat: defaultLat, lng: defaultLng },
                     zoom: 12,
                     mapTypeControl: true,
-                    streetViewControl: false
+                    streetViewControl: false,
+                    fullscreenControl: true,
+                    zoomControl: true
                 });
                 
                 let marker = new google.maps.Marker({
                     position: { lat: defaultLat, lng: defaultLng },
                     map: mapPicker,
-                    draggable: true
+                    draggable: true,
+                    animation: google.maps.Animation.DROP
                 });
                 
-                google.maps.event.addListener(mapPicker, 'click', function(event) {
+                // Add click listener to map
+                mapPicker.addListener('click', function(event) {
                     marker.setPosition(event.latLng);
                     updateSelectedCoord(event.latLng.lat(), event.latLng.lng());
                 });
                 
-                google.maps.event.addListener(marker, 'dragend', function(event) {
+                // Add drag end listener to marker
+                marker.addListener('dragend', function(event) {
                     updateSelectedCoord(event.latLng.lat(), event.latLng.lng());
                 });
                 
@@ -2577,12 +2644,25 @@
                             updateSelectedCoord(pos.lat, pos.lng);
                         },
                         () => {
+                            // Use default if geolocation fails
                             updateSelectedCoord(defaultLat, defaultLng);
                         }
                     );
                 } else {
                     updateSelectedCoord(defaultLat, defaultLng);
                 }
+                
+                googleMapsLoaded = true;
+                
+            } catch (error) {
+                console.error('Error initializing Google Maps:', error);
+                mapContainer.innerHTML = `
+                    <div class="map-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Error loading map</strong><br>
+                        ${error.message}
+                    </div>
+                `;
             }
         }
 
@@ -2593,18 +2673,54 @@
             event.target.classList.add('active');
             document.getElementById(tab + 'MapPanel').classList.add('active');
             
-            if (tab === 'onemap') {
-                initOneMap();
+            if (tab === 'google') {
+                setTimeout(() => initGoogleMaps(), 100);
+            } else if (tab === 'onemap') {
+                setTimeout(() => initOneMap(), 100);
             }
         }
 
+        // FIXED: Initialize OneMap properly
         function initOneMap() {
-            // OneMap Singapore integration
-            const oneMapUrl = `https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=12&marker=1.3521,103.8198`;
-            document.getElementById('oneMapFrame').src = oneMapUrl;
+            const oneMapPanel = document.getElementById('oneMapPanel');
             
-            // Note: In production, use OneMap API for proper integration
-            showToast('OneMap loaded (Singapore only)');
+            // Clear previous content
+            oneMapPanel.innerHTML = '';
+            
+            // Create iframe for OneMap
+            // Using the correct OneMap minimap URL format
+            const lat = 1.3521; // Singapore latitude
+            const lng = 103.8198; // Singapore longitude
+            const zoom = 15;
+            
+            // OneMap v2 embed URL format
+            const oneMapUrl = `https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=${zoom}&marker=${lat},${lng}&popupTitle=Selected%20Location&popupContent=Click%20to%20select%20this%20location`;
+            
+            const iframe = document.createElement('iframe');
+            iframe.className = 'onemap-container';
+            iframe.src = oneMapUrl;
+            iframe.title = 'OneMap Singapore';
+            iframe.allowFullscreen = true;
+            
+            // Add load event to handle OneMap interactions
+            iframe.onload = function() {
+                showToast('OneMap loaded. Use the map to find your location.');
+            };
+            
+            oneMapPanel.appendChild(iframe);
+            
+            // Set default coordinates (since OneMap iframe doesn't support two-way communication easily)
+            selectedMapLocation = {
+                lat: lat,
+                lng: lng,
+                accuracy: 10,
+                timestamp: new Date().toLocaleString(),
+                source: 'OneMap Singapore'
+            };
+            document.getElementById('selectedCoordDisplay').innerHTML = `
+                <strong>Default:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+                <small>Navigate the map above, then click Confirm to use these coordinates or enter manually.</small>
+            `;
         }
 
         function updateSelectedCoord(lat, lng) {
@@ -3032,1091 +3148,4 @@
             // Update UI
             document.getElementById('currentPageNum').textContent = pageNum;
             document.getElementById('pdfPrevBtn').disabled = pageNum === 1;
-            document.getElementById('pdfNextBtn').disabled = pageNum === currentReport.planPDFData.numPages;
-            
-            // Update thumbnails
-            document.querySelectorAll('.pdf-thumb').forEach((thumb, idx) => {
-                thumb.classList.toggle('active', idx + 1 === pageNum);
-            });
-            
-            loadImageToCanvas(imageUrl);
-        }
-
-        function changePDFPage(delta) {
-            if (!currentReport.planPDFData) return;
-            
-            const newPage = currentReport.planPDFData.currentPage + delta;
-            if (newPage >= 1 && newPage <= currentReport.planPDFData.numPages) {
-                renderPDFPage(newPage);
-            }
-        }
-
-        function selectPDFPage(pageNum) {
-            renderPDFPage(pageNum);
-        }
-
-        function loadImageToCanvas(src) {
-            planImageObj = new Image();
-            planImageObj.onload = function() {
-                document.getElementById('planPlaceholder').style.display = 'none';
-                document.getElementById('canvasWrapper').style.display = 'block';
-                
-                resizeCanvas();
-                renderPinsOverlay();
-            };
-            planImageObj.src = src;
-        }
-
-        function handleCanvasClick(e) {
-            if (!planImageObj) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // Convert to relative coordinates (0-1) for scaling
-            const relX = x / canvas.width;
-            const relY = y / canvas.height;
-            
-            pendingPin = {
-                id: Date.now(),
-                x: relX,
-                y: relY,
-                canvasX: x,
-                canvasY: y,
-                type: currentPinType,
-                color: pinTypes[currentPinType].color,
-                page: currentReport.planType === 'pdf' ? currentReport.planPDFData.currentPage : 1,
-                realCoords: currentReport.coordinates,
-                description: '',
-                timestamp: new Date().toLocaleString(),
-                linkedPhotoId: null
-            };
-            
-            // If photo type and photo selected, auto-link
-            if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
-                pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
-                finalizePin(pendingPin);
-            } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
-                // Show photo selection modal
-                openLinkPhotoModal();
-            } else {
-                // Other pin types - just add description
-                pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
-                finalizePin(pendingPin);
-            }
-        }
-
-        function openLinkPhotoModal() {
-            const grid = document.getElementById('linkPhotoGrid');
-            grid.innerHTML = currentReport.photos.map((photo, idx) => `
-                <div class="photo-select-item" onclick="selectPhotoForLink(${idx})">
-                    <img src="${photo.src}" alt="Photo ${idx + 1}">
-                    <span class="photo-select-number">${idx + 1}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('linkPhotoModal').classList.add('active');
-        }
-
-        function closeLinkPhotoModal() {
-            document.getElementById('linkPhotoModal').classList.remove('active');
-            pendingPin = null;
-        }
-
-        function selectPhotoForLink(index) {
-            if (pendingPin) {
-                pendingPin.linkedPhotoId = currentReport.photos[index].id;
-                closeLinkPhotoModal();
-                finalizePin(pendingPin);
-            }
-        }
-
-        function skipPhotoLink() {
-            if (pendingPin) {
-                pendingPin.description = prompt('Enter description for this pin:') || 'No description';
-                closeLinkPhotoModal();
-                finalizePin(pendingPin);
-            }
-        }
-
-        function finalizePin(pin) {
-            pins.push(pin);
-            currentReport.pins = pins;
-            
-            // Clear photo selection after placing pin
-            if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
-                selectedPhotoIndex = null;
-                document.getElementById('selectedPhotoInfo').style.display = 'none';
-                renderPhotos();
-            }
-            
-            drawPin(pin);
-            updatePinList();
-            renderPinsOverlay();
-            
-            const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
-            showToast(`Pin ${pins.length} placed: ${pinTypes[pin.type].label}${linkInfo}`);
-            
-            pendingPin = null;
-        }
-
-        function selectPinType(type) {
-            currentPinType = type;
-            document.querySelectorAll('.pin-type-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-type="${type}"]`).classList.add('active');
-        }
-
-        function drawPin(pin) {
-            // Pin is drawn as HTML overlay, not on canvas
-            // This allows pins to remain visible and clickable
-        }
-
-        function renderPinsOverlay() {
-            const overlay = document.getElementById('pinsOverlay');
-            overlay.innerHTML = '';
-            
-            const currentPage = currentReport.planType === 'pdf' ? currentReport.planPDFData.currentPage : 1;
-            
-            pins.forEach((pin, index) => {
-                // Only show pins for current page (for PDFs)
-                if (currentReport.planType === 'pdf' && pin.page !== currentPage) {
-                    return;
-                }
-                
-                const pinEl = document.createElement('div');
-                pinEl.className = 'plan-pin';
-                pinEl.style.left = (pin.x * 100) + '%';
-                pinEl.style.top = (pin.y * 100) + '%';
-                pinEl.style.setProperty('--color', pin.color);
-                
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                const photoBadge = linkedPhoto ? `
-                    <div class="plan-pin-photo-badge">
-                        <i class="fas fa-image"></i>
-                    </div>
-                ` : '';
-                
-                pinEl.innerHTML = `
-                    <div class="plan-pin-marker">
-                        <div class="plan-pin-head">
-                            <span class="plan-pin-number">${index + 1}</span>
-                        </div>
-                        ${photoBadge}
-                    </div>
-                    <div class="plan-tooltip">
-                        <strong>${pinTypes[pin.type].label}</strong><br>
-                        ${pin.description || 'No description'}
-                        ${linkedPhoto ? `<br><em>Linked to Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</em>` : ''}
-                    </div>
-                `;
-                
-                pinEl.onclick = (e) => {
-                    e.stopPropagation();
-                    // Could add pin editing here
-                };
-                
-                overlay.appendChild(pinEl);
-            });
-        }
-
-        function redrawCanvas() {
-            if (!planImageObj || !ctx) return;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(planImageObj, 0, 0, canvas.width, canvas.height);
-        }
-
-        function clearPins() {
-            if (pins.length === 0) return;
-            
-            if (confirm(`Clear all ${pins.length} pins?`)) {
-                pins = [];
-                currentReport.pins = [];
-                
-                // Clear photo links
-                currentReport.photos.forEach(p => p.linkedPinId = null);
-                renderPhotos();
-                
-                updatePinList();
-                renderPinsOverlay();
-                showToast('All pins cleared');
-            }
-        }
-
-        function updatePinList() {
-            const list = document.getElementById('pinList');
-            const count = document.getElementById('pinCount');
-            
-            count.textContent = pins.length;
-            
-            if (pins.length === 0) {
-                list.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No pins placed yet. Click on the plan above to add pins.</p>';
-                return;
-            }
-            
-            list.innerHTML = pins.map((pin, idx) => {
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                const photoThumb = linkedPhoto ? `
-                    <img src="${linkedPhoto.src}" class="pin-photo-thumb" onclick="openPhotoModal(${currentReport.photos.indexOf(linkedPhoto)})" title="Click to view linked photo">
-                ` : '';
-                
-                return `
-                <div class="pin-item ${linkedPhoto ? 'linked' : ''}">
-                    <div class="pin-number" style="background: ${pin.color};">${idx + 1}</div>
-                    <div class="pin-info">
-                        <div class="pin-type">${pinTypes[pin.type].label}</div>
-                        <div class="pin-desc">${pin.description || 'No description'}</div>
-                        ${linkedPhoto ? `
-                            <div class="pin-photo-link">
-                                <i class="fas fa-link"></i> Linked to Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}
-                            </div>
-                        ` : ''}
-                        ${pin.realCoords ? `
-                            <div class="pin-gps">
-                                <i class="fas fa-map-marker-alt"></i>
-                                ${pin.realCoords.lat.toFixed(4)}, ${pin.realCoords.lng.toFixed(4)}
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${photoThumb}
-                    <div class="pin-actions">
-                        <button class="pin-btn link-btn" onclick="linkPinToPhoto(${idx})" title="Link to photo">
-                            <i class="fas fa-link"></i>
-                        </button>
-                        <button class="pin-btn" onclick="deletePin(${pin.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function linkPinToPhoto(pinIndex) {
-            pendingPin = pins[pinIndex];
-            openLinkPhotoModal();
-        }
-
-        function deletePin(id) {
-            const pin = pins.find(p => p.id === id);
-            if (pin && pin.linkedPhotoId) {
-                // Remove link from photo
-                const photo = currentReport.photos.find(p => p.id === pin.linkedPhotoId);
-                if (photo) photo.linkedPinId = null;
-            }
-            
-            pins = pins.filter(p => p.id !== id);
-            currentReport.pins = pins;
-            
-            renderPinsOverlay();
-            updatePinList();
-            renderPhotos();
-            showToast('Pin deleted');
-        }
-
-        function exportAnnotatedPlan() {
-            if (!planImageObj) {
-                showToast('No plan drawing to export');
-                return;
-            }
-            
-            // Create a temporary canvas with pins drawn on it
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            exportCanvas.width = planImageObj.width;
-            exportCanvas.height = planImageObj.height;
-            
-            // Draw plan
-            exportCtx.drawImage(planImageObj, 0, 0);
-            
-            // Draw pins
-            pins.forEach((pin, idx) => {
-                if (currentReport.planType === 'pdf' && pin.page !== currentReport.planPDFData.currentPage) {
-                    return;
-                }
-                
-                const x = pin.x * exportCanvas.width;
-                const y = pin.y * exportCanvas.height;
-                
-                // Draw pin
-                exportCtx.save();
-                exportCtx.translate(x, y);
-                exportCtx.rotate(-45 * Math.PI / 180);
-                
-                exportCtx.beginPath();
-                exportCtx.arc(0, -15, 15, 0, 2 * Math.PI);
-                exportCtx.fillStyle = pin.color;
-                exportCtx.fill();
-                exportCtx.strokeStyle = 'white';
-                exportCtx.lineWidth = 3;
-                exportCtx.stroke();
-                
-                exportCtx.restore();
-                
-                // Draw number
-                exportCtx.fillStyle = 'white';
-                exportCtx.font = 'bold 16px Arial';
-                exportCtx.textAlign = 'center';
-                exportCtx.fillText(idx + 1, x, y - 10);
-            });
-            
-            const link = document.createElement('a');
-            link.download = `PLCIS_Plan_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = exportCanvas.toDataURL();
-            link.click();
-            showToast('Annotated plan exported!');
-        }
-
-        function printPlanWithPins() {
-            if (!planImageObj) {
-                showToast('No plan to print');
-                return;
-            }
-            
-            // For PDFs, print all pages with their respective pins
-            if (currentReport.planType === 'pdf' && currentReport.planPDFData.numPages > 1) {
-                printMultiPagePlan();
-            } else {
-                printSinglePagePlan();
-            }
-        }
-
-        function printSinglePagePlan() {
-            const printWindow = window.open('', '_blank');
-            const pinsTable = pins.map((pin, idx) => {
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                return `
-                    <tr>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                            <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${idx + 1}</div>
-                        </td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                            ${linkedPhoto ? `<span style="color: var(--success); font-weight: 600;">✓ Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                        </td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; font-size: 0.875rem;">
-                            ${pin.realCoords ? `${pin.realCoords.lat.toFixed(6)}<br>${pin.realCoords.lng.toFixed(6)}` : 'N/A'}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            
-            // Create canvas with pins
-            const printCanvas = document.createElement('canvas');
-            const printCtx = printCanvas.getContext('2d');
-            printCanvas.width = planImageObj.width;
-            printCanvas.height = planImageObj.height;
-            printCtx.drawImage(planImageObj, 0, 0);
-            
-            // Draw pins on canvas
-            pins.forEach((pin, idx) => {
-                const x = pin.x * printCanvas.width;
-                const y = pin.y * printCanvas.height;
-                
-                printCtx.save();
-                printCtx.translate(x, y);
-                printCtx.rotate(-45 * Math.PI / 180);
-                printCtx.beginPath();
-                printCtx.arc(0, -20, 20, 0, 2 * Math.PI);
-                printCtx.fillStyle = pin.color;
-                printCtx.fill();
-                printCtx.strokeStyle = 'white';
-                printCtx.lineWidth = 4;
-                printCtx.stroke();
-                printCtx.restore();
-                
-                printCtx.fillStyle = 'white';
-                printCtx.font = 'bold 20px Arial';
-                printCtx.textAlign = 'center';
-                printCtx.fillText(idx + 1, x, y - 12);
-            });
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Site Plan - ${currentReport.projectName}</title>
-                    <style>
-                        @page { size: A4 landscape; margin: 10mm; }
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; }
-                        .plan-container { text-align: center; margin-bottom: 20px; page-break-inside: avoid; }
-                        .plan-container img { max-width: 100%; max-height: 500px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.875rem; }
-                        th { background: #1e3a8a; color: white; padding: 12px; text-align: left; font-weight: 600; }
-                        h1 { color: #1e3a8a; margin: 0; font-size: 1.5rem; }
-                        .meta { color: #64748b; font-size: 0.875rem; margin-top: 5px; }
-                        .pin-legend { display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap; justify-content: center; }
-                        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.875rem; }
-                        .legend-dot { width: 16px; height: 16px; border-radius: 50%; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>🏗️ SITE PLAN ANNOTATION</h1>
-                        <div class="meta">Project: ${currentReport.projectName || 'N/A'} | Date: ${new Date().toLocaleDateString()} | Total Pins: ${pins.length}</div>
-                    </div>
-                    
-                    <div class="plan-container">
-                        <img src="${printCanvas.toDataURL()}" alt="Annotated Site Plan">
-                    </div>
-                    
-                    <div class="pin-legend">
-                        ${Object.entries(pinTypes).map(([key, type]) => `
-                            <div class="legend-item">
-                                <div class="legend-dot" style="background: ${type.color};"></div>
-                                <span>${type.label}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">Pin</th>
-                                <th>Type</th>
-                                <th>Description</th>
-                                <th style="width: 100px;">Photo Link</th>
-                                <th>GPS Coordinates</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${pinsTable || '<tr><td colspan="5" style="text-align: center; padding: 20px;">No pins placed</td></tr>'}
-                        </tbody>
-                    </table>
-                    
-                    <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.875rem;">
-                        <p><strong>PLCIS Report ID:</strong> ${currentReport.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This plan annotation was generated by ProjectLink Construction Intelligence System</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        async function printMultiPagePlan() {
-            const printWindow = window.open('', '_blank');
-            const numPages = currentReport.planPDFData.numPages;
-            
-            let pagesHTML = '';
-            
-            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                const pagePins = pins.filter(p => p.page === pageNum);
-                const pageImage = currentReport.pdfPages[pageNum - 1];
-                
-                if (!pageImage) continue;
-                
-                // Create canvas for this page
-                const pageCanvas = document.createElement('canvas');
-                const pageCtx = pageCanvas.getContext('2d');
-                const img = new Image();
-                await new Promise(resolve => {
-                    img.onload = resolve;
-                    img.src = pageImage;
-                });
-                
-                pageCanvas.width = img.width;
-                pageCanvas.height = img.height;
-                pageCtx.drawImage(img, 0, 0);
-                
-                // Draw pins for this page
-                pagePins.forEach((pin, idx) => {
-                    const x = pin.x * pageCanvas.width;
-                    const y = pin.y * pageCanvas.height;
-                    
-                    pageCtx.save();
-                    pageCtx.translate(x, y);
-                    pageCtx.rotate(-45 * Math.PI / 180);
-                    pageCtx.beginPath();
-                    pageCtx.arc(0, -20, 20, 0, 2 * Math.PI);
-                    pageCtx.fillStyle = pin.color;
-                    pageCtx.fill();
-                    pageCtx.strokeStyle = 'white';
-                    pageCtx.lineWidth = 4;
-                    pageCtx.stroke();
-                    pageCtx.restore();
-                    
-                    pageCtx.fillStyle = 'white';
-                    pageCtx.font = 'bold 20px Arial';
-                    pageCtx.textAlign = 'center';
-                    pageCtx.fillText(pins.indexOf(pin) + 1, x, y - 12);
-                });
-                
-                const pinsTable = pagePins.map((pin, idx) => {
-                    const globalIdx = pins.indexOf(pin);
-                    const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                    return `
-                        <tr>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${globalIdx + 1}</div>
-                            </td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                ${linkedPhoto ? `<span style="color: var(--success); font-weight: 600;">✓ Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-                
-                pagesHTML += `
-                    <div class="plan-print-page">
-                        <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
-                            <h2 style="color: #1e3a8a; margin: 0; font-size: 1.25rem;">Page ${pageNum} of ${numPages}</h2>
-                            <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.875rem;">${pagePins.length} pin(s) on this page</p>
-                        </div>
-                        
-                        <div class="plan-container">
-                            <img src="${pageCanvas.toDataURL()}" alt="Site Plan Page ${pageNum}">
-                        </div>
-                        
-                        ${pagePins.length > 0 ? `
-                        <table style="margin-top: 20px;">
-                            <thead>
-                                <tr style="background: #1e3a8a; color: white;">
-                                    <th style="padding: 10px; text-align: left; width: 60px;">Pin</th>
-                                    <th style="padding: 10px; text-align: left;">Type</th>
-                                    <th style="padding: 10px; text-align: left;">Description</th>
-                                    <th style="padding: 10px; text-align: center; width: 100px;">Photo Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${pinsTable}
-                            </tbody>
-                        </table>
-                        ` : '<p style="text-align: center; color: #64748b; padding: 20px;">No pins on this page</p>'}
-                    </div>
-                `;
-            }
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Site Plan - ${currentReport.projectName}</title>
-                    <style>
-                        @page { size: A4 landscape; margin: 10mm; }
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; }
-                        .plan-container { text-align: center; margin-bottom: 20px; }
-                        .plan-container img { max-width: 100%; max-height: 450px; border: 2px solid #e2e8f0; }
-                        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-                        th { background: #1e3a8a; color: white; padding: 10px; text-align: left; }
-                        td { border: 1px solid #e2e8f0; padding: 8px; }
-                        h1 { color: #1e3a8a; margin: 0; font-size: 1.5rem; }
-                        .meta { color: #64748b; font-size: 0.875rem; margin-top: 5px; }
-                        .plan-print-page { page-break-after: always; margin-bottom: 30px; }
-                        .plan-print-page:last-child { page-break-after: auto; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>🏗️ MULTI-PAGE SITE PLAN</h1>
-                        <div class="meta">Project: ${currentReport.projectName || 'N/A'} | Date: ${new Date().toLocaleDateString()} | Total Pages: ${numPages} | Total Pins: ${pins.length}</div>
-                    </div>
-                    
-                    ${pagesHTML}
-                    
-                    <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.875rem;">
-                        <p><strong>PLCIS Report ID:</strong> ${currentReport.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This multi-page plan was generated by ProjectLink Construction Intelligence System</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        // Report Management
-        function saveReport() {
-            // Validation
-            const projectName = document.getElementById('projectName').value.trim();
-            const siteLocation = document.getElementById('siteLocation').value.trim();
-            
-            if (!projectName || !siteLocation) {
-                showToast('Please fill in Project Name and Site Location');
-                return;
-            }
-            
-            // Update current report
-            currentReport.projectName = projectName;
-            currentReport.location = siteLocation;
-            currentReport.date = document.getElementById('reportDate').value;
-            currentReport.engineer = document.getElementById('engineerName').value;
-            currentReport.role = currentRole;
-            currentReport.weather = document.getElementById('weather').value;
-            currentReport.activities = document.getElementById('activities').value;
-            currentReport.issues = document.getElementById('issues').value;
-            currentReport.nextSteps = document.getElementById('nextSteps').value;
-            currentReport.id = currentReport.id || Date.now();
-            currentReport.savedAt = new Date().toLocaleString();
-            
-            // Save to localStorage
-            const existingIndex = reports.findIndex(r => r.id === currentReport.id);
-            if (existingIndex >= 0) {
-                reports[existingIndex] = JSON.parse(JSON.stringify(currentReport));
-            } else {
-                reports.push(JSON.parse(JSON.stringify(currentReport)));
-            }
-            
-            localStorage.setItem('plcis_reports', JSON.stringify(reports));
-            
-            showToast('Report saved successfully!');
-            
-            // Ask to print
-            setTimeout(() => {
-                if (confirm('Report saved! Would you like to preview the A4 print layout?')) {
-                    previewReport(currentReport);
-                }
-            }, 300);
-        }
-
-        function previewReport(report = currentReport) {
-            const modal = document.getElementById('pdfModal');
-            const content = document.getElementById('pdfPreviewContent');
-            
-            const photosHtml = report.photos.map((photo, idx) => {
-                const linkedPin = report.pins ? report.pins.find(p => p.linkedPhotoId === photo.id) : null;
-                return `
-                <div style="margin-bottom: 15px; break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                    <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e2e8f0;">
-                        <strong>Photo ${idx + 1}</strong>
-                        ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin ${report.pins.indexOf(linkedPin) + 1}</span>` : ''}
-                    </div>
-                    <div style="padding: 10px;">
-                        <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto;">
-                        <div style="margin-top: 8px; font-size: 0.875rem; color: var(--text-secondary);">
-                            ${photo.description || 'No description'}
-                            ${photo.coordinates ? `<br><small style="color: #059669;">📍 ${photo.coordinates.lat.toFixed(6)}, ${photo.coordinates.lng.toFixed(6)}</small>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-            
-            // Generate plan pages with pins
-            let planPagesHtml = '';
-            if (report.pins && report.pins.length > 0 && report.planImage) {
-                if (report.planType === 'pdf' && report.pdfPages) {
-                    // Multi-page PDF preview
-                    report.pdfPages.forEach((pageImg, pageIdx) => {
-                        if (!pageImg) return;
-                        const pageNum = pageIdx + 1;
-                        const pagePins = report.pins.filter(p => p.page === pageNum);
-                        
-                        planPagesHtml += `
-                            <div style="margin-bottom: 30px; page-break-inside: avoid;">
-                                <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
-                                    Site Plan - Page ${pageNum} ${pagePins.length > 0 ? `(${pagePins.length} pins)` : ''}
-                                </h3>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <img src="${pageImg}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
-                                </div>
-                                ${pagePins.length > 0 ? `
-                                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
-                                    <tr style="background: #1e3a8a; color: white;">
-                                        <th style="padding: 8px; text-align: center; width: 50px;">Pin</th>
-                                        <th style="padding: 8px;">Type</th>
-                                        <th style="padding: 8px;">Description</th>
-                                        <th style="padding: 8px; text-align: center; width: 80px;">Photo</th>
-                                    </tr>
-                                    ${pagePins.map(pin => {
-                                        const globalIdx = report.pins.indexOf(pin);
-                                        const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                                        return `
-                                            <tr>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${globalIdx + 1}</div>
-                                                </td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                    ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </table>
-                                ` : ''}
-                            </div>
-                        `;
-                    });
-                } else {
-                    // Single image plan
-                    planPagesHtml = `
-                        <div style="margin-bottom: 30px;">
-                            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Site Plan with Annotations (${report.pins.length} pins)</h3>
-                            <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${report.planImage}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
-                            </div>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
-                                <tr style="background: #1e3a8a; color: white;">
-                                    <th style="padding: 8px; text-align: center; width: 50px;">Pin</th>
-                                    <th style="padding: 8px;">Type</th>
-                                    <th style="padding: 8px;">Description</th>
-                                    <th style="padding: 8px; text-align: center; width: 80px;">Photo</th>
-                                    <th style="padding: 8px;">GPS</th>
-                                </tr>
-                                ${report.pins.map((pin, idx) => {
-                                    const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                                    return `
-                                        <tr>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${idx + 1}</div>
-                                            </td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                                            </td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; font-size: 0.75rem;">
-                                                ${pin.realCoords ? `${pin.realCoords.lat.toFixed(4)}, ${pin.realCoords.lng.toFixed(4)}` : 'N/A'}
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </table>
-                        </div>
-                    `;
-                }
-            }
-            
-            content.innerHTML = `
-                <div class="a4-preview">
-                    <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h1 style="color: #1e3a8a; margin: 0; font-size: 1.75rem;">🏗️ CONSTRUCTION SITE REPORT</h1>
-                        <div style="color: #64748b; font-size: 0.875rem; margin-top: 5px;">
-                            ProjectLink Construction Intelligence System (PLCIS)
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                        <table style="width: 100%; font-size: 0.9375rem;">
-                            <tr>
-                                <td style="padding: 5px 0; width: 150px;"><strong>Project:</strong></td>
-                                <td>${report.projectName}</td>
-                                <td style="padding: 5px 0; width: 150px;"><strong>Date:</strong></td>
-                                <td>${report.date}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 5px 0;"><strong>Location:</strong></td>
-                                <td>${report.location}</td>
-                                <td style="padding: 5px 0;"><strong>Weather:</strong></td>
-                                <td>${report.weather}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 5px 0;"><strong>Engineer:</strong></td>
-                                <td>${report.engineer || 'N/A'}</td>
-                                <td style="padding: 5px 0;"><strong>Role:</strong></td>
-                                <td>${report.role ? roleConfig[report.role].name : 'N/A'}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    ${report.coordinates ? `
-                    <div style="background: #eff6ff; padding: 12px; border-left: 4px solid #1e3a8a; margin-bottom: 20px; font-family: monospace; font-size: 0.875rem;">
-                        <strong>📍 GPS Coordinates:</strong> ${report.coordinates.lat.toFixed(6)}, ${report.coordinates.lng.toFixed(6)}<br>
-                        <small>Accuracy: ${report.coordinates.accuracy || 'N/A'}m | Source: ${report.coordinates.source || 'Unknown'} | ${report.coordinates.timestamp}</small>
-                    </div>
-                    ` : ''}
-                    
-                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px;">📝 Work Activities</h2>
-                    <p style="line-height: 1.6; margin-bottom: 15px;">${report.activities || 'No activities recorded.'}</p>
-                    
-                    <div style="display: flex; gap: 20px;">
-                        <div style="flex: 1;">
-                            <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px;">⚠️ Issues & Observations</h2>
-                            <p style="line-height: 1.6;">${report.issues || 'No issues reported.'}</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px;">➡️ Next Steps</h2>
-                            <p style="line-height: 1.6;">${report.nextSteps || 'No next steps defined.'}</p>
-                        </div>
-                    </div>
-                    
-                    ${planPagesHtml ? `
-                    <div class="plan-print-container">
-                        <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📍 Site Plan Annotations</h2>
-                        ${planPagesHtml}
-                    </div>
-                    ` : ''}
-                    
-                    ${report.photos.length > 0 ? `
-                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📸 Site Photographs (${report.photos.length})</h2>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                        ${photosHtml}
-                    </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 40px; padding-top: 15px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.875rem;">
-                        <p><strong>PLCIS Report ID:</strong> ${report.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This report was generated electronically and is valid without signature.</p>
-                    </div>
-                </div>
-            `;
-            
-            modal.classList.add('active');
-        }
-
-        function closePdfModal() {
-            document.getElementById('pdfModal').classList.remove('active');
-        }
-
-        function printReport() {
-            window.print();
-        }
-
-        function resetForm() {
-            currentReport = {
-                id: null,
-                projectName: '',
-                location: '',
-                date: new Date().toISOString().split('T')[0],
-                engineer: '',
-                role: currentRole,
-                weather: 'Clear',
-                coordinates: null,
-                activities: '',
-                issues: '',
-                nextSteps: '',
-                photos: [],
-                pins: [],
-                planImage: null,
-                planType: null,
-                planPDFData: null,
-                pdfPages: [],
-                collaborators: []
-            };
-            pins = [];
-            selectedPhotoIndex = null;
-            
-            document.getElementById('projectName').value = '';
-            document.getElementById('siteLocation').value = '';
-            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('engineerName').value = '';
-            document.getElementById('weather').value = 'Clear';
-            document.getElementById('activities').value = '';
-            document.getElementById('issues').value = '';
-            document.getElementById('nextSteps').value = '';
-            
-            document.getElementById('coordDisplay').style.display = 'none';
-            document.getElementById('gpsStatus').className = 'gps-status error';
-            document.getElementById('gpsText').textContent = 'GPS Not Active - Select location source below';
-            
-            planImageObj = null;
-            document.getElementById('planPlaceholder').style.display = 'flex';
-            document.getElementById('canvasWrapper').style.display = 'none';
-            document.getElementById('pinTypeSelector').style.display = 'none';
-            document.getElementById('pinListCard').style.display = 'none';
-            document.getElementById('pdfNav').style.display = 'none';
-            document.getElementById('pdfThumbnails').style.display = 'none';
-            document.getElementById('uploadZone').classList.remove('has-file');
-            document.querySelector('.upload-text').textContent = 'Click to upload site plan';
-            
-            renderPhotos();
-            updatePinList();
-            loadReportsList();
-        }
-
-        function loadReportsList() {
-            const container = document.getElementById('reportsList');
-            
-            if (reports.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon"><i class="fas fa-folder-open" style="font-size: 4rem;"></i></div>
-                        <p>No reports saved yet.</p>
-                        <button class="btn btn-primary" onclick="switchTab('new')" style="margin-top: 1rem; width: auto;">
-                            Create First Report
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = reports.sort((a, b) => b.id - a.id).map(report => `
-                <div class="report-item">
-                    <div class="report-info">
-                        <h3>${report.projectName}</h3>
-                        <div class="report-meta">
-                            <i class="fas fa-map-marker-alt"></i> ${report.location} | 
-                            <i class="fas fa-calendar"></i> ${report.date} | 
-                            <i class="fas fa-user"></i> ${report.engineer || 'No engineer'}
-                        </div>
-                        <div class="report-badges">
-                            <span class="badge badge-photos"><i class="fas fa-camera"></i> ${report.photos.length}</span>
-                            <span class="badge badge-pins"><i class="fas fa-thumbtack"></i> ${report.pins ? report.pins.length : 0}</span>
-                            ${report.role ? `<span class="badge badge-role"><i class="fas ${roleConfig[report.role].icon}"></i> ${roleConfig[report.role].name}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="report-actions">
-                        <button class="icon-btn" onclick="viewReport(${report.id})" title="View/PDF"><i class="fas fa-eye"></i></button>
-                        <button class="icon-btn" onclick="editReport(${report.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="icon-btn" onclick="deleteReport(${report.id})" title="Delete" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function viewReport(id) {
-            const report = reports.find(r => r.id === id);
-            if (report) {
-                previewReport(report);
-            }
-        }
-
-        async function editReport(id) {
-            const report = reports.find(r => r.id === id);
-            if (!report) return;
-            
-            currentReport = JSON.parse(JSON.stringify(report));
-            pins = currentReport.pins || [];
-            
-            document.getElementById('projectName').value = report.projectName;
-            document.getElementById('siteLocation').value = report.location;
-            document.getElementById('reportDate').value = report.date;
-            document.getElementById('engineerName').value = report.engineer;
-            document.getElementById('weather').value = report.weather;
-            document.getElementById('activities').value = report.activities;
-            document.getElementById('issues').value = report.issues;
-            document.getElementById('nextSteps').value = report.nextSteps;
-            
-            if (report.coordinates) {
-                updateGPSDisplay(report.coordinates);
-            }
-            
-            // Restore plan
-            if (report.planType === 'pdf' && report.planPDFData) {
-                // Re-render PDF
-                currentReport.planPDFData = report.planPDFData;
-                currentReport.pdfPages = report.pdfPages || [];
-                if (currentReport.pdfPages.length > 0) {
-                    loadImageToCanvas(currentReport.pdfPages[0]);
-                    document.getElementById('pdfNav').style.display = 'flex';
-                    document.getElementById('totalPages').textContent = currentReport.planPDFData.numPages;
-                    document.getElementById('currentPageNum').textContent = '1';
-                    
-                    // Restore thumbnails
-                    const thumbContainer = document.getElementById('pdfThumbnails');
-                    thumbContainer.style.display = 'flex';
-                    thumbContainer.innerHTML = currentReport.pdfPages.map((page, idx) => `
-                        <div class="pdf-thumb ${idx === 0 ? 'active' : ''}" onclick="selectPDFPage(${idx + 1})">
-                            <img src="${page}" alt="Page ${idx + 1}">
-                            <span class="pdf-thumb-page">${idx + 1}</span>
-                        </div>
-                    `).join('');
-                }
-            } else if (report.planImage) {
-                loadImageToCanvas(report.planImage);
-            }
-            
-            if (report.pins && report.pins.length > 0) {
-                document.getElementById('pinTypeSelector').style.display = 'flex';
-                document.getElementById('pinListCard').style.display = 'block';
-                updatePinList();
-            }
-            
-            renderPhotos();
-            
-            // Switch to new report tab
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelector('.nav-tab').classList.add('active');
-            document.getElementById('new-section').classList.add('active');
-            
-            showToast('Report loaded for editing');
-            window.scrollTo(0, 0);
-        }
-
-        function deleteReport(id) {
-            if (confirm('Delete this report permanently?')) {
-                reports = reports.filter(r => r.id !== id);
-                localStorage.setItem('plcis_reports', JSON.stringify(reports));
-                loadReportsList();
-                showToast('Report deleted');
-            }
-        }
-
-        function filterReports(type) {
-            // Implementation for filtering reports
-            showToast(`Filter: ${type} (demo)`);
-        }
-
-        // Collaboration Functions
-        function loadCollaborationData() {
-            // Simulate team members
-            const teamMembers = [
-                { role: 'engineer', name: 'John Smith', status: 'online' },
-                { role: 'supervisor', name: 'Sarah Lee', status: 'online' },
-                { role: 're', name: 'Michael Chen', status: 'offline' },
-                { role: 'pm', name: 'David Wong', status: 'online' }
-            ];
-            
-            const list = document.getElementById('collabList');
-            document.getElementById('teamCount').textContent = `${teamMembers.filter(m => m.status === 'online').length} online`;
-            
-            list.innerHTML = teamMembers.map(member => `
-                <div class="collab-item">
-                    <div class="collab-avatar" style="background: ${roleConfig[member.role].color};">
-                        ${member.name.charAt(0)}
-                    </div>
-                    <div class="collab-info">
-                        <div class="collab-name">${member.name}</div>
-                        <div class="collab-role">${roleConfig[member.role].name}</div>
-                    </div>
-                    <div class="collab-status" style="background: ${member.status === 'online' ? 'var(--success)' : '#cbd5e1'};"></div>
-                </div>
-            `).join('');
-        }
-
-        function shareReport() {
-            showToast('Report shared with selected team members');
-            addActivityLog('Report shared with team');
-        }
-
-        function addActivityLog(message) {
-            const log = document.getElementById('activityLog');
-            const item = document.createElement('div');
-            item.className = 'collab-item fade-in';
-            item.innerHTML = `
-                <div class="collab-avatar role-${currentRole}" style="background: ${roleConfig[currentRole].color};">
-                    ${roleConfig[currentRole].name.charAt(0)}
-                </div>
-                <div class="collab-info">
-                    <div class="collab-name">${roleConfig[currentRole].name}</div>
-                    <div class="collab-role">${message} - ${new Date().toLocaleTimeString()}</div>
-                </div>
-            `;
-            log.insertBefore(item, log.firstChild);
-        }
-
-        // Utilities
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').classList.toggle('active', show);
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
-                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
-            `)).catch(() => console.log('Service Worker registration skipped'));
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('pdfNextBtn').disabled
