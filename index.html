@@ -6,16 +6,6 @@
     <meta name="theme-color" content="#1e3a8a">
     <title>ProjectLink Construction Intelligence System (PLCIS) - Complete</title>
     
-    <!-- Google Maps API - Now loaded with async and callback -->
-    <script>
-        // Global callback function for Google Maps
-        function initGoogleMaps() {
-            console.log('Google Maps API loaded successfully');
-            window.googleMapsLoaded = true;
-        }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKeyForDemo&libraries=places&callback=initGoogleMaps"></script>
-    
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
@@ -1074,9 +1064,10 @@
             min-height: 500px;
         }
 
-        #mapPicker, #oneMapPicker {
+        .map-iframe {
             width: 100%;
             height: 100%;
+            border: none;
             min-height: 500px;
         }
 
@@ -1753,6 +1744,274 @@
             min-height: 500px;
             border: none;
         }
+
+        /* NEW: Team Member Form Styles */
+        .member-form {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .member-form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .member-form-grid {
+                grid-template-columns: 1fr 1fr 1fr auto;
+            }
+        }
+
+        .member-list-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .member-details {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .member-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: #fee2e2;
+            color: var(--danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .member-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* NEW: Layout Selection Styles */
+        .layout-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .layout-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .layout-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s;
+        }
+
+        .layout-card.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .layout-card.has-content {
+            border-color: var(--success);
+        }
+
+        .layout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .layout-number {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .layout-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: var(--text-secondary);
+        }
+
+        .layout-status.filled {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .layout-upload {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .layout-upload:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .layout-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .layout-preview img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .layout-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .layout-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .layout-tab {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .layout-tab.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .layout-tab.has-content {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* Email Share Modal */
+        .email-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .email-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .email-item:hover {
+            background: #f8fafc;
+        }
+
+        .email-item.selected {
+            background: #eff6ff;
+            border-color: var(--primary);
+        }
+
+        .email-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .email-info {
+            flex: 1;
+        }
+
+        .email-name {
+            font-weight: 600;
+        }
+
+        .email-address {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .share-summary {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -2011,96 +2270,112 @@
                 </div>
             </section>
 
-            <!-- Drawing Section -->
+            <!-- Drawing Section - MODIFIED FOR MULTI-LAYOUT -->
             <section id="drawing-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
-                        Upload site plan (Image or PDF) and mark locations. 
-                        <strong style="color: var(--primary);">Select a photo first, then click on the plan to place a linked pin.</strong>
-                        Pins will always be visible and included in printed reports.
+                        Select number of layouts needed, upload plans, and mark locations. 
+                        <strong style="color: var(--primary);">Only layouts with content will be printed.</strong>
                     </p>
 
-                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('planInput').click()">
-                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                        <div class="upload-text">Click to upload site plan</div>
-                        <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB)</div>
-                    </div>
-
-                    <input type="file" id="planInput" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadPlanDrawing(this)">
-
-                    <!-- PDF Thumbnails Navigation -->
-                    <div id="pdfThumbnails" class="pdf-thumbnails" style="display: none;"></div>
-
-                    <!-- PDF Page Navigation -->
-                    <div id="pdfNav" class="pdf-nav" style="display: none;">
-                        <button class="pdf-nav-btn" onclick="changePDFPage(-1)" id="pdfPrevBtn">
-                            <i class="fas fa-chevron-left"></i> Previous
-                        </button>
-                        <span class="pdf-page-info">Page <span id="currentPageNum">1</span> of <span id="totalPages">1</span></span>
-                        <button class="pdf-nav-btn" onclick="changePDFPage(1)" id="pdfNextBtn">
-                            Next <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <!-- Pin Type Selector -->
-                    <div class="pin-type-selector" id="pinTypeSelector" style="display: none;">
-                        <button class="pin-type-btn active" onclick="selectPinType('photo')" data-type="photo">
-                            <span class="pin-type-dot" style="background: #3b82f6;"></span>
-                            Photo Link
-                        </button>
-                        <button class="pin-type-btn" onclick="selectPinType('issue')" data-type="issue">
-                            <span class="pin-type-dot" style="background: #ef4444;"></span>
-                            Issue/Delay
-                        </button>
-                        <button class="pin-type-btn" onclick="selectPinType('completed')" data-type="completed">
-                            <span class="pin-type-dot" style="background: #10b981;"></span>
-                            Completed Work
-                        </button>
-                        <button class="pin-type-btn" onclick="selectPinType('inspection')" data-type="inspection">
-                            <span class="pin-type-dot" style="background: #f59e0b;"></span>
-                            Inspection Point
-                        </button>
-                        <button class="pin-type-btn" onclick="selectPinType('safety')" data-type="safety">
-                            <span class="pin-type-dot" style="background: #8b5cf6;"></span>
-                            Safety Issue
-                        </button>
-                    </div>
-
-                    <div class="drawing-controls" style="margin-top: 1rem;">
-                        <button class="btn btn-secondary" onclick="clearPins()">
-                            <i class="fas fa-trash"></i> Clear All Pins
-                        </button>
-                        <button class="btn btn-accent" onclick="exportAnnotatedPlan()">
-                            <i class="fas fa-download"></i> Export Plan
-                        </button>
-                        <button class="btn btn-primary" onclick="printPlanWithPins()">
-                            <i class="fas fa-print"></i> Print Plan (A4)
-                        </button>
-                    </div>
-
-                    <div class="drawing-container" id="drawingContainer">
-                        <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
-                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">
-                                <i class="fas fa-drafting-compass"></i>
-                            </div>
-                            <p>Upload site plan drawing</p>
-                            <p style="font-size: 0.875rem; margin-top: 0.5rem;">
-                                Click upload zone above or drag and drop
-                            </p>
-                            <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--text-secondary);">
-                                Supports multi-page PDFs
-                            </p>
+                    <!-- Layout Count Selector -->
+                    <div class="layout-selector">
+                        <label class="form-label" style="margin-bottom: 0;">Number of Layouts:</label>
+                        <div class="layout-input-group">
+                            <button class="btn btn-sm btn-secondary" onclick="adjustLayoutCount(-1)" style="width: 40px;">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="layout-input" id="layoutCount" value="1" min="1" max="10" readonly>
+                            <button class="btn btn-sm btn-secondary" onclick="adjustLayoutCount(1)" style="width: 40px;">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
-                        <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
-                            <canvas id="planCanvas" class="drawing-canvas"></canvas>
-                            <div class="pins-overlay" id="pinsOverlay"></div>
+                        <button class="btn btn-primary btn-sm" onclick="initializeLayouts()">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                    </div>
+
+                    <!-- Layout Tabs -->
+                    <div class="layout-tabs" id="layoutTabs"></div>
+
+                    <!-- Current Layout Content -->
+                    <div id="currentLayoutContent">
+                        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('layoutInput').click()">
+                            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="upload-text">Click to upload plan for Layout <span id="currentLayoutNum">1</span></div>
+                            <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB)</div>
+                        </div>
+
+                        <input type="file" id="layoutInput" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutDrawing(this)">
+
+                        <!-- PDF Page Navigation -->
+                        <div id="layoutPdfNav" class="pdf-nav" style="display: none;">
+                            <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(-1)" id="layoutPdfPrevBtn">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </button>
+                            <span class="pdf-page-info">Page <span id="layoutCurrentPageNum">1</span> of <span id="layoutTotalPages">1</span></span>
+                            <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(1)" id="layoutPdfNextBtn">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Pin Type Selector -->
+                        <div class="pin-type-selector" id="pinTypeSelector" style="display: none;">
+                            <button class="pin-type-btn active" onclick="selectPinType('photo')" data-type="photo">
+                                <span class="pin-type-dot" style="background: #3b82f6;"></span>
+                                Photo Link
+                            </button>
+                            <button class="pin-type-btn" onclick="selectPinType('issue')" data-type="issue">
+                                <span class="pin-type-dot" style="background: #ef4444;"></span>
+                                Issue/Delay
+                            </button>
+                            <button class="pin-type-btn" onclick="selectPinType('completed')" data-type="completed">
+                                <span class="pin-type-dot" style="background: #10b981;"></span>
+                                Completed Work
+                            </button>
+                            <button class="pin-type-btn" onclick="selectPinType('inspection')" data-type="inspection">
+                                <span class="pin-type-dot" style="background: #f59e0b;"></span>
+                                Inspection Point
+                            </button>
+                            <button class="pin-type-btn" onclick="selectPinType('safety')" data-type="safety">
+                                <span class="pin-type-dot" style="background: #8b5cf6;"></span>
+                                Safety Issue
+                            </button>
+                        </div>
+
+                        <div class="drawing-controls" style="margin-top: 1rem;">
+                            <button class="btn btn-secondary" onclick="clearLayoutPins()">
+                                <i class="fas fa-trash"></i> Clear Layout Pins
+                            </button>
+                            <button class="btn btn-accent" onclick="exportAnnotatedLayout()">
+                                <i class="fas fa-download"></i> Export Layout
+                            </button>
+                            <button class="btn btn-danger" onclick="removeCurrentLayout()">
+                                <i class="fas fa-times"></i> Remove Layout
+                            </button>
+                        </div>
+
+                        <div class="drawing-container" id="drawingContainer">
+                            <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-drafting-compass"></i>
+                                </div>
+                                <p>Upload plan drawing for Layout <span class="layout-placeholder-num">1</span></p>
+                                <p style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                    Click upload zone above or drag and drop
+                                </p>
+                            </div>
+                            <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
+                                <canvas id="planCanvas" class="drawing-canvas"></canvas>
+                                <div class="pins-overlay" id="pinsOverlay"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card" id="pinListCard" style="display: none;">
-                    <h2 class="card-title"><i class="fas fa-thumbtack"></i> Placed Pins (<span id="pinCount">0</span>)</h2>
+                    <h2 class="card-title"><i class="fas fa-thumbtack"></i> Layout Pins (<span id="pinCount">0</span>)</h2>
                     <div class="pin-list" id="pinList">
                         <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
                             No pins placed yet. Click on the plan above to add pins.
@@ -2109,47 +2384,60 @@
                 </div>
             </section>
 
-            <!-- Collaboration Section -->
+            <!-- Collaboration Section - MODIFIED FOR TEAM MEMBER MANAGEMENT -->
             <section id="collaboration-section" class="section">
                 <div class="card">
-                    <h2 class="card-title"><i class="fas fa-users"></i> Team Collaboration</h2>
+                    <h2 class="card-title"><i class="fas fa-users"></i> Team Member Management</h2>
                     
+                    <!-- Add Member Form -->
+                    <div class="member-form">
+                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--primary);">Add New Member</h3>
+                        <div class="member-form-grid">
+                            <input type="text" class="form-input" id="memberName" placeholder="Full Name">
+                            <input type="email" class="form-input" id="memberEmail" placeholder="Email Address">
+                            <input type="tel" class="form-input" id="memberContact" placeholder="Contact Number">
+                            <select class="form-select" id="memberRole">
+                                <option value="engineer">Engineer</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="client">Client</option>
+                                <option value="rto">RTO</option>
+                                <option value="re">RE</option>
+                                <option value="pm">PM</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="addTeamMember()" style="margin-top: 0.75rem; width: auto;">
+                            <i class="fas fa-plus"></i> Add Member
+                        </button>
+                    </div>
+
+                    <!-- Team Members List -->
                     <div class="collab-panel">
                         <div class="collab-header">
-                            <h3 style="font-size: 1rem;">Active Team Members</h3>
-                            <span class="badge badge-role" id="teamCount">0 online</span>
+                            <h3 style="font-size: 1rem;">Team Members</h3>
+                            <span class="badge badge-role" id="memberCount">0 members</span>
                         </div>
-                        <div class="collab-list" id="collabList">
-                            <!-- Dynamic content -->
+                        <div class="collab-list" id="teamMembersList">
+                            <div class="empty-state" style="padding: 1rem;">
+                                <p style="font-size: 0.875rem;">No team members added yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-share-alt"></i> Share Report</h2>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                        Select team members to share this report with via email.
+                    </p>
+                    
+                    <div class="email-list" id="shareEmailList">
+                        <div class="empty-state" style="padding: 1rem;">
+                            <p style="font-size: 0.875rem;">Add team members first to enable sharing.</p>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Share Report With</label>
-                        <div class="drawing-controls">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox" checked> Engineer
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox"> Supervisor
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox"> Client
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox"> RTO
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox"> RE
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox"> PM
-                            </label>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" onclick="shareReport()">
-                        <i class="fas fa-share-alt"></i> Share Report
+                    <button class="btn btn-primary" onclick="openShareModal()" id="shareReportBtn" disabled>
+                        <i class="fas fa-paper-plane"></i> Share Report via Email
                     </button>
                 </div>
 
@@ -2264,7 +2552,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - FIXED -->
+    <!-- Map Picker Modal - MODIFIED FOR IFRAME EMBEDDING -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2283,18 +2571,20 @@
             
             <div class="map-container-full">
                 <div id="googleMapPanel" class="map-panel active">
-                    <div id="mapPicker" style="width: 100%; height: 100%; min-height: 500px;">
-                        <!-- Map will be initialized here -->
-                    </div>
+                    <iframe id="googleMapFrame" class="map-iframe" src="https://www.google.com/maps" allowfullscreen></iframe>
                 </div>
                 <div id="oneMapPanel" class="map-panel">
-                    <!-- OneMap will be loaded here -->
+                    <iframe id="oneMapFrame" class="map-iframe" src="https://www.onemap.gov.sg/" allowfullscreen></iframe>
                 </div>
             </div>
             
             <div style="padding: 1rem; border-top: 1px solid var(--border); background: #f8fafc;">
-                <div id="selectedCoordDisplay" style="margin-bottom: 1rem; font-family: monospace; background: white; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
-                    Click on map to select location
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label class="form-label">Enter Coordinates from Map:</label>
+                    <div class="grid-2" style="gap: 0.5rem;">
+                        <input type="text" class="form-input" id="manualLat" placeholder="Latitude (e.g., 1.3521)">
+                        <input type="text" class="form-input" id="manualLng" placeholder="Longitude (e.g., 103.8198)">
+                    </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" onclick="closeMapModal()">Cancel</button>
@@ -2302,6 +2592,34 @@
                         <i class="fas fa-check"></i> Confirm Location
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Report Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Report via Email</h3>
+                <button class="modal-close" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="email-list" id="modalEmailList"></div>
+                
+                <div class="share-summary">
+                    <strong>Selected Recipients:</strong> <span id="selectedCount">0</span> member(s)
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Additional Message (Optional)</label>
+                    <textarea class="form-textarea" id="shareMessage" placeholder="Add a personal message..."></textarea>
+                </div>
+            </div>
+            <div style="padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary" onclick="closeShareModal()" style="flex: 1;">Cancel</button>
+                <button class="btn btn-primary" onclick="sendShareReport()" style="flex: 1;">
+                    <i class="fas fa-paper-plane"></i> Send Report
+                </button>
             </div>
         </div>
     </div>
@@ -2352,27 +2670,24 @@
             issues: '',
             nextSteps: '',
             photos: [],
-            pins: [],
-            planImage: null,
-            planType: null,
-            planPDFData: null,
-            pdfPages: [],
-            collaborators: []
+            layouts: [], // NEW: Array of layout objects
+            collaborators: [],
+            teamMembers: [] // NEW: Array of team member objects
         };
 
         let reports = JSON.parse(localStorage.getItem('plcis_reports') || '[]');
         let currentPhotoIndex = null;
         let selectedPhotoIndex = null;
-        let mapPicker = null;
-        let oneMapPicker = null;
-        let selectedMapLocation = null;
         let currentRole = null;
         let currentPinType = 'photo';
         let canvas, ctx;
-        let pins = [];
         let planImageObj = null;
         let canvasScale = 1;
         let pendingPin = null;
+
+        // NEW: Layout Management
+        let currentLayoutIndex = 0;
+        let layoutCount = 1;
 
         // Role Configuration
         const roleConfig = {
@@ -2406,6 +2721,8 @@
             loadReportsList();
             initCanvas();
             initDragAndDrop();
+            initializeLayouts();
+            loadTeamMembers();
         });
 
         // Role Management
@@ -2461,9 +2778,10 @@
             }
             
             if (tab === 'reports') loadReportsList();
-            if (tab === 'collaboration') loadCollaborationData();
-            if (tab === 'drawing' && planImageObj) {
-                renderPinsOverlay();
+            if (tab === 'collaboration') loadTeamMembers();
+            if (tab === 'drawing') {
+                renderLayoutTabs();
+                loadCurrentLayout();
             }
         }
 
@@ -2548,7 +2866,7 @@
             showToast(message);
         }
 
-        // FIXED Map Picker Functions
+        // MODIFIED: Map Picker Functions - Using iframe embedding
         function openMapPicker(type) {
             if (type === 'manual') {
                 const lat = prompt('Enter Latitude:');
@@ -2570,87 +2888,9 @@
             
             document.getElementById('mapModal').classList.add('active');
             
-            if (type === 'google' || type === 'onemap') {
-                if (type === 'google') {
-                    setTimeout(() => initGoogleMaps(), 100);
-                } else {
-                    setTimeout(() => initOneMap(), 100);
-                }
-            }
-        }
-
-        function initGoogleMaps() {
-            const mapContainer = document.getElementById('mapPicker');
-            
-            if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-                mapContainer.innerHTML = `
-                    <div class="map-error">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Google Maps API not loaded</strong><br>
-                        Please check your API key or internet connection.
-                    </div>
-                `;
-                return;
-            }
-            
-            const defaultLat = 1.3521;
-            const defaultLng = 103.8198;
-            
-            try {
-                mapPicker = new google.maps.Map(mapContainer, {
-                    center: { lat: defaultLat, lng: defaultLng },
-                    zoom: 12,
-                    mapTypeControl: true,
-                    streetViewControl: false,
-                    fullscreenControl: true,
-                    zoomControl: true
-                });
-                
-                let marker = new google.maps.Marker({
-                    position: { lat: defaultLat, lng: defaultLng },
-                    map: mapPicker,
-                    draggable: true,
-                    animation: google.maps.Animation.DROP
-                });
-                
-                mapPicker.addListener('click', function(event) {
-                    marker.setPosition(event.latLng);
-                    updateSelectedCoord(event.latLng.lat(), event.latLng.lng());
-                });
-                
-                marker.addListener('dragend', function(event) {
-                    updateSelectedCoord(event.latLng.lat(), event.latLng.lng());
-                });
-                
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const pos = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude
-                            };
-                            mapPicker.setCenter(pos);
-                            marker.setPosition(pos);
-                            updateSelectedCoord(pos.lat, pos.lng);
-                        },
-                        () => {
-                            updateSelectedCoord(defaultLat, defaultLng);
-                        }
-                    );
-                } else {
-                    updateSelectedCoord(defaultLat, defaultLng);
-                }
-                
-            } catch (error) {
-                console.error('Error initializing Google Maps:', error);
-                mapContainer.innerHTML = `
-                    <div class="map-error">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Error loading map</strong><br>
-                        ${error.message}
-                    </div>
-                `;
-            }
+            // Reset coordinate inputs
+            document.getElementById('manualLat').value = '';
+            document.getElementById('manualLng').value = '';
         }
 
         function switchMapTab(tab) {
@@ -2659,60 +2899,6 @@
             
             event.target.classList.add('active');
             document.getElementById(tab + 'MapPanel').classList.add('active');
-            
-            if (tab === 'google') {
-                setTimeout(() => initGoogleMaps(), 100);
-            } else if (tab === 'onemap') {
-                setTimeout(() => initOneMap(), 100);
-            }
-        }
-
-        function initOneMap() {
-            const oneMapPanel = document.getElementById('oneMapPanel');
-            oneMapPanel.innerHTML = '';
-            
-            const lat = 1.3521;
-            const lng = 103.8198;
-            const zoom = 15;
-            
-            const oneMapUrl = `https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=${zoom}&marker=${lat},${lng}&popupTitle=Selected%20Location&popupContent=Click%20to%20select%20this%20location`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.className = 'onemap-container';
-            iframe.src = oneMapUrl;
-            iframe.title = 'OneMap Singapore';
-            iframe.allowFullscreen = true;
-            
-            iframe.onload = function() {
-                showToast('OneMap loaded. Use the map to find your location.');
-            };
-            
-            oneMapPanel.appendChild(iframe);
-            
-            selectedMapLocation = {
-                lat: lat,
-                lng: lng,
-                accuracy: 10,
-                timestamp: new Date().toLocaleString(),
-                source: 'OneMap Singapore'
-            };
-            document.getElementById('selectedCoordDisplay').innerHTML = `
-                <strong>Default:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-                <small>Navigate the map above, then click Confirm to use these coordinates or enter manually.</small>
-            `;
-        }
-
-        function updateSelectedCoord(lat, lng) {
-            selectedMapLocation = {
-                lat: lat,
-                lng: lng,
-                accuracy: 10,
-                timestamp: new Date().toLocaleString(),
-                source: 'Map Selection'
-            };
-            document.getElementById('selectedCoordDisplay').innerHTML = `
-                <strong>Selected:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}
-            `;
         }
 
         function closeMapModal() {
@@ -2720,14 +2906,26 @@
         }
 
         function confirmMapLocation() {
-            if (selectedMapLocation) {
-                currentReport.coordinates = selectedMapLocation;
-                updateGPSDisplay(selectedMapLocation);
-                closeMapModal();
-                showToast('Location confirmed from map');
-            } else {
-                showToast('Please select a location on the map first');
+            const lat = parseFloat(document.getElementById('manualLat').value);
+            const lng = parseFloat(document.getElementById('manualLng').value);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                showToast('Please enter valid coordinates from the map');
+                return;
             }
+            
+            const coords = {
+                lat: lat,
+                lng: lng,
+                accuracy: 10,
+                timestamp: new Date().toLocaleString(),
+                source: 'Map Selection'
+            };
+            
+            currentReport.coordinates = coords;
+            updateGPSDisplay(coords);
+            closeMapModal();
+            showToast('Location confirmed from map');
         }
 
         // Photo Handling
@@ -2775,7 +2973,7 @@
             }
             
             container.innerHTML = currentReport.photos.map((photo, index) => {
-                const linkedPin = pins.find(p => p.linkedPhotoId === photo.id);
+                const linkedPin = getAllPins().find(p => p.linkedPhotoId === photo.id);
                 return `
                 <div class="photo-item ${selectedPhotoIndex === index ? 'selected' : ''} ${linkedPin ? 'has-pin' : ''}" 
                      onclick="selectPhotoForPinning(${index})" 
@@ -2784,7 +2982,7 @@
                     <div class="photo-badge">${index + 1}</div>
                     ${linkedPin ? `
                         <div class="photo-pin-badge">
-                            <i class="fas fa-thumbtack"></i> Pin ${pins.indexOf(linkedPin) + 1}
+                            <i class="fas fa-thumbtack"></i> Pin ${getAllPins().indexOf(linkedPin) + 1}
                         </div>
                     ` : ''}
                     <button class="photo-delete" onclick="event.stopPropagation(); deletePhoto(${index})">
@@ -2809,12 +3007,6 @@
             num.textContent = index + 1;
             
             showToast(`Photo ${index + 1} selected. Click on site plan to place linked pin.`);
-            
-            setTimeout(() => {
-                if (confirm('Switch to Site Plan tab to place the pin?')) {
-                    switchTab('drawing');
-                }
-            }, 500);
         }
 
         function clearPhotoSelection() {
@@ -2848,8 +3040,13 @@
         function deletePhoto(index) {
             if (confirm('Delete this photo?')) {
                 const photo = currentReport.photos[index];
-                pins = pins.filter(p => p.linkedPhotoId !== photo.id);
-                currentReport.pins = pins;
+                
+                // Remove pin links to this photo
+                currentReport.layouts.forEach(layout => {
+                    if (layout.pins) {
+                        layout.pins = layout.pins.filter(p => p.linkedPhotoId !== photo.id);
+                    }
+                });
                 
                 currentReport.photos.splice(index, 1);
                 
@@ -2879,13 +3076,13 @@
             document.getElementById('photoDescription').value = photo.description || '';
             document.getElementById('photoTags').value = photo.tags ? photo.tags.join(', ') : '';
             
-            const linkedPin = pins.find(p => p.linkedPhotoId === photo.id);
+            const linkedPin = getAllPins().find(p => p.linkedPhotoId === photo.id);
             const linkedRow = document.getElementById('linkedPinRow');
             const linkedText = document.getElementById('modalLinkedPin');
             
             if (linkedPin) {
                 linkedRow.style.display = 'flex';
-                linkedText.textContent = `Pin ${pins.indexOf(linkedPin) + 1} (${pinTypes[linkedPin.type].label})`;
+                linkedText.textContent = `Pin ${getAllPins().indexOf(linkedPin) + 1} (${pinTypes[linkedPin.type].label})`;
             } else {
                 linkedRow.style.display = 'none';
             }
@@ -2914,6 +3111,254 @@
                 deletePhoto(currentPhotoIndex);
                 closeModal();
             }
+        }
+
+        // NEW: Layout Management Functions
+        function adjustLayoutCount(delta) {
+            const input = document.getElementById('layoutCount');
+            let newValue = parseInt(input.value) + delta;
+            if (newValue < 1) newValue = 1;
+            if (newValue > 10) newValue = 10;
+            input.value = newValue;
+        }
+
+        function initializeLayouts() {
+            layoutCount = parseInt(document.getElementById('layoutCount').value);
+            
+            // Initialize layouts array if needed
+            if (!currentReport.layouts) {
+                currentReport.layouts = [];
+            }
+            
+            // Add or remove layouts to match count
+            while (currentReport.layouts.length < layoutCount) {
+                currentReport.layouts.push({
+                    id: Date.now() + Math.random(),
+                    index: currentReport.layouts.length,
+                    image: null,
+                    type: null,
+                    pdfData: null,
+                    pdfPages: [],
+                    pins: [],
+                    hasContent: false
+                });
+            }
+            
+            if (currentReport.layouts.length > layoutCount) {
+                currentReport.layouts = currentReport.layouts.slice(0, layoutCount);
+            }
+            
+            currentLayoutIndex = 0;
+            renderLayoutTabs();
+            loadCurrentLayout();
+            showToast(`${layoutCount} layout(s) initialized`);
+        }
+
+        function renderLayoutTabs() {
+            const container = document.getElementById('layoutTabs');
+            if (!container) return;
+            
+            container.innerHTML = currentReport.layouts.map((layout, index) => `
+                <button class="layout-tab ${index === currentLayoutIndex ? 'active' : ''} ${layout.hasContent ? 'has-content' : ''}" 
+                        onclick="switchToLayout(${index})">
+                    Layout ${index + 1}
+                    ${layout.pins && layout.pins.length > 0 ? `<span style="margin-left: 4px; background: var(--accent); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">${layout.pins.length}</span>` : ''}
+                </button>
+            `).join('');
+        }
+
+        function switchToLayout(index) {
+            currentLayoutIndex = index;
+            renderLayoutTabs();
+            loadCurrentLayout();
+        }
+
+        function loadCurrentLayout() {
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout) return;
+            
+            // Update UI
+            document.getElementById('currentLayoutNum').textContent = currentLayoutIndex + 1;
+            document.querySelectorAll('.layout-placeholder-num').forEach(el => {
+                el.textContent = currentLayoutIndex + 1;
+            });
+            
+            // Reset display
+            document.getElementById('planPlaceholder').style.display = 'flex';
+            document.getElementById('canvasWrapper').style.display = 'none';
+            document.getElementById('pinTypeSelector').style.display = 'none';
+            document.getElementById('pinListCard').style.display = 'none';
+            document.getElementById('layoutPdfNav').style.display = 'none';
+            
+            planImageObj = null;
+            
+            // Load layout content if exists
+            if (layout.image) {
+                if (layout.type === 'pdf' && layout.pdfPages && layout.pdfPages.length > 0) {
+                    loadLayoutImage(layout.pdfPages[0]);
+                    document.getElementById('layoutPdfNav').style.display = 'flex';
+                    document.getElementById('layoutTotalPages').textContent = layout.pdfPages.length;
+                    document.getElementById('layoutCurrentPageNum').textContent = '1';
+                } else {
+                    loadLayoutImage(layout.image);
+                }
+            }
+            
+            updatePinList();
+        }
+
+        function loadLayoutImage(src) {
+            planImageObj = new Image();
+            planImageObj.onload = function() {
+                document.getElementById('planPlaceholder').style.display = 'none';
+                document.getElementById('canvasWrapper').style.display = 'block';
+                document.getElementById('pinTypeSelector').style.display = 'flex';
+                document.getElementById('pinListCard').style.display = 'block';
+                
+                resizeCanvas();
+                renderPinsOverlay();
+            };
+            planImageObj.src = src;
+        }
+
+        async function loadLayoutDrawing(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            
+            showLoading(true);
+            
+            try {
+                const layout = currentReport.layouts[currentLayoutIndex];
+                
+                if (isPDF) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    const numPages = pdf.numPages;
+                    
+                    layout.type = 'pdf';
+                    layout.pdfData = arrayBuffer;
+                    layout.pdfPages = [];
+                    
+                    // Render all pages
+                    for (let i = 1; i <= numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        
+                        const pageCanvas = document.createElement('canvas');
+                        const pageCtx = pageCanvas.getContext('2d');
+                        pageCanvas.width = viewport.width;
+                        pageCanvas.height = viewport.height;
+                        
+                        await page.render({
+                            canvasContext: pageCtx,
+                            viewport: viewport
+                        }).promise;
+                        
+                        layout.pdfPages.push(pageCanvas.toDataURL('image/png'));
+                    }
+                    
+                    layout.image = layout.pdfPages[0];
+                    document.getElementById('layoutPdfNav').style.display = 'flex';
+                    document.getElementById('layoutTotalPages').textContent = numPages;
+                    document.getElementById('layoutCurrentPageNum').textContent = '1';
+                } else {
+                    const reader = new FileReader();
+                    await new Promise((resolve, reject) => {
+                        reader.onload = (e) => {
+                            layout.type = 'image';
+                            layout.image = e.target.result;
+                            layout.pdfData = null;
+                            layout.pdfPages = [];
+                            resolve();
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                    document.getElementById('layoutPdfNav').style.display = 'none';
+                }
+                
+                layout.hasContent = true;
+                loadLayoutImage(layout.image);
+                renderLayoutTabs();
+                showToast(`Layout ${currentLayoutIndex + 1} loaded successfully!`);
+                
+            } catch (error) {
+                console.error('Error loading file:', error);
+                showToast('Error loading file. Please try again.');
+            } finally {
+                showLoading(false);
+                input.value = '';
+            }
+        }
+
+        function changeLayoutPDFPage(delta) {
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout || !layout.pdfPages || layout.pdfPages.length === 0) return;
+            
+            const currentPage = parseInt(document.getElementById('layoutCurrentPageNum').textContent);
+            const newPage = currentPage + delta;
+            
+            if (newPage >= 1 && newPage <= layout.pdfPages.length) {
+                document.getElementById('layoutCurrentPageNum').textContent = newPage;
+                document.getElementById('layoutPdfPrevBtn').disabled = newPage === 1;
+                document.getElementById('layoutPdfNextBtn').disabled = newPage === layout.pdfPages.length;
+                loadLayoutImage(layout.pdfPages[newPage - 1]);
+            }
+        }
+
+        function removeCurrentLayout() {
+            if (currentReport.layouts.length <= 1) {
+                showToast('Cannot remove the last layout');
+                return;
+            }
+            
+            if (confirm(`Remove Layout ${currentLayoutIndex + 1}? This will delete all pins on this layout.`)) {
+                currentReport.layouts.splice(currentLayoutIndex, 1);
+                
+                // Reindex remaining layouts
+                currentReport.layouts.forEach((layout, idx) => {
+                    layout.index = idx;
+                });
+                
+                layoutCount = currentReport.layouts.length;
+                document.getElementById('layoutCount').value = layoutCount;
+                
+                if (currentLayoutIndex >= currentReport.layouts.length) {
+                    currentLayoutIndex = currentReport.layouts.length - 1;
+                }
+                
+                renderLayoutTabs();
+                loadCurrentLayout();
+                showToast('Layout removed');
+            }
+        }
+
+        function clearLayoutPins() {
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout || !layout.pins || layout.pins.length === 0) return;
+            
+            if (confirm(`Clear all ${layout.pins.length} pins from Layout ${currentLayoutIndex + 1}?`)) {
+                layout.pins = [];
+                updatePinList();
+                renderPinsOverlay();
+                renderLayoutTabs();
+                showToast('Layout pins cleared');
+            }
+        }
+
+        function getAllPins() {
+            let allPins = [];
+            currentReport.layouts.forEach((layout, layoutIdx) => {
+                if (layout.pins) {
+                    layout.pins.forEach(pin => {
+                        pin.layoutIndex = layoutIdx;
+                        allPins.push(pin);
+                    });
+                }
+            });
+            return allPins;
         }
 
         // Canvas and Drawing Functions
@@ -2958,7 +3403,11 @@
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    handlePlanFile(files[0]);
+                    const input = document.getElementById('layoutInput');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    input.files = dataTransfer.files;
+                    loadLayoutDrawing(input);
                 }
             });
         }
@@ -2976,174 +3425,6 @@
                 redrawCanvas();
                 renderPinsOverlay();
             }
-        }
-
-        function loadPlanDrawing(input) {
-            if (input.files && input.files[0]) {
-                handlePlanFile(input.files[0]);
-            }
-            input.value = '';
-        }
-
-        async function handlePlanFile(file) {
-            const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-            
-            showLoading(true);
-            
-            try {
-                if (isPDF) {
-                    await handlePDFFile(file);
-                } else {
-                    await handleImageFile(file);
-                }
-                
-                document.getElementById('uploadZone').classList.add('has-file');
-                document.querySelector('.upload-text').textContent = 'Plan loaded (click to change)';
-                
-                document.getElementById('pinTypeSelector').style.display = 'flex';
-                document.getElementById('pinListCard').style.display = 'block';
-                
-                showToast('Plan loaded successfully! Click to place pins.');
-            } catch (error) {
-                console.error('Error loading file:', error);
-                showToast('Error loading file. Please try again.');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function handleImageFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentReport.planType = 'image';
-                    currentReport.planImage = e.target.result;
-                    currentReport.planPDFData = null;
-                    currentReport.pdfPages = [];
-                    
-                    document.getElementById('pdfNav').style.display = 'none';
-                    document.getElementById('pdfThumbnails').style.display = 'none';
-                    
-                    loadImageToCanvas(e.target.result);
-                    resolve();
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function handlePDFFile(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            const numPages = pdf.numPages;
-            
-            currentReport.planType = 'pdf';
-            currentReport.planPDFData = {
-                data: arrayBuffer,
-                numPages: numPages,
-                currentPage: 1
-            };
-            currentReport.pdfPages = [];
-            
-            document.getElementById('pdfNav').style.display = 'flex';
-            document.getElementById('totalPages').textContent = numPages;
-            document.getElementById('currentPageNum').textContent = '1';
-            
-            await renderPDFThumbnails(pdf);
-            
-            await renderPDFPage(1);
-        }
-
-        async function renderPDFThumbnails(pdf) {
-            const container = document.getElementById('pdfThumbnails');
-            container.style.display = 'flex';
-            container.innerHTML = '';
-            
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 0.2 });
-                
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                
-                await page.render({
-                    canvasContext: context,
-                    viewport: viewport
-                }).promise;
-                
-                const thumbDiv = document.createElement('div');
-                thumbDiv.className = 'pdf-thumb' + (i === 1 ? ' active' : '');
-                thumbDiv.onclick = () => selectPDFPage(i);
-                thumbDiv.innerHTML = `
-                    <img src="${canvas.toDataURL()}" alt="Page ${i}">
-                    <span class="pdf-thumb-page">${i}</span>
-                `;
-                container.appendChild(thumbDiv);
-            }
-        }
-
-        async function renderPDFPage(pageNum) {
-            if (!currentReport.planPDFData) return;
-            
-            const pdf = await pdfjsLib.getDocument({ data: currentReport.planPDFData.data }).promise;
-            const page = await pdf.getPage(pageNum);
-            
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale: scale });
-            
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            
-            await page.render({
-                canvasContext: context,
-                viewport: viewport
-            }).promise;
-            
-            const imageUrl = canvas.toDataURL('image/png');
-            
-            currentReport.pdfPages[pageNum - 1] = imageUrl;
-            currentReport.planImage = imageUrl;
-            currentReport.planPDFData.currentPage = pageNum;
-            
-            document.getElementById('currentPageNum').textContent = pageNum;
-            document.getElementById('pdfPrevBtn').disabled = pageNum === 1;
-            document.getElementById('pdfNextBtn').disabled = pageNum === currentReport.planPDFData.numPages;
-            
-            document.querySelectorAll('.pdf-thumb').forEach((thumb, idx) => {
-                thumb.classList.toggle('active', idx + 1 === pageNum);
-            });
-            
-            loadImageToCanvas(imageUrl);
-        }
-
-        function changePDFPage(delta) {
-            if (!currentReport.planPDFData) return;
-            
-            const newPage = currentReport.planPDFData.currentPage + delta;
-            if (newPage >= 1 && newPage <= currentReport.planPDFData.numPages) {
-                renderPDFPage(newPage);
-            }
-        }
-
-        function selectPDFPage(pageNum) {
-            renderPDFPage(pageNum);
-        }
-
-        function loadImageToCanvas(src) {
-            planImageObj = new Image();
-            planImageObj.onload = function() {
-                document.getElementById('planPlaceholder').style.display = 'none';
-                document.getElementById('canvasWrapper').style.display = 'block';
-                
-                resizeCanvas();
-                renderPinsOverlay();
-            };
-            planImageObj.src = src;
         }
 
         function handleCanvasClick(e) {
@@ -3164,7 +3445,7 @@
                 canvasY: y,
                 type: currentPinType,
                 color: pinTypes[currentPinType].color,
-                page: currentReport.planType === 'pdf' ? currentReport.planPDFData.currentPage : 1,
+                layoutIndex: currentLayoutIndex,
                 realCoords: currentReport.coordinates,
                 description: '',
                 timestamp: new Date().toLocaleString(),
@@ -3216,8 +3497,10 @@
         }
 
         function finalizePin(pin) {
-            pins.push(pin);
-            currentReport.pins = pins;
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout.pins) layout.pins = [];
+            
+            layout.pins.push(pin);
             
             if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
                 selectedPhotoIndex = null;
@@ -3228,9 +3511,10 @@
             drawPin(pin);
             updatePinList();
             renderPinsOverlay();
+            renderLayoutTabs();
             
             const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
-            showToast(`Pin ${pins.length} placed: ${pinTypes[pin.type].label}${linkInfo}`);
+            showToast(`Pin ${layout.pins.length} placed: ${pinTypes[pin.type].label}${linkInfo}`);
             
             pendingPin = null;
         }
@@ -3251,13 +3535,10 @@
             const overlay = document.getElementById('pinsOverlay');
             overlay.innerHTML = '';
             
-            const currentPage = currentReport.planType === 'pdf' ? currentReport.planPDFData.currentPage : 1;
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout || !layout.pins) return;
             
-            pins.forEach((pin, index) => {
-                if (currentReport.planType === 'pdf' && pin.page !== currentPage) {
-                    return;
-                }
-                
+            layout.pins.forEach((pin, index) => {
                 const pinEl = document.createElement('div');
                 pinEl.className = 'plan-pin';
                 pinEl.style.left = (pin.x * 100) + '%';
@@ -3300,25 +3581,12 @@
             ctx.drawImage(planImageObj, 0, 0, canvas.width, canvas.height);
         }
 
-        function clearPins() {
-            if (pins.length === 0) return;
-            
-            if (confirm(`Clear all ${pins.length} pins?`)) {
-                pins = [];
-                currentReport.pins = [];
-                
-                currentReport.photos.forEach(p => p.linkedPinId = null);
-                renderPhotos();
-                
-                updatePinList();
-                renderPinsOverlay();
-                showToast('All pins cleared');
-            }
-        }
-
         function updatePinList() {
             const list = document.getElementById('pinList');
             const count = document.getElementById('pinCount');
+            
+            const layout = currentReport.layouts[currentLayoutIndex];
+            const pins = layout && layout.pins ? layout.pins : [];
             
             count.textContent = pins.length;
             
@@ -3356,7 +3624,7 @@
                         <button class="pin-btn link-btn" onclick="linkPinToPhoto(${idx})" title="Link to photo">
                             <i class="fas fa-link"></i>
                         </button>
-                        <button class="pin-btn" onclick="deletePin(${pin.id})" title="Delete">
+                        <button class="pin-btn" onclick="deleteLayoutPin(${pin.id})" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -3365,333 +3633,271 @@
         }
 
         function linkPinToPhoto(pinIndex) {
-            pendingPin = pins[pinIndex];
+            const layout = currentReport.layouts[currentLayoutIndex];
+            pendingPin = layout.pins[pinIndex];
             openLinkPhotoModal();
         }
 
-        function deletePin(id) {
-            const pin = pins.find(p => p.id === id);
+        function deleteLayoutPin(id) {
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout || !layout.pins) return;
+            
+            const pin = layout.pins.find(p => p.id === id);
             if (pin && pin.linkedPhotoId) {
-                const photo = currentReport.photos.find(p => p.id === pin.linkedPhotoId);
-                if (photo) photo.linkedPinId = null;
+                // Unlink photo if needed
             }
             
-            pins = pins.filter(p => p.id !== id);
-            currentReport.pins = pins;
+            layout.pins = layout.pins.filter(p => p.id !== id);
             
             renderPinsOverlay();
             updatePinList();
+            renderLayoutTabs();
             renderPhotos();
             showToast('Pin deleted');
         }
 
-        function exportAnnotatedPlan() {
-            if (!planImageObj) {
+        function exportAnnotatedLayout() {
+            const layout = currentReport.layouts[currentLayoutIndex];
+            if (!layout || !layout.image) {
                 showToast('No plan drawing to export');
                 return;
             }
             
             const exportCanvas = document.createElement('canvas');
             const exportCtx = exportCanvas.getContext('2d');
-            exportCanvas.width = planImageObj.width;
-            exportCanvas.height = planImageObj.height;
             
-            exportCtx.drawImage(planImageObj, 0, 0);
-            
-            pins.forEach((pin, idx) => {
-                if (currentReport.planType === 'pdf' && pin.page !== currentReport.planPDFData.currentPage) {
-                    return;
+            const img = new Image();
+            img.onload = function() {
+                exportCanvas.width = img.width;
+                exportCanvas.height = img.height;
+                exportCtx.drawImage(img, 0, 0);
+                
+                if (layout.pins) {
+                    layout.pins.forEach((pin, idx) => {
+                        const x = pin.x * exportCanvas.width;
+                        const y = pin.y * exportCanvas.height;
+                        
+                        exportCtx.save();
+                        exportCtx.translate(x, y);
+                        exportCtx.rotate(-45 * Math.PI / 180);
+                        exportCtx.beginPath();
+                        exportCtx.arc(0, -15, 15, 0, 2 * Math.PI);
+                        exportCtx.fillStyle = pin.color;
+                        exportCtx.fill();
+                        exportCtx.strokeStyle = 'white';
+                        exportCtx.lineWidth = 3;
+                        exportCtx.stroke();
+                        exportCtx.restore();
+                        
+                        exportCtx.fillStyle = 'white';
+                        exportCtx.font = 'bold 16px Arial';
+                        exportCtx.textAlign = 'center';
+                        exportCtx.fillText(idx + 1, x, y - 10);
+                    });
                 }
                 
-                const x = pin.x * exportCanvas.width;
-                const y = pin.y * exportCanvas.height;
-                
-                exportCtx.save();
-                exportCtx.translate(x, y);
-                exportCtx.rotate(-45 * Math.PI / 180);
-                
-                exportCtx.beginPath();
-                exportCtx.arc(0, -15, 15, 0, 2 * Math.PI);
-                exportCtx.fillStyle = pin.color;
-                exportCtx.fill();
-                exportCtx.strokeStyle = 'white';
-                exportCtx.lineWidth = 3;
-                exportCtx.stroke();
-                
-                exportCtx.restore();
-                
-                exportCtx.fillStyle = 'white';
-                exportCtx.font = 'bold 16px Arial';
-                exportCtx.textAlign = 'center';
-                exportCtx.fillText(idx + 1, x, y - 10);
-            });
-            
-            const link = document.createElement('a');
-            link.download = `PLCIS_Plan_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = exportCanvas.toDataURL();
-            link.click();
-            showToast('Annotated plan exported!');
+                const link = document.createElement('a');
+                link.download = `PLCIS_Layout${currentLayoutIndex + 1}_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = exportCanvas.toDataURL();
+                link.click();
+                showToast('Annotated layout exported!');
+            };
+            img.src = layout.image;
         }
 
-        function printPlanWithPins() {
-            if (!planImageObj) {
-                showToast('No plan to print');
+        // NEW: Team Member Management
+        function addTeamMember() {
+            const name = document.getElementById('memberName').value.trim();
+            const email = document.getElementById('memberEmail').value.trim();
+            const contact = document.getElementById('memberContact').value.trim();
+            const role = document.getElementById('memberRole').value;
+            
+            if (!name || !email) {
+                showToast('Please enter at least name and email');
                 return;
             }
             
-            if (currentReport.planType === 'pdf' && currentReport.planPDFData.numPages > 1) {
-                printMultiPagePlan();
-            } else {
-                printSinglePagePlan();
-            }
-        }
-
-        function printSinglePagePlan() {
-            const printWindow = window.open('', '_blank');
-            const pinsTable = pins.map((pin, idx) => {
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                return `
-                    <tr>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                            <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${idx + 1}</div>
-                        </td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                            ${linkedPhoto ? `<span style="color: var(--success); font-weight: 600;">✓ Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                        </td>
-                        <td style="border: 1px solid #e2e8f0; padding: 8px; font-size: 0.875rem;">
-                            ${pin.realCoords ? `${pin.realCoords.lat.toFixed(6)}<br>${pin.realCoords.lng.toFixed(6)}` : 'N/A'}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            
-            const printCanvas = document.createElement('canvas');
-            const printCtx = printCanvas.getContext('2d');
-            printCanvas.width = planImageObj.width;
-            printCanvas.height = planImageObj.height;
-            printCtx.drawImage(planImageObj, 0, 0);
-            
-            pins.forEach((pin, idx) => {
-                const x = pin.x * printCanvas.width;
-                const y = pin.y * printCanvas.height;
-                
-                printCtx.save();
-                printCtx.translate(x, y);
-                printCtx.rotate(-45 * Math.PI / 180);
-                printCtx.beginPath();
-                printCtx.arc(0, -20, 20, 0, 2 * Math.PI);
-                printCtx.fillStyle = pin.color;
-                printCtx.fill();
-                printCtx.strokeStyle = 'white';
-                printCtx.lineWidth = 4;
-                printCtx.stroke();
-                printCtx.restore();
-                
-                printCtx.fillStyle = 'white';
-                printCtx.font = 'bold 20px Arial';
-                printCtx.textAlign = 'center';
-                printCtx.fillText(idx + 1, x, y - 12);
-            });
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Site Plan - ${currentReport.projectName}</title>
-                    <style>
-                        @page { size: A4 landscape; margin: 10mm; }
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; }
-                        .plan-container { text-align: center; margin-bottom: 20px; page-break-inside: avoid; }
-                        .plan-container img { max-width: 100%; max-height: 500px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.875rem; }
-                        th { background: #1e3a8a; color: white; padding: 12px; text-align: left; font-weight: 600; }
-                        h1 { color: #1e3a8a; margin: 0; font-size: 1.5rem; }
-                        .meta { color: #64748b; font-size: 0.875rem; margin-top: 5px; }
-                        .pin-legend { display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap; justify-content: center; }
-                        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.875rem; }
-                        .legend-dot { width: 16px; height: 16px; border-radius: 50%; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>🏗️ SITE PLAN ANNOTATION</h1>
-                        <div class="meta">Project: ${currentReport.projectName || 'N/A'} | Date: ${new Date().toLocaleDateString()} | Total Pins: ${pins.length}</div>
-                    </div>
-                    
-                    <div class="plan-container">
-                        <img src="${printCanvas.toDataURL()}" alt="Annotated Site Plan">
-                    </div>
-                    
-                    <div class="pin-legend">
-                        ${Object.entries(pinTypes).map(([key, type]) => `
-                            <div class="legend-item">
-                                <div class="legend-dot" style="background: ${type.color};"></div>
-                                <span>${type.label}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">Pin</th>
-                                <th>Type</th>
-                                <th>Description</th>
-                                <th style="width: 100px;">Photo Link</th>
-                                <th>GPS Coordinates</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${pinsTable || '<tr><td colspan="5" style="text-align: center; padding: 20px;">No pins placed</td></tr>'}
-                        </tbody>
-                    </table>
-                    
-                    <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.875rem;">
-                        <p><strong>PLCIS Report ID:</strong> ${currentReport.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This plan annotation was generated by ProjectLink Construction Intelligence System</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        async function printMultiPagePlan() {
-            const printWindow = window.open('', '_blank');
-            const numPages = currentReport.planPDFData.numPages;
-            
-            let pagesHTML = '';
-            
-            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                const pagePins = pins.filter(p => p.page === pageNum);
-                const pageImage = currentReport.pdfPages[pageNum - 1];
-                
-                if (!pageImage) continue;
-                
-                const pageCanvas = document.createElement('canvas');
-                const pageCtx = pageCanvas.getContext('2d');
-                const img = new Image();
-                await new Promise(resolve => {
-                    img.onload = resolve;
-                    img.src = pageImage;
-                });
-                
-                pageCanvas.width = img.width;
-                pageCanvas.height = img.height;
-                pageCtx.drawImage(img, 0, 0);
-                
-                pagePins.forEach((pin, idx) => {
-                    const x = pin.x * pageCanvas.width;
-                    const y = pin.y * pageCanvas.height;
-                    
-                    pageCtx.save();
-                    pageCtx.translate(x, y);
-                    pageCtx.rotate(-45 * Math.PI / 180);
-                    pageCtx.beginPath();
-                    pageCtx.arc(0, -20, 20, 0, 2 * Math.PI);
-                    pageCtx.fillStyle = pin.color;
-                    pageCtx.fill();
-                    pageCtx.strokeStyle = 'white';
-                    pageCtx.lineWidth = 4;
-                    pageCtx.stroke();
-                    pageCtx.restore();
-                    
-                    pageCtx.fillStyle = 'white';
-                    pageCtx.font = 'bold 20px Arial';
-                    pageCtx.textAlign = 'center';
-                    pageCtx.fillText(pins.indexOf(pin) + 1, x, y - 12);
-                });
-                
-                const pinsTable = pagePins.map((pin, idx) => {
-                    const globalIdx = pins.indexOf(pin);
-                    const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                    return `
-                        <tr>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${globalIdx + 1}</div>
-                            </td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                ${linkedPhoto ? `<span style="color: var(--success); font-weight: 600;">✓ Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-                
-                pagesHTML += `
-                    <div class="plan-print-page">
-                        <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
-                            <h2 style="color: #1e3a8a; margin: 0; font-size: 1.25rem;">Page ${pageNum} of ${numPages}</h2>
-                            <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.875rem;">${pagePins.length} pin(s) on this page</p>
-                        </div>
-                        
-                        <div class="plan-container">
-                            <img src="${pageCanvas.toDataURL()}" alt="Site Plan Page ${pageNum}">
-                        </div>
-                        
-                        ${pagePins.length > 0 ? `
-                        <table style="margin-top: 20px;">
-                            <thead>
-                                <tr style="background: #1e3a8a; color: white;">
-                                    <th style="padding: 10px; text-align: left; width: 60px;">Pin</th>
-                                    <th style="padding: 10px; text-align: left;">Type</th>
-                                    <th style="padding: 10px; text-align: left;">Description</th>
-                                    <th style="padding: 10px; text-align: center; width: 100px;">Photo Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${pinsTable}
-                            </tbody>
-                        </table>
-                        ` : '<p style="text-align: center; color: #64748b; padding: 20px;">No pins on this page</p>'}
-                    </div>
-                `;
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('Please enter a valid email address');
+                return;
             }
             
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Site Plan - ${currentReport.projectName}</title>
-                    <style>
-                        @page { size: A4 landscape; margin: 10mm; }
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; }
-                        .plan-container { text-align: center; margin-bottom: 20px; }
-                        .plan-container img { max-width: 100%; max-height: 450px; border: 2px solid #e2e8f0; }
-                        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-                        th { background: #1e3a8a; color: white; padding: 10px; text-align: left; }
-                        td { border: 1px solid #e2e8f0; padding: 8px; }
-                        h1 { color: #1e3a8a; margin: 0; font-size: 1.5rem; }
-                        .meta { color: #64748b; font-size: 0.875rem; margin-top: 5px; }
-                        .plan-print-page { page-break-after: always; margin-bottom: 30px; }
-                        .plan-print-page:last-child { page-break-after: auto; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>🏗️ MULTI-PAGE SITE PLAN</h1>
-                        <div class="meta">Project: ${currentReport.projectName || 'N/A'} | Date: ${new Date().toLocaleDateString()} | Total Pages: ${numPages} | Total Pins: ${pins.length}</div>
-                    </div>
-                    
-                    ${pagesHTML}
-                    
-                    <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.875rem;">
-                        <p><strong>PLCIS Report ID:</strong> ${currentReport.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This multi-page plan was generated by ProjectLink Construction Intelligence System</p>
-                    </div>
-                </body>
-                </html>
-            `);
+            const member = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                contact: contact,
+                role: role,
+                addedAt: new Date().toLocaleString()
+            };
             
-            printWindow.document.close();
-            printWindow.print();
+            if (!currentReport.teamMembers) {
+                currentReport.teamMembers = [];
+            }
+            
+            currentReport.teamMembers.push(member);
+            
+            // Clear form
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberEmail').value = '';
+            document.getElementById('memberContact').value = '';
+            
+            loadTeamMembers();
+            showToast('Team member added successfully');
+            addActivityLog(`Added team member: ${name} (${roleConfig[role].name})`);
+        }
+
+        function deleteTeamMember(id) {
+            if (!confirm('Remove this team member?')) return;
+            
+            currentReport.teamMembers = currentReport.teamMembers.filter(m => m.id !== id);
+            loadTeamMembers();
+            showToast('Team member removed');
+        }
+
+        function loadTeamMembers() {
+            const list = document.getElementById('teamMembersList');
+            const shareList = document.getElementById('shareEmailList');
+            const count = document.getElementById('memberCount');
+            const shareBtn = document.getElementById('shareReportBtn');
+            
+            const members = currentReport.teamMembers || [];
+            count.textContent = `${members.length} member(s)`;
+            
+            // Enable/disable share button
+            shareBtn.disabled = members.length === 0;
+            
+            if (members.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state" style="padding: 1rem;">
+                        <p style="font-size: 0.875rem;">No team members added yet.</p>
+                    </div>
+                `;
+                shareList.innerHTML = `
+                    <div class="empty-state" style="padding: 1rem;">
+                        <p style="font-size: 0.875rem;">Add team members first to enable sharing.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Members list
+            list.innerHTML = members.map(member => `
+                <div class="member-list-item">
+                    <div class="collab-avatar" style="background: ${roleConfig[member.role].color};">
+                        ${member.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${member.name}</div>
+                        <div class="member-details">
+                            ${roleConfig[member.role].name} | ${member.email}
+                            ${member.contact ? ` | ${member.contact}` : ''}
+                        </div>
+                    </div>
+                    <button class="member-delete" onclick="deleteTeamMember(${member.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            // Share list preview
+            shareList.innerHTML = members.map(member => `
+                <div class="email-item">
+                    <div class="collab-avatar" style="background: ${roleConfig[member.role].color}; width: 32px; height: 32px; font-size: 0.75rem;">
+                        ${member.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="email-info">
+                        <div class="email-name">${member.name}</div>
+                        <div class="email-address">${member.email}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // NEW: Share Report Functions
+        function openShareModal() {
+            const members = currentReport.teamMembers || [];
+            if (members.length === 0) {
+                showToast('Add team members first');
+                return;
+            }
+            
+            const list = document.getElementById('modalEmailList');
+            list.innerHTML = members.map((member, idx) => `
+                <div class="email-item" onclick="toggleEmailSelection(this, '${member.email}')">
+                    <input type="checkbox" class="email-checkbox" data-email="${member.email}" onchange="updateSelectedCount()">
+                    <div class="collab-avatar" style="background: ${roleConfig[member.role].color}; width: 32px; height: 32px; font-size: 0.75rem;">
+                        ${member.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="email-info">
+                        <div class="email-name">${member.name}</div>
+                        <div class="email-address">${member.email}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('selectedCount').textContent = '0';
+            document.getElementById('shareMessage').value = '';
+            document.getElementById('shareModal').classList.add('active');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        function toggleEmailSelection(element, email) {
+            const checkbox = element.querySelector('.email-checkbox');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('selected', checkbox.checked);
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.email-checkbox:checked');
+            document.getElementById('selectedCount').textContent = checkboxes.length;
+        }
+
+        function sendShareReport() {
+            const checkboxes = document.querySelectorAll('.email-checkbox:checked');
+            const selectedEmails = Array.from(checkboxes).map(cb => cb.dataset.email);
+            
+            if (selectedEmails.length === 0) {
+                showToast('Please select at least one recipient');
+                return;
+            }
+            
+            const message = document.getElementById('shareMessage').value;
+            
+            // Simulate email sending
+            showLoading(true);
+            setTimeout(() => {
+                showLoading(false);
+                closeShareModal();
+                showToast(`Report shared with ${selectedEmails.length} member(s) via email!`);
+                addActivityLog(`Shared report with: ${selectedEmails.join(', ')}`);
+                
+                // In real implementation, this would send to backend
+                console.log('Sharing report with:', selectedEmails);
+                console.log('Message:', message);
+            }, 1500);
+        }
+
+        function addActivityLog(message) {
+            const log = document.getElementById('activityLog');
+            const item = document.createElement('div');
+            item.className = 'collab-item fade-in';
+            item.innerHTML = `
+                <div class="collab-avatar role-${currentRole}" style="background: ${roleConfig[currentRole].color};">
+                    ${roleConfig[currentRole].name.charAt(0)}
+                </div>
+                <div class="collab-info">
+                    <div class="collab-name">${roleConfig[currentRole].name}</div>
+                    <div class="collab-role">${message} - ${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            log.insertBefore(item, log.firstChild);
         }
 
         // Report Management
@@ -3734,17 +3940,18 @@
             }, 300);
         }
 
+        // MODIFIED: Preview Report - Only shows layouts with content
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
             
             const photosHtml = report.photos.map((photo, idx) => {
-                const linkedPin = report.pins ? report.pins.find(p => p.linkedPhotoId === photo.id) : null;
+                const linkedPin = getAllPinsFromReport(report).find(p => p.linkedPhotoId === photo.id);
                 return `
                 <div style="margin-bottom: 15px; break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                     <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e2e8f0;">
                         <strong>Photo ${idx + 1}</strong>
-                        ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin ${report.pins.indexOf(linkedPin) + 1}</span>` : ''}
+                        ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin</span>` : ''}
                     </div>
                     <div style="padding: 10px;">
                         <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto;">
@@ -3756,88 +3963,63 @@
                 </div>
             `}).join('');
             
-            let planPagesHtml = '';
-            if (report.pins && report.pins.length > 0 && report.planImage) {
-                if (report.planType === 'pdf' && report.pdfPages) {
-                    report.pdfPages.forEach((pageImg, pageIdx) => {
-                        if (!pageImg) return;
-                        const pageNum = pageIdx + 1;
-                        const pagePins = report.pins.filter(p => p.page === pageNum);
-                        
-                        planPagesHtml += `
-                            <div style="margin-bottom: 30px; page-break-inside: avoid;">
-                                <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
-                                    Site Plan - Page ${pageNum} ${pagePins.length > 0 ? `(${pagePins.length} pins)` : ''}
-                                </h3>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <img src="${pageImg}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
-                                </div>
-                                ${pagePins.length > 0 ? `
-                                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
-                                    <tr style="background: #1e3a8a; color: white;">
-                                        <th style="padding: 8px; text-align: center; width: 50px;">Pin</th>
-                                        <th style="padding: 8px;">Type</th>
-                                        <th style="padding: 8px;">Description</th>
-                                        <th style="padding: 8px; text-align: center; width: 80px;">Photo</th>
-                                    </tr>
-                                    ${pagePins.map(pin => {
-                                        const globalIdx = report.pins.indexOf(pin);
-                                        const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                                        return `
-                                            <tr>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${globalIdx + 1}</div>
-                                                </td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
-                                                <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                    ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </table>
-                                ` : ''}
+            // Only include layouts with content
+            const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent);
+            
+            let layoutsHtml = '';
+            if (layoutsWithContent.length > 0) {
+                layoutsHtml = layoutsWithContent.map((layout, idx) => {
+                    const layoutNum = report.layouts.indexOf(layout) + 1;
+                    const pins = layout.pins || [];
+                    
+                    let planHtml = '';
+                    if (layout.image) {
+                        planHtml = `
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <img src="${layout.image}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
                             </div>
                         `;
-                    });
-                } else {
-                    planPagesHtml = `
-                        <div style="margin-bottom: 30px;">
-                            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Site Plan with Annotations (${report.pins.length} pins)</h3>
-                            <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${report.planImage}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
-                            </div>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                    }
+                    
+                    let pinsTable = '';
+                    if (pins.length > 0) {
+                        pinsTable = `
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 15px;">
                                 <tr style="background: #1e3a8a; color: white;">
                                     <th style="padding: 8px; text-align: center; width: 50px;">Pin</th>
                                     <th style="padding: 8px;">Type</th>
                                     <th style="padding: 8px;">Description</th>
                                     <th style="padding: 8px; text-align: center; width: 80px;">Photo</th>
-                                    <th style="padding: 8px;">GPS</th>
                                 </tr>
-                                ${report.pins.map((pin, idx) => {
+                                ${pins.map(pin => {
                                     const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
                                     return `
                                         <tr>
                                             <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
-                                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${idx + 1}</div>
+                                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${pins.indexOf(pin) + 1}</div>
                                             </td>
                                             <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
                                             <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
                                             <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
                                                 ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
                                             </td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 8px; font-size: 0.75rem;">
-                                                ${pin.realCoords ? `${pin.realCoords.lat.toFixed(4)}, ${pin.realCoords.lng.toFixed(4)}` : 'N/A'}
-                                            </td>
                                         </tr>
                                     `;
                                 }).join('')}
                             </table>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="plan-print-page">
+                            <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
+                                Site Plan - Layout ${layoutNum} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
+                            </h3>
+                            ${planHtml}
+                            ${pinsTable}
                         </div>
                     `;
-                }
+                }).join('');
             }
             
             content.innerHTML = `
@@ -3893,10 +4075,10 @@
                         </div>
                     </div>
                     
-                    ${planPagesHtml ? `
+                    ${layoutsHtml ? `
                     <div class="plan-print-container">
-                        <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📍 Site Plan Annotations</h2>
-                        ${planPagesHtml}
+                        <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📍 Site Plan Annotations (${layoutsWithContent.length} layout(s))</h2>
+                        ${layoutsHtml}
                     </div>
                     ` : ''}
                     
@@ -3915,6 +4097,16 @@
             `;
             
             modal.classList.add('active');
+        }
+
+        function getAllPinsFromReport(report) {
+            let allPins = [];
+            (report.layouts || []).forEach(layout => {
+                if (layout.pins) {
+                    allPins = allPins.concat(layout.pins);
+                }
+            });
+            return allPins;
         }
 
         function closePdfModal() {
@@ -3939,15 +4131,13 @@
                 issues: '',
                 nextSteps: '',
                 photos: [],
-                pins: [],
-                planImage: null,
-                planType: null,
-                planPDFData: null,
-                pdfPages: [],
-                collaborators: []
+                layouts: [],
+                collaborators: [],
+                teamMembers: currentReport.teamMembers // Keep team members
             };
-            pins = [];
-            selectedPhotoIndex = null;
+            
+            layoutCount = 1;
+            currentLayoutIndex = 0;
             
             document.getElementById('projectName').value = '';
             document.getElementById('siteLocation').value = '';
@@ -3957,6 +4147,7 @@
             document.getElementById('activities').value = '';
             document.getElementById('issues').value = '';
             document.getElementById('nextSteps').value = '';
+            document.getElementById('layoutCount').value = '1';
             
             document.getElementById('coordDisplay').style.display = 'none';
             document.getElementById('gpsStatus').className = 'gps-status error';
@@ -3967,13 +4158,10 @@
             document.getElementById('canvasWrapper').style.display = 'none';
             document.getElementById('pinTypeSelector').style.display = 'none';
             document.getElementById('pinListCard').style.display = 'none';
-            document.getElementById('pdfNav').style.display = 'none';
-            document.getElementById('pdfThumbnails').style.display = 'none';
-            document.getElementById('uploadZone').classList.remove('has-file');
-            document.querySelector('.upload-text').textContent = 'Click to upload site plan';
+            document.getElementById('layoutPdfNav').style.display = 'none';
             
+            initializeLayouts();
             renderPhotos();
-            updatePinList();
             loadReportsList();
         }
 
@@ -3993,7 +4181,11 @@
                 return;
             }
             
-            container.innerHTML = reports.sort((a, b) => b.id - a.id).map(report => `
+            container.innerHTML = reports.sort((a, b) => b.id - a.id).map(report => {
+                const layoutCount = (report.layouts || []).filter(l => l.hasContent).length;
+                const pinCount = getAllPinsFromReport(report).length;
+                
+                return `
                 <div class="report-item">
                     <div class="report-info">
                         <h3>${report.projectName}</h3>
@@ -4004,7 +4196,8 @@
                         </div>
                         <div class="report-badges">
                             <span class="badge badge-photos"><i class="fas fa-camera"></i> ${report.photos.length}</span>
-                            <span class="badge badge-pins"><i class="fas fa-thumbtack"></i> ${report.pins ? report.pins.length : 0}</span>
+                            <span class="badge badge-pins"><i class="fas fa-thumbtack"></i> ${pinCount}</span>
+                            ${layoutCount > 0 ? `<span class="badge" style="background: #dbeafe; color: #1e40af;"><i class="fas fa-drafting-compass"></i> ${layoutCount} layout(s)</span>` : ''}
                             ${report.role ? `<span class="badge badge-role"><i class="fas ${roleConfig[report.role].icon}"></i> ${roleConfig[report.role].name}</span>` : ''}
                         </div>
                     </div>
@@ -4014,7 +4207,7 @@
                         <button class="icon-btn" onclick="deleteReport(${report.id})" title="Delete" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function viewReport(id) {
@@ -4029,7 +4222,11 @@
             if (!report) return;
             
             currentReport = JSON.parse(JSON.stringify(report));
-            pins = currentReport.pins || [];
+            
+            // Ensure layouts array exists
+            if (!currentReport.layouts) {
+                currentReport.layouts = [];
+            }
             
             document.getElementById('projectName').value = report.projectName;
             document.getElementById('siteLocation').value = report.location;
@@ -4044,34 +4241,13 @@
                 updateGPSDisplay(report.coordinates);
             }
             
-            if (report.planType === 'pdf' && report.planPDFData) {
-                currentReport.planPDFData = report.planPDFData;
-                currentReport.pdfPages = report.pdfPages || [];
-                if (currentReport.pdfPages.length > 0) {
-                    loadImageToCanvas(currentReport.pdfPages[0]);
-                    document.getElementById('pdfNav').style.display = 'flex';
-                    document.getElementById('totalPages').textContent = currentReport.planPDFData.numPages;
-                    document.getElementById('currentPageNum').textContent = '1';
-                    
-                    const thumbContainer = document.getElementById('pdfThumbnails');
-                    thumbContainer.style.display = 'flex';
-                    thumbContainer.innerHTML = currentReport.pdfPages.map((page, idx) => `
-                        <div class="pdf-thumb ${idx === 0 ? 'active' : ''}" onclick="selectPDFPage(${idx + 1})">
-                            <img src="${page}" alt="Page ${idx + 1}">
-                            <span class="pdf-thumb-page">${idx + 1}</span>
-                        </div>
-                    `).join('');
-                }
-            } else if (report.planImage) {
-                loadImageToCanvas(report.planImage);
-            }
+            // Setup layouts
+            layoutCount = currentReport.layouts.length || 1;
+            document.getElementById('layoutCount').value = layoutCount;
+            currentLayoutIndex = 0;
             
-            if (report.pins && report.pins.length > 0) {
-                document.getElementById('pinTypeSelector').style.display = 'flex';
-                document.getElementById('pinListCard').style.display = 'block';
-                updatePinList();
-            }
-            
+            renderLayoutTabs();
+            loadCurrentLayout();
             renderPhotos();
             
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -4096,53 +4272,6 @@
             showToast(`Filter: ${type} (demo)`);
         }
 
-        // Collaboration Functions
-        function loadCollaborationData() {
-            const teamMembers = [
-                { role: 'engineer', name: 'John Smith', status: 'online' },
-                { role: 'supervisor', name: 'Sarah Lee', status: 'online' },
-                { role: 're', name: 'Michael Chen', status: 'offline' },
-                { role: 'pm', name: 'David Wong', status: 'online' }
-            ];
-            
-            const list = document.getElementById('collabList');
-            document.getElementById('teamCount').textContent = `${teamMembers.filter(m => m.status === 'online').length} online`;
-            
-            list.innerHTML = teamMembers.map(member => `
-                <div class="collab-item">
-                    <div class="collab-avatar" style="background: ${roleConfig[member.role].color};">
-                        ${member.name.charAt(0)}
-                    </div>
-                    <div class="collab-info">
-                        <div class="collab-name">${member.name}</div>
-                        <div class="collab-role">${roleConfig[member.role].name}</div>
-                    </div>
-                    <div class="collab-status" style="background: ${member.status === 'online' ? 'var(--success)' : '#cbd5e1'};"></div>
-                </div>
-            `).join('');
-        }
-
-        function shareReport() {
-            showToast('Report shared with selected team members');
-            addActivityLog('Report shared with team');
-        }
-
-        function addActivityLog(message) {
-            const log = document.getElementById('activityLog');
-            const item = document.createElement('div');
-            item.className = 'collab-item fade-in';
-            item.innerHTML = `
-                <div class="collab-avatar role-${currentRole}" style="background: ${roleConfig[currentRole].color};">
-                    ${roleConfig[currentRole].name.charAt(0)}
-                </div>
-                <div class="collab-info">
-                    <div class="collab-name">${roleConfig[currentRole].name}</div>
-                    <div class="collab-role">${message} - ${new Date().toLocaleTimeString()}</div>
-                </div>
-            `;
-            log.insertBefore(item, log.firstChild);
-        }
-
         // Utilities
         function showLoading(show) {
             document.getElementById('loadingOverlay').classList.toggle('active', show);
@@ -4153,15 +4282,6 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
-                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
-            `)).catch(() => console.log('Service Worker registration skipped'));
         }
     </script>
 </body>
