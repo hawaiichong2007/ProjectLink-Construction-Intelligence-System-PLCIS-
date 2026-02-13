@@ -2280,21 +2280,27 @@
                     <i class="fas fa-map"></i> OneMap Singapore
                 </button>
             </div>
+            
             <div class="map-container-full">
                 <div id="googleMapPanel" class="map-panel active">
-                    <iframe id="googleMapFrame" src="https://www.google.com/maps" width="100%" height="500" frameborder="0" style="border:0; border-radius:8px;" allowfullscreen></iframe>
+                    <div id="mapPicker" style="width: 100%; height: 100%; min-height: 500px;">
+                        <!-- Map will be initialized here -->
+                    </div>
                 </div>
                 <div id="oneMapPanel" class="map-panel">
-                    <iframe id="oneMapFrame" src="https://www.onemap.gov.sg/" width="100%" height="500" frameborder="0" style="border:0; border-radius:8px;" allowfullscreen></iframe>
+                    <!-- OneMap will be loaded here -->
                 </div>
             </div>
+            
             <div style="padding: 1rem; border-top: 1px solid var(--border); background: #f8fafc;">
                 <div id="selectedCoordDisplay" style="margin-bottom: 1rem; font-family: monospace; background: white; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
-                    Browse the map above, then manually enter coordinates below.
+                    Click on map to select location
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" onclick="closeMapModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="openMapPicker('manual')">Enter Coordinates Manually</button>
+                    <button class="btn btn-primary" onclick="confirmMapLocation()" style="flex: 1;">
+                        <i class="fas fa-check"></i> Confirm Location
+                    </button>
                 </div>
             </div>
         </div>
@@ -2565,9 +2571,7 @@
             document.getElementById('mapModal').classList.add('active');
             
             if (type === 'google' || type === 'onemap') {
-                // No API, just show modal with iframes
-                return;
-
+                if (type === 'google') {
                     setTimeout(() => initGoogleMaps(), 100);
                 } else {
                     setTimeout(() => initOneMap(), 100);
