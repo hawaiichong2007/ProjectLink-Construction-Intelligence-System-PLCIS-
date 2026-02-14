@@ -12,6 +12,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- html2canvas for map snapshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         /* [Previous CSS styles remain the same] */
         * {
@@ -1979,6 +1982,103 @@
             pointer-events: none;
             opacity: 0.8;
         }
+
+        /* Map Snapshot Button */
+        .map-snapshot-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .map-snapshot-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* All Layouts Container */
+        .all-layouts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .layout-section {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .layout-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .layout-section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+            margin-bottom: 1rem;
+        }
+
+        .layout-upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .layout-canvas-container {
+            position: relative;
+            width: 100%;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px dashed #cbd5e1;
+            margin-bottom: 1rem;
+            min-height: 400px;
+        }
+
+        /* Map container for snapshot */
+        .map-snapshot-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #googleMapFrame, #oneMapFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -2237,13 +2337,13 @@
                 </div>
             </section>
 
-            <!-- Drawing Section - MODIFIED WITH GOOGLE MAPS STYLE NAVIGATION -->
+            <!-- Drawing Section - MODIFIED TO SHOW ALL LAYOUTS AT ONCE -->
             <section id="drawing-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
-                        Select number of layouts needed, upload plans, and mark locations. 
-                        <strong style="color: var(--primary);">Use two fingers to drag/pan. Pinch to zoom in/out from center. All 10 layouts with content will be printed.</strong>
+                        All layouts are displayed below. Scroll down to access each layout. Upload plans and mark locations. 
+                        <strong style="color: var(--primary);">Click on any plan to place pins. Use zoom buttons to zoom in/out.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2263,115 +2363,9 @@
                         </button>
                     </div>
 
-                    <!-- Layout Tabs -->
-                    <div class="layout-tabs" id="layoutTabs"></div>
-
-                    <!-- Current Layout Content -->
-                    <div id="currentLayoutContent">
-                        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('layoutInput').click()">
-                            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                            <div class="upload-text">Click to upload plan for Layout <span id="currentLayoutNum">1</span></div>
-                            <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB). High resolution images supported with zoom.</div>
-                        </div>
-
-                        <input type="file" id="layoutInput" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutDrawing(this)">
-
-                        <!-- PDF Page Navigation -->
-                        <div id="layoutPdfNav" class="pdf-nav" style="display: none;">
-                            <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(-1)" id="layoutPdfPrevBtn">
-                                <i class="fas fa-chevron-left"></i> Previous
-                            </button>
-                            <span class="pdf-page-info">Page <span id="layoutCurrentPageNum">1</span> of <span id="layoutTotalPages">1</span></span>
-                            <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(1)" id="layoutPdfNextBtn">
-                                Next <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-
-                        <!-- Pin Type Selector -->
-                        <div class="pin-type-selector" id="pinTypeSelector" style="display: none;">
-                            <button class="pin-type-btn active" onclick="selectPinType('photo')" data-type="photo">
-                                <span class="pin-type-dot" style="background: #3b82f6;"></span>
-                                Photo Link
-                            </button>
-                            <button class="pin-type-btn" onclick="selectPinType('issue')" data-type="issue">
-                                <span class="pin-type-dot" style="background: #ef4444;"></span>
-                                Issue/Delay
-                            </button>
-                            <button class="pin-type-btn" onclick="selectPinType('completed')" data-type="completed">
-                                <span class="pin-type-dot" style="background: #10b981;"></span>
-                                Completed Work
-                            </button>
-                            <button class="pin-type-btn" onclick="selectPinType('inspection')" data-type="inspection">
-                                <span class="pin-type-dot" style="background: #f59e0b;"></span>
-                                Inspection Point
-                            </button>
-                            <button class="pin-type-btn" onclick="selectPinType('safety')" data-type="safety">
-                                <span class="pin-type-dot" style="background: #8b5cf6;"></span>
-                                Safety Issue
-                            </button>
-                        </div>
-
-                        <div class="drawing-controls" style="margin-top: 1rem;">
-                            <button class="btn btn-secondary" onclick="clearLayoutPins()">
-                                <i class="fas fa-trash"></i> Clear Layout Pins
-                            </button>
-                            <button class="btn btn-accent" onclick="exportAnnotatedLayout()">
-                                <i class="fas fa-download"></i> Export Layout
-                            </button>
-                            <button class="btn btn-danger" onclick="removeCurrentLayout()">
-                                <i class="fas fa-times"></i> Remove Layout
-                            </button>
-                        </div>
-
-                        <!-- Zoom Controls -->
-                        <div class="zoom-controls-container" id="zoomControlsContainer" style="display: none;">
-                            <div class="zoom-controls">
-                                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <div class="zoom-level" id="zoomLevel">100%</div>
-                                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">
-                                    <i class="fas fa-compress-arrows-alt"></i>
-                                </button>
-                            </div>
-                            <div class="zoom-hint">
-                                <i class="fas fa-hand-pointer"></i> Two fingers to drag • Pinch to zoom
-                            </div>
-                        </div>
-
-                        <!-- MODIFIED: Drawing Container with Google Maps Style Navigation -->
-                        <div class="drawing-container" id="drawingContainer">
-                            <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
-                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">
-                                    <i class="fas fa-drafting-compass"></i>
-                                </div>
-                                <p>Upload plan drawing for Layout <span class="layout-placeholder-num">1</span></p>
-                                <p style="font-size: 0.875rem; margin-top: 0.5rem;">
-                                    Click upload zone above or drag and drop
-                                </p>
-                            </div>
-                            <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
-                                <div class="nav-hint" id="navHint">
-                                    <i class="fas fa-hand-pointer"></i> Two fingers drag • Pinch zoom
-                                </div>
-                                <div class="canvas-viewport" id="canvasViewport">
-                                    <canvas id="planCanvas" class="drawing-canvas"></canvas>
-                                    <div class="pins-overlay" id="pinsOverlay"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card" id="pinListCard" style="display: none;">
-                    <h2 class="card-title"><i class="fas fa-thumbtack"></i> Layout Pins (<span id="pinCount">0</span>)</h2>
-                    <div class="pin-list" id="pinList">
-                        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
-                            No pins placed yet. Click on the plan above to add pins.
-                        </p>
+                    <!-- All Layouts Container -->
+                    <div id="allLayoutsContainer" class="all-layouts-container">
+                        <!-- Layouts will be generated here -->
                     </div>
                 </div>
             </section>
@@ -2561,7 +2555,12 @@
                 </button>
             </div>
             
-            <div class="map-container-full">
+            <div class="map-container-full" style="position: relative;">
+                <!-- Map Snapshot Button -->
+                <button class="map-snapshot-btn" onclick="captureMapSnapshot()">
+                    <i class="fas fa-camera"></i> Snapshot Map
+                </button>
+                
                 <!-- Google Maps Embed Panel -->
                 <div id="googleMapPanel" class="map-panel active">
                     <iframe id="googleMapFrame" class="map-iframe" 
@@ -2572,10 +2571,10 @@
                     </iframe>
                 </div>
                 
-                <!-- OneMap Embed Panel - FIXED URL -->
+                <!-- OneMap Embed Panel - FIXED URL using V2 embed -->
                 <div id="oneMapPanel" class="map-panel">
                     <iframe id="oneMapFrame" class="map-iframe" 
-                        src="https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red!r:50" 
+                        src="https://www.onemap.gov.sg/v2/embed.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red!r:50" 
                         allowfullscreen>
                     </iframe>
                 </div>
@@ -2675,7 +2674,8 @@
             photos: [],
             layouts: [],
             collaborators: [],
-            teamMembers: []
+            teamMembers: [],
+            mapSnapshot: null
         };
 
         let reports = JSON.parse(localStorage.getItem('plcis_reports') || '[]');
@@ -2683,30 +2683,14 @@
         let selectedPhotoIndex = null;
         let currentRole = null;
         let currentPinType = 'photo';
-        let canvas, ctx;
-        let planImageObj = null;
+        let canvas = {};
+        let ctx = {};
+        let planImageObj = {};
         let canvasScale = 1;
         let pendingPin = null;
-
-        // NEW: Google Maps Style Navigation State
-        let currentZoom = 1;
-        let currentPan = { x: 0, y: 0 };
-        const MIN_ZOOM = 0.5;
-        const MAX_ZOOM = 5;
-        const ZOOM_STEP = 0.25;
-
-        // Touch/Pinch State
-        let isPinching = false;
-        let isDragging = false;
-        let lastTouchDistance = 0;
-        let lastTouchCenter = { x: 0, y: 0 };
-        let lastPanPosition = { x: 0, y: 0 };
-        let touchStartTime = 0;
-        let initialPinchZoom = 1;
-        let initialPinchPan = { x: 0, y: 0 };
+        let currentLayoutIndex = 0;
 
         // Layout Management
-        let currentLayoutIndex = 0;
         let layoutCount = 1;
         const MAX_LAYOUTS = 10;
 
@@ -2740,8 +2724,6 @@
             }
             
             loadReportsList();
-            initCanvas();
-            initDragAndDrop();
             initializeLayouts();
             loadTeamMembers();
         });
@@ -2801,8 +2783,7 @@
             if (tab === 'reports') loadReportsList();
             if (tab === 'collaboration') loadTeamMembers();
             if (tab === 'drawing') {
-                renderLayoutTabs();
-                loadCurrentLayout();
+                renderAllLayouts();
             }
         }
 
@@ -2955,6 +2936,45 @@
             showToast('Location confirmed from map');
         }
 
+        // Map Snapshot Function
+        function captureMapSnapshot() {
+            const activePanel = document.querySelector('.map-panel.active');
+            const iframe = activePanel.querySelector('iframe');
+            
+            showLoading(true);
+            
+            // Use html2canvas to capture the iframe content
+            html2canvas(activePanel, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 2
+            }).then(canvas => {
+                const snapshotData = canvas.toDataURL('image/png');
+                currentReport.mapSnapshot = snapshotData;
+                
+                // Add as a photo
+                const photo = {
+                    id: Date.now(),
+                    src: snapshotData,
+                    timestamp: new Date().toLocaleString(),
+                    coordinates: currentReport.coordinates ? {...currentReport.coordinates} : null,
+                    description: 'Map snapshot from ' + (activePanel.id === 'googleMapPanel' ? 'Google Maps' : 'OneMap'),
+                    tags: ['map', 'snapshot'],
+                    linkedPinId: null
+                };
+                
+                currentReport.photos.push(photo);
+                renderPhotos();
+                
+                showLoading(false);
+                showToast('Map snapshot saved! You can find it in Photos section.');
+            }).catch(err => {
+                console.error('Snapshot error:', err);
+                showLoading(false);
+                showToast('Failed to capture snapshot. Please try again.');
+            });
+        }
+
         // Photo Handling
         function handlePhoto(input) {
             if (input.files) {
@@ -3085,8 +3105,8 @@
                 }
                 
                 renderPhotos();
-                updatePinList();
-                renderPinsOverlay();
+                updateAllPinLists();
+                renderAllLayouts();
                 showToast('Photo deleted');
             }
         }
@@ -3140,7 +3160,7 @@
             }
         }
 
-        // Layout Management Functions
+        // Layout Management Functions - MODIFIED TO SHOW ALL LAYOUTS AT ONCE
         function adjustLayoutCount(delta) {
             const input = document.getElementById('layoutCount');
             let newValue = parseInt(input.value) + delta;
@@ -3167,7 +3187,8 @@
                     pdfData: null,
                     pdfPages: [],
                     pins: [],
-                    hasContent: false
+                    hasContent: false,
+                    zoom: 1
                 });
             }
             
@@ -3175,90 +3196,291 @@
                 currentReport.layouts = currentReport.layouts.slice(0, layoutCount);
             }
             
-            currentLayoutIndex = 0;
-            renderLayoutTabs();
-            loadCurrentLayout();
+            renderAllLayouts();
             showToast(`${layoutCount} layout(s) initialized`);
         }
 
-        function renderLayoutTabs() {
-            const container = document.getElementById('layoutTabs');
+        function renderAllLayouts() {
+            const container = document.getElementById('allLayoutsContainer');
             if (!container) return;
             
             container.innerHTML = currentReport.layouts.map((layout, index) => `
-                <button class="layout-tab ${index === currentLayoutIndex ? 'active' : ''} ${layout.hasContent ? 'has-content' : ''}" 
-                        onclick="switchToLayout(${index})">
-                    Layout ${index + 1}
-                    ${layout.pins && layout.pins.length > 0 ? `<span style="margin-left: 4px; background: var(--accent); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">${layout.pins.length}</span>` : ''}
-                </button>
+                <div class="layout-section" id="layout-${index}">
+                    <div class="layout-section-header">
+                        <div class="layout-section-title">
+                            <i class="fas fa-drafting-compass"></i> Layout ${index + 1}
+                            ${layout.pins && layout.pins.length > 0 ? `<span style="margin-left: 8px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">${layout.pins.length} pins</span>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" onclick="clearLayoutPins(${index})">
+                                <i class="fas fa-trash"></i> Clear Pins
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="removeLayout(${index})">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${!layout.image ? `
+                        <div class="layout-upload-zone" onclick="document.getElementById('layoutInput-${index}').click()">
+                            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="upload-text">Click to upload plan for Layout ${index + 1}</div>
+                            <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB)</div>
+                        </div>
+                        <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
+                    ` : `
+                        <div class="drawing-controls" style="margin-bottom: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" onclick="document.getElementById('layoutInput-${index}').click()">
+                                <i class="fas fa-upload"></i> Change Plan
+                            </button>
+                            <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
+                            <button class="btn btn-sm btn-secondary" onclick="zoomLayout(${index}, -0.25)">
+                                <i class="fas fa-minus"></i> Zoom Out
+                            </button>
+                            <span style="font-size: 0.875rem; font-weight: 600;">${Math.round((layout.zoom || 1) * 100)}%</span>
+                            <button class="btn btn-sm btn-secondary" onclick="zoomLayout(${index}, 0.25)">
+                                <i class="fas fa-plus"></i> Zoom In
+                            </button>
+                            <button class="btn btn-sm btn-accent" onclick="exportLayout(${index})">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                        
+                        ${layout.type === 'pdf' && layout.pdfPages && layout.pdfPages.length > 1 ? `
+                            <div class="pdf-nav" style="margin-bottom: 0.5rem;">
+                                <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(${index}, -1)" ${layout.currentPage === 1 ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="pdf-page-info">Page ${layout.currentPage || 1} of ${layout.pdfPages.length}</span>
+                                <button class="pdf-nav-btn" onclick="changeLayoutPDFPage(${index}, 1)" ${layout.currentPage === layout.pdfPages.length ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="pin-type-selector" style="margin-bottom: 0.5rem;">
+                            <button class="pin-type-btn ${currentPinType === 'photo' ? 'active' : ''}" onclick="selectPinType('photo')" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                                <span class="pin-type-dot" style="background: #3b82f6;"></span> Photo
+                            </button>
+                            <button class="pin-type-btn ${currentPinType === 'issue' ? 'active' : ''}" onclick="selectPinType('issue')" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                                <span class="pin-type-dot" style="background: #ef4444;"></span> Issue
+                            </button>
+                            <button class="pin-type-btn ${currentPinType === 'completed' ? 'active' : ''}" onclick="selectPinType('completed')" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                                <span class="pin-type-dot" style="background: #10b981;"></span> Completed
+                            </button>
+                            <button class="pin-type-btn ${currentPinType === 'inspection' ? 'active' : ''}" onclick="selectPinType('inspection')" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                                <span class="pin-type-dot" style="background: #f59e0b;"></span> Inspection
+                            </button>
+                            <button class="pin-type-btn ${currentPinType === 'safety' ? 'active' : ''}" onclick="selectPinType('safety')" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                                <span class="pin-type-dot" style="background: #8b5cf6;"></span> Safety
+                            </button>
+                        </div>
+                        
+                        <div class="layout-canvas-container" style="height: 500px; overflow: auto; position: relative;">
+                            <canvas id="layoutCanvas-${index}" style="cursor: crosshair; display: block; margin: 0 auto;"></canvas>
+                            <div id="pinsOverlay-${index}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                        </div>
+                        
+                        <div class="pin-list" id="pinList-${index}" style="margin-top: 1rem; max-height: 200px;">
+                            ${renderPinListHTML(layout.pins, index)}
+                        </div>
+                    `}
+                </div>
             `).join('');
-        }
-
-        function switchToLayout(index) {
-            currentLayoutIndex = index;
-            // Reset zoom when switching layouts
-            resetZoom();
-            renderLayoutTabs();
-            loadCurrentLayout();
-        }
-
-        function loadCurrentLayout() {
-            const layout = currentReport.layouts[currentLayoutIndex];
-            if (!layout) return;
             
-            // Update UI
-            document.getElementById('currentLayoutNum').textContent = currentLayoutIndex + 1;
-            document.querySelectorAll('.layout-placeholder-num').forEach(el => {
-                el.textContent = currentLayoutIndex + 1;
-            });
-            
-            // Reset display
-            document.getElementById('planPlaceholder').style.display = 'flex';
-            document.getElementById('canvasWrapper').style.display = 'none';
-            document.getElementById('pinTypeSelector').style.display = 'none';
-            document.getElementById('pinListCard').style.display = 'none';
-            document.getElementById('layoutPdfNav').style.display = 'none';
-            document.getElementById('zoomControlsContainer').style.display = 'none';
-            
-            planImageObj = null;
-            
-            // Load layout content if exists
-            if (layout.image) {
-                if (layout.type === 'pdf' && layout.pdfPages && layout.pdfPages.length > 0) {
-                    loadLayoutImage(layout.pdfPages[0]);
-                    document.getElementById('layoutPdfNav').style.display = 'flex';
-                    document.getElementById('layoutTotalPages').textContent = layout.pdfPages.length;
-                    document.getElementById('layoutCurrentPageNum').textContent = '1';
-                } else {
-                    loadLayoutImage(layout.image);
+            // Initialize canvases for layouts with images
+            currentReport.layouts.forEach((layout, index) => {
+                if (layout.image) {
+                    initLayoutCanvas(index);
                 }
+            });
+        }
+
+        function renderPinListHTML(pins, layoutIndex) {
+            if (!pins || pins.length === 0) {
+                return '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No pins placed yet. Click on the plan to add pins.</p>';
             }
             
-            updatePinList();
+            return pins.map((pin, idx) => {
+                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
+                const photoThumb = linkedPhoto ? `<img src="${linkedPhoto.src}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover; margin-left: 8px;">` : '';
+                
+                return `
+                <div class="pin-item" style="padding: 0.5rem;">
+                    <div class="pin-number" style="width: 24px; height: 24px; font-size: 0.75rem; background: ${pin.color};">${idx + 1}</div>
+                    <div class="pin-info">
+                        <div class="pin-type" style="font-size: 0.8125rem;">${pinTypes[pin.type].label}</div>
+                        <div class="pin-desc" style="font-size: 0.75rem;">${pin.description || 'No description'}</div>
+                    </div>
+                    ${photoThumb}
+                    <button class="pin-btn" onclick="deleteLayoutPin(${layoutIndex}, ${pin.id})" style="width: 28px; height: 28px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `}).join('');
         }
 
-        // Load Layout Image with High Resolution Support
-        function loadLayoutImage(src) {
-            planImageObj = new Image();
-            planImageObj.onload = function() {
-                document.getElementById('planPlaceholder').style.display = 'none';
-                document.getElementById('canvasWrapper').style.display = 'block';
-                document.getElementById('pinTypeSelector').style.display = 'flex';
-                document.getElementById('pinListCard').style.display = 'block';
-                document.getElementById('zoomControlsContainer').style.display = 'flex';
+        function initLayoutCanvas(index) {
+            const layout = currentReport.layouts[index];
+            const canvasEl = document.getElementById(`layoutCanvas-${index}`);
+            const container = canvasEl.parentElement;
+            
+            if (!canvasEl || !layout.image) return;
+            
+            const img = new Image();
+            img.onload = function() {
+                const zoom = layout.zoom || 1;
+                canvasEl.width = img.naturalWidth * zoom;
+                canvasEl.height = img.naturalHeight * zoom;
                 
-                // Reset zoom when loading new image
-                resetZoom();
+                const ctx = canvasEl.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvasEl.width, canvasEl.height);
                 
-                resizeCanvas();
-                renderPinsOverlay();
+                // Store for later use
+                canvas[index] = canvasEl;
+                ctx[index] = ctx;
+                planImageObj[index] = img;
+                
+                // Add click handler for placing pins
+                canvasEl.onclick = function(e) {
+                    handleLayoutClick(index, e);
+                };
+                
+                // Render pins
+                renderLayoutPins(index);
             };
-            planImageObj.src = src;
-            planImageObj.dataset.originalSrc = src;
+            img.src = layout.image;
         }
 
-        // PDF Rendering with Higher Resolution
-        async function loadLayoutDrawing(input) {
+        function handleLayoutClick(index, e) {
+            const layout = currentReport.layouts[index];
+            const canvasEl = document.getElementById(`layoutCanvas-${index}`);
+            const rect = canvasEl.getBoundingClientRect();
+            const container = canvasEl.parentElement;
+            const containerRect = container.getBoundingClientRect();
+            
+            // Calculate position relative to canvas
+            const scaleX = canvasEl.width / rect.width;
+            const scaleY = canvasEl.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            const relX = x / canvasEl.width;
+            const relY = y / canvasEl.height;
+            
+            pendingPin = {
+                id: Date.now(),
+                x: relX,
+                y: relY,
+                canvasX: x,
+                canvasY: y,
+                type: currentPinType,
+                color: pinTypes[currentPinType].color,
+                layoutIndex: index,
+                realCoords: currentReport.coordinates,
+                description: '',
+                timestamp: new Date().toLocaleString(),
+                linkedPhotoId: null
+            };
+            
+            if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
+                pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
+                finalizePin(index, pendingPin);
+            } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
+                openLinkPhotoModalForLayout(index);
+            } else {
+                pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
+                finalizePin(index, pendingPin);
+            }
+        }
+
+        function openLinkPhotoModalForLayout(layoutIndex) {
+            currentLayoutIndex = layoutIndex;
+            const grid = document.getElementById('linkPhotoGrid');
+            grid.innerHTML = currentReport.photos.map((photo, idx) => `
+                <div class="photo-select-item" onclick="selectPhotoForLink(${idx})">
+                    <img src="${photo.src}" alt="Photo ${idx + 1}">
+                    <span class="photo-select-number">${idx + 1}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('linkPhotoModal').classList.add('active');
+        }
+
+        function finalizePin(layoutIndex, pin) {
+            const layout = currentReport.layouts[layoutIndex];
+            if (!layout.pins) layout.pins = [];
+            
+            layout.pins.push(pin);
+            
+            // Clear photo selection if pin was linked to a photo
+            if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
+                selectedPhotoIndex = null;
+                document.getElementById('selectedPhotoInfo').style.display = 'none';
+                renderPhotos();
+            }
+            
+            renderLayoutPins(layoutIndex);
+            updatePinListForLayout(layoutIndex);
+            renderAllLayouts(); // Re-render to update pin counts
+            
+            const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
+            showToast(`Pin ${layout.pins.length} placed: ${pinTypes[pin.type].label}${linkInfo}`);
+            
+            pendingPin = null;
+        }
+
+        function renderLayoutPins(index) {
+            const layout = currentReport.layouts[index];
+            const overlay = document.getElementById(`pinsOverlay-${index}`);
+            const canvasEl = document.getElementById(`layoutCanvas-${index}`);
+            
+            if (!overlay || !canvasEl || !layout.pins) return;
+            
+            overlay.innerHTML = '';
+            
+            layout.pins.forEach((pin, pinIndex) => {
+                const pinEl = document.createElement('div');
+                pinEl.style.position = 'absolute';
+                pinEl.style.left = (pin.x * 100) + '%';
+                pinEl.style.top = (pin.y * 100) + '%';
+                pinEl.style.transform = 'translate(-50%, -100%)';
+                pinEl.style.width = '24px';
+                pinEl.style.height = '24px';
+                pinEl.style.cursor = 'pointer';
+                pinEl.style.zIndex = '10';
+                
+                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
+                
+                pinEl.innerHTML = `
+                    <div style="width: 100%; height: 100%; position: relative;">
+                        <div style="width: 20px; height: 20px; border-radius: 50% 50% 50% 0; background: ${pin.color}; position: absolute; transform: rotate(-45deg); left: 2px; top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+                            <span style="transform: rotate(45deg); color: white; font-weight: 700; font-size: 10px;">${pinIndex + 1}</span>
+                        </div>
+                        ${linkedPhoto ? `<div style="position: absolute; bottom: -2px; right: -2px; background: var(--accent); color: white; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; border: 2px solid white;"><i class="fas fa-image"></i></div>` : ''}
+                    </div>
+                `;
+                
+                overlay.appendChild(pinEl);
+            });
+        }
+
+        function updatePinListForLayout(index) {
+            const layout = currentReport.layouts[index];
+            const list = document.getElementById(`pinList-${index}`);
+            if (list) {
+                list.innerHTML = renderPinListHTML(layout.pins, index);
+            }
+        }
+
+        function updateAllPinLists() {
+            currentReport.layouts.forEach((layout, index) => {
+                updatePinListForLayout(index);
+            });
+        }
+
+        async function loadLayoutFile(index, input) {
             if (!input.files || !input.files[0]) return;
             
             const file = input.files[0];
@@ -3267,7 +3489,7 @@
             showLoading(true);
             
             try {
-                const layout = currentReport.layouts[currentLayoutIndex];
+                const layout = currentReport.layouts[index];
                 
                 if (isPDF) {
                     const arrayBuffer = await file.arrayBuffer();
@@ -3278,7 +3500,6 @@
                     layout.pdfData = arrayBuffer;
                     layout.pdfPages = [];
                     
-                    // Render all pages with higher resolution
                     for (let i = 1; i <= numPages; i++) {
                         const page = await pdf.getPage(i);
                         const viewport = page.getViewport({ scale: 2.0 });
@@ -3297,9 +3518,7 @@
                     }
                     
                     layout.image = layout.pdfPages[0];
-                    document.getElementById('layoutPdfNav').style.display = 'flex';
-                    document.getElementById('layoutTotalPages').textContent = numPages;
-                    document.getElementById('layoutCurrentPageNum').textContent = '1';
+                    layout.currentPage = 1;
                 } else {
                     const reader = new FileReader();
                     await new Promise((resolve, reject) => {
@@ -3313,13 +3532,11 @@
                         reader.onerror = reject;
                         reader.readAsDataURL(file);
                     });
-                    document.getElementById('layoutPdfNav').style.display = 'none';
                 }
                 
                 layout.hasContent = true;
-                loadLayoutImage(layout.image);
-                renderLayoutTabs();
-                showToast(`Layout ${currentLayoutIndex + 1} loaded successfully!`);
+                layout.zoom = 1;
+                showToast(`Layout ${index + 1} loaded successfully!`);
                 
             } catch (error) {
                 console.error('Error loading file:', error);
@@ -3327,32 +3544,49 @@
             } finally {
                 showLoading(false);
                 input.value = '';
+                renderAllLayouts();
             }
         }
 
-        function changeLayoutPDFPage(delta) {
-            const layout = currentReport.layouts[currentLayoutIndex];
+        function changeLayoutPDFPage(index, delta) {
+            const layout = currentReport.layouts[index];
             if (!layout || !layout.pdfPages || layout.pdfPages.length === 0) return;
             
-            const currentPage = parseInt(document.getElementById('layoutCurrentPageNum').textContent);
-            const newPage = currentPage + delta;
+            const newPage = (layout.currentPage || 1) + delta;
             
             if (newPage >= 1 && newPage <= layout.pdfPages.length) {
-                document.getElementById('layoutCurrentPageNum').textContent = newPage;
-                document.getElementById('layoutPdfPrevBtn').disabled = newPage === 1;
-                document.getElementById('layoutPdfNextBtn').disabled = newPage === layout.pdfPages.length;
-                loadLayoutImage(layout.pdfPages[newPage - 1]);
+                layout.currentPage = newPage;
+                layout.image = layout.pdfPages[newPage - 1];
+                renderAllLayouts();
             }
         }
 
-        function removeCurrentLayout() {
+        function zoomLayout(index, delta) {
+            const layout = currentReport.layouts[index];
+            const newZoom = Math.max(0.5, Math.min(3, (layout.zoom || 1) + delta));
+            layout.zoom = newZoom;
+            renderAllLayouts();
+        }
+
+        function clearLayoutPins(index) {
+            const layout = currentReport.layouts[index];
+            if (!layout || !layout.pins || layout.pins.length === 0) return;
+            
+            if (confirm(`Clear all ${layout.pins.length} pins from Layout ${index + 1}?`)) {
+                layout.pins = [];
+                renderAllLayouts();
+                showToast('Layout pins cleared');
+            }
+        }
+
+        function removeLayout(index) {
             if (currentReport.layouts.length <= 1) {
                 showToast('Cannot remove the last layout');
                 return;
             }
             
-            if (confirm(`Remove Layout ${currentLayoutIndex + 1}? This will delete all pins on this layout.`)) {
-                currentReport.layouts.splice(currentLayoutIndex, 1);
+            if (confirm(`Remove Layout ${index + 1}? This will delete all pins on this layout.`)) {
+                currentReport.layouts.splice(index, 1);
                 
                 // Reindex remaining layouts
                 currentReport.layouts.forEach((layout, idx) => {
@@ -3362,607 +3596,22 @@
                 layoutCount = currentReport.layouts.length;
                 document.getElementById('layoutCount').value = layoutCount;
                 
-                if (currentLayoutIndex >= currentReport.layouts.length) {
-                    currentLayoutIndex = currentReport.layouts.length - 1;
-                }
-                
-                renderLayoutTabs();
-                loadCurrentLayout();
+                renderAllLayouts();
                 showToast('Layout removed');
             }
         }
 
-        function clearLayoutPins() {
-            const layout = currentReport.layouts[currentLayoutIndex];
-            if (!layout || !layout.pins || layout.pins.length === 0) return;
-            
-            if (confirm(`Clear all ${layout.pins.length} pins from Layout ${currentLayoutIndex + 1}?`)) {
-                layout.pins = [];
-                updatePinList();
-                renderPinsOverlay();
-                renderLayoutTabs();
-                showToast('Layout pins cleared');
-            }
-        }
-
-        function getAllPins() {
-            let allPins = [];
-            currentReport.layouts.forEach((layout, layoutIdx) => {
-                if (layout.pins) {
-                    layout.pins.forEach(pin => {
-                        pin.layoutIndex = layoutIdx;
-                        allPins.push(pin);
-                    });
-                }
-            });
-            return allPins;
-        }
-
-        // GOOGLE MAPS STYLE ZOOM AND PAN FUNCTIONS
-        function zoomIn() {
-            if (currentZoom < MAX_ZOOM) {
-                const oldZoom = currentZoom;
-                currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
-                
-                // Zoom towards center of viewport
-                const wrapper = document.getElementById('canvasWrapper');
-                const centerX = wrapper.clientWidth / 2;
-                const centerY = wrapper.clientHeight / 2;
-                
-                // Adjust pan to zoom towards center
-                const zoomRatio = currentZoom / oldZoom;
-                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio;
-                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio;
-                
-                applyTransform();
-            }
-        }
-
-        function zoomOut() {
-            if (currentZoom > MIN_ZOOM) {
-                const oldZoom = currentZoom;
-                currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
-                
-                // Zoom from center of viewport
-                const wrapper = document.getElementById('canvasWrapper');
-                const centerX = wrapper.clientWidth / 2;
-                const centerY = wrapper.clientHeight / 2;
-                
-                // Adjust pan to zoom from center
-                const zoomRatio = currentZoom / oldZoom;
-                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio;
-                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio;
-                
-                applyTransform();
-            }
-        }
-
-        function resetZoom() {
-            currentZoom = 1;
-            currentPan = { x: 0, y: 0 };
-            applyTransform();
-        }
-
-        function applyTransform() {
-            const viewport = document.getElementById('canvasViewport');
-            if (viewport) {
-                viewport.style.transform = `translate(${currentPan.x}px, ${currentPan.y}px) scale(${currentZoom})`;
-                document.getElementById('zoomLevel').textContent = `${Math.round(currentZoom * 100)}%`;
-            }
-        }
-
-        // Google Maps Style Touch Handling
-        function getTouchDistance(touches) {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
-        function getTouchCenter(touches) {
-            return {
-                x: (touches[0].clientX + touches[1].clientX) / 2,
-                y: (touches[0].clientY + touches[1].clientY) / 2
-            };
-        }
-
-        function handleTouchStart(e) {
-            touchStartTime = Date.now();
-            
-            if (e.touches.length === 2) {
-                // Two finger pinch start
-                isPinching = true;
-                isDragging = false;
-                lastTouchDistance = getTouchDistance(e.touches);
-                lastTouchCenter = getTouchCenter(e.touches);
-                initialPinchZoom = currentZoom;
-                initialPinchPan = { ...currentPan };
-                e.preventDefault();
-            } else if (e.touches.length === 1) {
-                // Single touch - could be drag or click
-                isDragging = true;
-                lastPanPosition = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY
-                };
-            }
-        }
-
-        function handleTouchMove(e) {
-            if (isPinching && e.touches.length === 2) {
-                e.preventDefault();
-                
-                const currentDistance = getTouchDistance(e.touches);
-                const currentCenter = getTouchCenter(e.touches);
-                
-                // Calculate zoom based on pinch distance
-                const pinchRatio = currentDistance / lastTouchDistance;
-                let newZoom = initialPinchZoom * pinchRatio;
-                newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
-                
-                // Calculate how much the center moved (for panning while pinching)
-                const centerDeltaX = currentCenter.x - lastTouchCenter.x;
-                const centerDeltaY = currentCenter.y - lastTouchCenter.y;
-                
-                // Apply zoom from the center point between fingers
-                const zoomRatio = newZoom / currentZoom;
-                const wrapper = document.getElementById('canvasWrapper');
-                const rect = wrapper.getBoundingClientRect();
-                
-                // Convert center to be relative to wrapper
-                const centerX = currentCenter.x - rect.left;
-                const centerY = currentCenter.y - rect.top;
-                
-                // Adjust pan to zoom towards center point between fingers
-                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio + centerDeltaX;
-                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio + centerDeltaY;
-                
-                currentZoom = newZoom;
-                applyTransform();
-                
-            } else if (isDragging && e.touches.length === 1 && !isPinching) {
-                // Two-finger drag to pan
-                const touch = e.touches[0];
-                const deltaX = touch.clientX - lastPanPosition.x;
-                const deltaY = touch.clientY - lastPanPosition.y;
-                
-                currentPan.x += deltaX;
-                currentPan.y += deltaY;
-                
-                lastPanPosition = {
-                    x: touch.clientX,
-                    y: touch.clientY
-                };
-                
-                applyTransform();
-            }
-        }
-
-        function handleTouchEnd(e) {
-            const touchDuration = Date.now() - touchStartTime;
-            
-            if (e.touches.length < 2) {
-                isPinching = false;
-            }
-            
-            if (e.touches.length === 0) {
-                isDragging = false;
-                
-                // Check if it was a tap (short duration, no movement)
-                if (touchDuration < 200 && !isPinching) {
-                    // This was a tap - handle pin placement
-                    handleCanvasTap(lastPanPosition);
-                }
-            }
-        }
-
-        function handleCanvasTap(position) {
-            if (!planImageObj) return;
-            
-            // Convert screen position to canvas position
-            const wrapper = document.getElementById('canvasWrapper');
-            const rect = wrapper.getBoundingClientRect();
-            
-            const x = (position.x - rect.left - currentPan.x) / currentZoom;
-            const y = (position.y - rect.top - currentPan.y) / currentZoom;
-            
-            // Check if within canvas bounds
-            if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) return;
-            
-            const relX = x / canvas.width;
-            const relY = y / canvas.height;
-            
-            pendingPin = {
-                id: Date.now(),
-                x: relX,
-                y: relY,
-                canvasX: x,
-                canvasY: y,
-                type: currentPinType,
-                color: pinTypes[currentPinType].color,
-                layoutIndex: currentLayoutIndex,
-                realCoords: currentReport.coordinates,
-                description: '',
-                timestamp: new Date().toLocaleString(),
-                linkedPhotoId: null
-            };
-            
-            if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
-                pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
-                finalizePin(pendingPin);
-            } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
-                openLinkPhotoModal();
-            } else {
-                pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
-                finalizePin(pendingPin);
-            }
-        }
-
-        // Canvas and Drawing Functions
-        function initCanvas() {
-            canvas = document.getElementById('planCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Add touch event listeners for Google Maps style navigation
-            const wrapper = document.getElementById('canvasWrapper');
-            wrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
-            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
-            wrapper.addEventListener('touchend', handleTouchEnd);
-            wrapper.addEventListener('touchcancel', handleTouchEnd);
-            
-            // Mouse wheel zoom
-            wrapper.addEventListener('wheel', handleWheelZoom, { passive: false });
-            
-            // Mouse drag to pan
-            let isMouseDown = false;
-            let lastMousePos = { x: 0, y: 0 };
-            
-            wrapper.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                lastMousePos = { x: e.clientX, y: e.clientY };
-                wrapper.style.cursor = 'grabbing';
-            });
-            
-            wrapper.addEventListener('mousemove', (e) => {
-                if (isMouseDown) {
-                    const deltaX = e.clientX - lastMousePos.x;
-                    const deltaY = e.clientY - lastMousePos.y;
-                    currentPan.x += deltaX;
-                    currentPan.y += deltaY;
-                    lastMousePos = { x: e.clientX, y: e.clientY };
-                    applyTransform();
-                }
-            });
-            
-            wrapper.addEventListener('mouseup', () => {
-                isMouseDown = false;
-                wrapper.style.cursor = 'grab';
-            });
-            
-            wrapper.addEventListener('mouseleave', () => {
-                isMouseDown = false;
-                wrapper.style.cursor = 'grab';
-            });
-            
-            // Click to place pin
-            canvas.addEventListener('click', (e) => {
-                if (!planImageObj) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                
-                const x = (e.clientX - rect.left) * scaleX;
-                const y = (e.clientY - rect.top) * scaleY;
-                
-                const relX = x / canvas.width;
-                const relY = y / canvas.height;
-                
-                pendingPin = {
-                    id: Date.now(),
-                    x: relX,
-                    y: relY,
-                    canvasX: x,
-                    canvasY: y,
-                    type: currentPinType,
-                    color: pinTypes[currentPinType].color,
-                    layoutIndex: currentLayoutIndex,
-                    realCoords: currentReport.coordinates,
-                    description: '',
-                    timestamp: new Date().toLocaleString(),
-                    linkedPhotoId: null
-                };
-                
-                if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
-                    pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
-                    finalizePin(pendingPin);
-                } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
-                    openLinkPhotoModal();
-                } else {
-                    pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
-                    finalizePin(pendingPin);
-                }
-            });
-            
-            window.addEventListener('resize', debounce(resizeCanvas, 250));
-        }
-
-        function handleWheelZoom(e) {
-            e.preventDefault();
-            
-            const wrapper = document.getElementById('canvasWrapper');
-            const rect = wrapper.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-            
-            const oldZoom = currentZoom;
-            
-            if (e.deltaY < 0) {
-                currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
-            } else {
-                currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
-            }
-            
-            // Zoom towards mouse position
-            const zoomRatio = currentZoom / oldZoom;
-            currentPan.x = mouseX - (mouseX - currentPan.x) * zoomRatio;
-            currentPan.y = mouseY - (mouseY - currentPan.y) * zoomRatio;
-            
-            applyTransform();
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        function initDragAndDrop() {
-            const uploadZone = document.getElementById('uploadZone');
-            
-            uploadZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadZone.style.borderColor = 'var(--primary)';
-                uploadZone.style.background = '#eff6ff';
-            });
-            
-            uploadZone.addEventListener('dragleave', () => {
-                uploadZone.style.borderColor = '#cbd5e1';
-                uploadZone.style.background = '#f8fafc';
-            });
-            
-            uploadZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadZone.style.borderColor = '#cbd5e1';
-                uploadZone.style.background = '#f8fafc';
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    const input = document.getElementById('layoutInput');
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(files[0]);
-                    input.files = dataTransfer.files;
-                    loadLayoutDrawing(input);
-                }
-            });
-        }
-
-        function resizeCanvas() {
-            if (planImageObj && canvas) {
-                const container = document.getElementById('drawingContainer');
-                const aspectRatio = planImageObj.height / planImageObj.width;
-                
-                // Set canvas to natural image size for high resolution
-                canvas.width = planImageObj.naturalWidth || planImageObj.width;
-                canvas.height = planImageObj.naturalHeight || planImageObj.height;
-                
-                // Store original dimensions
-                canvas.dataset.originalWidth = canvas.width;
-                canvas.dataset.originalHeight = canvas.height;
-                
-                redrawCanvas();
-                renderPinsOverlay();
-            }
-        }
-
-        function openLinkPhotoModal() {
-            const grid = document.getElementById('linkPhotoGrid');
-            grid.innerHTML = currentReport.photos.map((photo, idx) => `
-                <div class="photo-select-item" onclick="selectPhotoForLink(${idx})">
-                    <img src="${photo.src}" alt="Photo ${idx + 1}">
-                    <span class="photo-select-number">${idx + 1}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('linkPhotoModal').classList.add('active');
-        }
-
-        function closeLinkPhotoModal() {
-            document.getElementById('linkPhotoModal').classList.remove('active');
-            pendingPin = null;
-        }
-
-        function selectPhotoForLink(index) {
-            if (pendingPin) {
-                pendingPin.linkedPhotoId = currentReport.photos[index].id;
-                closeLinkPhotoModal();
-                finalizePin(pendingPin);
-            }
-        }
-
-        function skipPhotoLink() {
-            if (pendingPin) {
-                pendingPin.description = prompt('Enter description for this pin:') || 'No description';
-                closeLinkPhotoModal();
-                finalizePin(pendingPin);
-            }
-        }
-
-        function finalizePin(pin) {
-            const layout = currentReport.layouts[currentLayoutIndex];
-            if (!layout.pins) layout.pins = [];
-            
-            layout.pins.push(pin);
-            
-            // Clear photo selection if pin was linked to a photo
-            if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
-                selectedPhotoIndex = null;
-                document.getElementById('selectedPhotoInfo').style.display = 'none';
-                renderPhotos();
-            }
-            
-            // Force redraw and update
-            redrawCanvas();
-            renderPinsOverlay();
-            updatePinList();
-            renderLayoutTabs();
-            
-            const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
-            showToast(`Pin ${layout.pins.length} placed: ${pinTypes[pin.type].label}${linkInfo}`);
-            
-            pendingPin = null;
-        }
-
-        function selectPinType(type) {
-            currentPinType = type;
-            document.querySelectorAll('.pin-type-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-type="${type}"]`).classList.add('active');
-        }
-
-        function renderPinsOverlay() {
-            const overlay = document.getElementById('pinsOverlay');
-            overlay.innerHTML = '';
-            
-            const layout = currentReport.layouts[currentLayoutIndex];
-            if (!layout || !layout.pins || layout.pins.length === 0) return;
-            
-            layout.pins.forEach((pin, index) => {
-                const pinEl = document.createElement('div');
-                pinEl.className = 'plan-pin';
-                pinEl.style.left = (pin.x * 100) + '%';
-                pinEl.style.top = (pin.y * 100) + '%';
-                pinEl.style.setProperty('--color', pin.color);
-                
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                const photoBadge = linkedPhoto ? `
-                    <div class="plan-pin-photo-badge">
-                        <i class="fas fa-image"></i>
-                    </div>
-                ` : '';
-                
-                pinEl.innerHTML = `
-                    <div class="plan-pin-marker">
-                        <div class="plan-pin-head">
-                            <span class="plan-pin-number">${index + 1}</span>
-                        </div>
-                        ${photoBadge}
-                    </div>
-                    <div class="plan-tooltip">
-                        <strong>${pinTypes[pin.type].label}</strong><br>
-                        ${pin.description || 'No description'}
-                        ${linkedPhoto ? `<br><em>Linked to Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}</em>` : ''}
-                    </div>
-                `;
-                
-                pinEl.onclick = (e) => {
-                    e.stopPropagation();
-                };
-                
-                overlay.appendChild(pinEl);
-            });
-        }
-
-        function redrawCanvas() {
-            if (!planImageObj || !ctx) return;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(planImageObj, 0, 0, canvas.width, canvas.height);
-        }
-
-        function updatePinList() {
-            const list = document.getElementById('pinList');
-            const count = document.getElementById('pinCount');
-            
-            const layout = currentReport.layouts[currentLayoutIndex];
-            const pins = layout && layout.pins ? layout.pins : [];
-            
-            count.textContent = pins.length;
-            
-            if (pins.length === 0) {
-                list.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No pins placed yet. Click on the plan above to add pins.</p>';
-                return;
-            }
-            
-            list.innerHTML = pins.map((pin, idx) => {
-                const linkedPhoto = pin.linkedPhotoId ? currentReport.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                const photoThumb = linkedPhoto ? `
-                    <img src="${linkedPhoto.src}" class="pin-photo-thumb" onclick="openPhotoModal(${currentReport.photos.indexOf(linkedPhoto)})" title="Click to view linked photo">
-                ` : '';
-                
-                return `
-                <div class="pin-item ${linkedPhoto ? 'linked' : ''}">
-                    <div class="pin-number" style="background: ${pin.color};">${idx + 1}</div>
-                    <div class="pin-info">
-                        <div class="pin-type">${pinTypes[pin.type].label}</div>
-                        <div class="pin-desc">${pin.description || 'No description'}</div>
-                        ${linkedPhoto ? `
-                            <div class="pin-photo-link">
-                                <i class="fas fa-link"></i> Linked to Photo ${currentReport.photos.indexOf(linkedPhoto) + 1}
-                            </div>
-                        ` : ''}
-                        ${pin.realCoords ? `
-                            <div class="pin-gps">
-                                <i class="fas fa-map-marker-alt"></i>
-                                ${pin.realCoords.lat.toFixed(4)}, ${pin.realCoords.lng.toFixed(4)}
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${photoThumb}
-                    <div class="pin-actions">
-                        <button class="pin-btn link-btn" onclick="linkPinToPhoto(${idx})" title="Link to photo">
-                            <i class="fas fa-link"></i>
-                        </button>
-                        <button class="pin-btn" onclick="deleteLayoutPin(${pin.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function linkPinToPhoto(pinIndex) {
-            const layout = currentReport.layouts[currentLayoutIndex];
-            pendingPin = layout.pins[pinIndex];
-            openLinkPhotoModal();
-        }
-
-        function deleteLayoutPin(id) {
-            const layout = currentReport.layouts[currentLayoutIndex];
+        function deleteLayoutPin(layoutIndex, pinId) {
+            const layout = currentReport.layouts[layoutIndex];
             if (!layout || !layout.pins) return;
             
-            const pin = layout.pins.find(p => p.id === id);
-            if (pin && pin.linkedPhotoId) {
-                // Unlink photo if needed
-            }
-            
-            layout.pins = layout.pins.filter(p => p.id !== id);
-            
-            renderPinsOverlay();
-            updatePinList();
-            renderLayoutTabs();
-            renderPhotos();
+            layout.pins = layout.pins.filter(p => p.id !== pinId);
+            renderAllLayouts();
             showToast('Pin deleted');
         }
 
-        function exportAnnotatedLayout() {
-            const layout = currentReport.layouts[currentLayoutIndex];
+        function exportLayout(index) {
+            const layout = currentReport.layouts[index];
             if (!layout || !layout.image) {
                 showToast('No plan drawing to export');
                 return;
@@ -4002,12 +3651,52 @@
                 }
                 
                 const link = document.createElement('a');
-                link.download = `PLCIS_Layout${currentLayoutIndex + 1}_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
+                link.download = `PLCIS_Layout${index + 1}_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
                 link.href = exportCanvas.toDataURL('image/png');
                 link.click();
                 showToast('Annotated layout exported!');
             };
             img.src = layout.image;
+        }
+
+        function selectPinType(type) {
+            currentPinType = type;
+            renderAllLayouts(); // Re-render to update button states
+        }
+
+        function getAllPins() {
+            let allPins = [];
+            currentReport.layouts.forEach((layout, layoutIdx) => {
+                if (layout.pins) {
+                    layout.pins.forEach(pin => {
+                        pin.layoutIndex = layoutIdx;
+                        allPins.push(pin);
+                    });
+                }
+            });
+            return allPins;
+        }
+
+        // Link Photo Modal Functions
+        function closeLinkPhotoModal() {
+            document.getElementById('linkPhotoModal').classList.remove('active');
+            pendingPin = null;
+        }
+
+        function selectPhotoForLink(index) {
+            if (pendingPin) {
+                pendingPin.linkedPhotoId = currentReport.photos[index].id;
+                closeLinkPhotoModal();
+                finalizePin(currentLayoutIndex, pendingPin);
+            }
+        }
+
+        function skipPhotoLink() {
+            if (pendingPin) {
+                pendingPin.description = prompt('Enter description for this pin:') || 'No description';
+                closeLinkPhotoModal();
+                finalizePin(currentLayoutIndex, pendingPin);
+            }
         }
 
         // Team Member Management
@@ -4234,7 +3923,7 @@
             }, 300);
         }
 
-        // MODIFIED: Preview Report - PRINT ALL 10 LAYOUT CONTAINERS WITH CONTENT
+        // MODIFIED: Preview Report - PRINT ALL LAYOUTS ON SAME PAGE
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -4257,12 +3946,13 @@
                 </div>
             `}).join('');
             
-            // Generate HTML for all 10 layout containers - only show those with content
+            // Generate HTML for all layouts with content - displayed on same page
             let layoutsHtml = '';
-            for (let i = 0; i < MAX_LAYOUTS; i++) {
-                const layout = report.layouts && report.layouts[i] ? report.layouts[i] : null;
-                
-                if (layout && layout.hasContent && layout.image) {
+            const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
+            
+            if (layoutsWithContent.length > 0) {
+                layoutsHtml = layoutsWithContent.map((layout, idx) => {
+                    const originalIndex = report.layouts.indexOf(layout);
                     const pins = layout.pins || [];
                     
                     let pinsTable = '';
@@ -4294,18 +3984,18 @@
                         `;
                     }
                     
-                    layoutsHtml += `
-                        <div class="print-layout-container" style="page-break-before: always;">
+                    return `
+                        <div style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; page-break-inside: avoid;">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
-                                Site Plan - Layout ${i + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
+                                Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
                             <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 500px; border: 1px solid #e2e8f0;">
+                                <img src="${layout.image}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
                             </div>
                             ${pinsTable}
                         </div>
                     `;
-                }
+                }).join('');
             }
             
             content.innerHTML = `
@@ -4361,12 +4051,22 @@
                         </div>
                     </div>
                     
+                    ${layoutsWithContent.length > 0 ? `
+                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📐 Site Plans (${layoutsWithContent.length} Layouts)</h2>
                     ${layoutsHtml}
+                    ` : ''}
                     
                     ${report.photos.length > 0 ? `
                     <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px; page-break-before: always;">📸 Site Photographs (${report.photos.length})</h2>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                         ${photosHtml}
+                    </div>
+                    ` : ''}
+                    
+                    ${report.mapSnapshot ? `
+                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">🗺️ Map Snapshot</h2>
+                    <div style="text-align: center;">
+                        <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
                     </div>
                     ` : ''}
                     
@@ -4414,13 +4114,12 @@
                 photos: [],
                 layouts: [],
                 collaborators: [],
-                teamMembers: currentReport.teamMembers
+                teamMembers: currentReport.teamMembers,
+                mapSnapshot: null
             };
             
             layoutCount = 1;
             currentLayoutIndex = 0;
-            currentZoom = 1;
-            currentPan = { x: 0, y: 0 };
             
             document.getElementById('projectName').value = '';
             document.getElementById('siteLocation').value = '';
@@ -4435,14 +4134,6 @@
             document.getElementById('coordDisplay').style.display = 'none';
             document.getElementById('gpsStatus').className = 'gps-status error';
             document.getElementById('gpsText').textContent = 'GPS Not Active - Select location source below';
-            
-            planImageObj = null;
-            document.getElementById('planPlaceholder').style.display = 'flex';
-            document.getElementById('canvasWrapper').style.display = 'none';
-            document.getElementById('pinTypeSelector').style.display = 'none';
-            document.getElementById('pinListCard').style.display = 'none';
-            document.getElementById('layoutPdfNav').style.display = 'none';
-            document.getElementById('zoomControlsContainer').style.display = 'none';
             
             initializeLayouts();
             renderPhotos();
@@ -4528,8 +4219,7 @@
             document.getElementById('layoutCount').value = layoutCount;
             currentLayoutIndex = 0;
             
-            renderLayoutTabs();
-            loadCurrentLayout();
+            renderAllLayouts();
             renderPhotos();
             
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
