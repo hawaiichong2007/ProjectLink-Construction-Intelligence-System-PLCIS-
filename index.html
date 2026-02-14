@@ -660,7 +660,7 @@
             gap: 4px;
         }
 
-        /* Drawing Canvas - MODIFIED FOR ZOOM */
+        /* Drawing Canvas - MODIFIED FOR GOOGLE MAPS STYLE NAVIGATION */
         .drawing-container {
             position: relative;
             width: 100%;
@@ -670,15 +670,18 @@
             border: 2px dashed #cbd5e1;
             margin-bottom: 1rem;
             min-height: 400px;
-            touch-action: none; /* Prevent default touch actions */
+            touch-action: none;
         }
 
         .drawing-canvas {
-            width: 100%;
             display: block;
-            cursor: crosshair;
-            transform-origin: top left;
-            transition: transform 0.2s ease-out;
+            cursor: grab;
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+        }
+
+        .drawing-canvas:active {
+            cursor: grabbing;
         }
 
         .drawing-controls {
@@ -688,7 +691,7 @@
             flex-wrap: wrap;
         }
 
-        /* MODIFIED: Zoom Controls - Moved to top outside container */
+        /* Zoom Controls */
         .zoom-controls-container {
             display: flex;
             align-items: center;
@@ -1107,7 +1110,7 @@
             color: var(--danger);
         }
 
-        /* Map Modal Specific - MODIFIED FOR WORKING EMBEDS */
+        /* Map Modal Specific */
         .map-modal-content {
             max-width: 95vw;
             height: 90vh;
@@ -1162,8 +1165,6 @@
         .map-panel.active {
             display: block;
         }
-
-        /* REMOVED: Map Instructions - Client requested removal */
 
         /* Preview Image */
         .preview-image {
@@ -1362,7 +1363,7 @@
             background: var(--success);
         }
 
-        /* Print Styles - A4 Optimized - MODIFIED TO PRINT ALL LAYOUTS */
+        /* Print Styles - A4 Optimized - PRINT ALL 10 LAYOUT CONTAINERS */
         @media print {
             @page {
                 size: A4;
@@ -1418,22 +1419,28 @@
                 break-inside: avoid;
             }
 
-            .plan-print-container {
+            /* Print all 10 layout containers */
+            .layout-print-container {
                 page-break-before: always;
             }
 
-            .plan-print-page {
+            .layout-print-page {
                 page-break-after: always;
                 margin-bottom: 20px;
             }
 
-            .plan-print-page:last-child {
+            .layout-print-page:last-child {
                 page-break-after: auto;
             }
 
-            /* Ensure all layouts print */
-            .layout-print-section {
+            /* Ensure all 10 layout containers print if they have content */
+            .print-layout-container {
+                display: block !important;
                 page-break-before: always;
+            }
+
+            .print-layout-container.empty {
+                display: none !important;
             }
         }
 
@@ -1560,14 +1567,22 @@
             font-weight: 700;
         }
 
-        /* Canvas Container with Pins Overlay - MODIFIED FOR ZOOM */
+        /* Canvas Container with Pins Overlay - GOOGLE MAPS STYLE PAN/ZOOM */
         .canvas-wrapper {
             position: relative;
-            display: inline-block;
             width: 100%;
-            overflow: auto;
-            max-height: 70vh;
-            touch-action: none; /* Enable custom touch handling */
+            height: 600px;
+            overflow: hidden;
+            background: #e5e7eb;
+            touch-action: none;
+        }
+
+        .canvas-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
         }
 
         .pins-overlay {
@@ -1577,8 +1592,6 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            transform-origin: top left;
-            transition: transform 0.2s ease-out;
         }
 
         .plan-pin {
@@ -1950,6 +1963,22 @@
             height: auto;
             display: block;
         }
+
+        /* Navigation Hint Overlay */
+        .nav-hint {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -2208,13 +2237,13 @@
                 </div>
             </section>
 
-            <!-- Drawing Section - MODIFIED WITH ZOOM CONTROLS -->
+            <!-- Drawing Section - MODIFIED WITH GOOGLE MAPS STYLE NAVIGATION -->
             <section id="drawing-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
                         Select number of layouts needed, upload plans, and mark locations. 
-                        <strong style="color: var(--primary);">Use zoom controls or pinch to zoom for precise pin placement. All layouts with content will be printed.</strong>
+                        <strong style="color: var(--primary);">Use two fingers to drag/pan. Pinch to zoom in/out from center. All 10 layouts with content will be printed.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2294,7 +2323,7 @@
                             </button>
                         </div>
 
-                        <!-- MODIFIED: Zoom Controls - Moved outside plan container -->
+                        <!-- Zoom Controls -->
                         <div class="zoom-controls-container" id="zoomControlsContainer" style="display: none;">
                             <div class="zoom-controls">
                                 <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
@@ -2309,11 +2338,11 @@
                                 </button>
                             </div>
                             <div class="zoom-hint">
-                                <i class="fas fa-hand-pointer"></i> Pinch to zoom on mobile
+                                <i class="fas fa-hand-pointer"></i> Two fingers to drag • Pinch to zoom
                             </div>
                         </div>
 
-                        <!-- MODIFIED: Drawing Container with Pinch Zoom Support -->
+                        <!-- MODIFIED: Drawing Container with Google Maps Style Navigation -->
                         <div class="drawing-container" id="drawingContainer">
                             <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
                                 <div style="font-size: 3rem; margin-bottom: 0.5rem;">
@@ -2325,8 +2354,13 @@
                                 </p>
                             </div>
                             <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
-                                <canvas id="planCanvas" class="drawing-canvas"></canvas>
-                                <div class="pins-overlay" id="pinsOverlay"></div>
+                                <div class="nav-hint" id="navHint">
+                                    <i class="fas fa-hand-pointer"></i> Two fingers drag • Pinch zoom
+                                </div>
+                                <div class="canvas-viewport" id="canvasViewport">
+                                    <canvas id="planCanvas" class="drawing-canvas"></canvas>
+                                    <div class="pins-overlay" id="pinsOverlay"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2510,7 +2544,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - MODIFIED: REMOVED GOOGLE MAPS TUTORIAL -->
+    <!-- Map Picker Modal - FIXED ONEMAP URL -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2528,7 +2562,7 @@
             </div>
             
             <div class="map-container-full">
-                <!-- Google Maps Embed Panel - NO TUTORIAL -->
+                <!-- Google Maps Embed Panel -->
                 <div id="googleMapPanel" class="map-panel active">
                     <iframe id="googleMapFrame" class="map-iframe" 
                         src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
@@ -2541,7 +2575,7 @@
                 <!-- OneMap Embed Panel - FIXED URL -->
                 <div id="oneMapPanel" class="map-panel">
                     <iframe id="oneMapFrame" class="map-iframe" 
-                        src="https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=15&marker=1.3147264,103.80988615&popupTitle=Selected%20Location" 
+                        src="https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red!r:50" 
                         allowfullscreen>
                     </iframe>
                 </div>
@@ -2654,20 +2688,27 @@
         let canvasScale = 1;
         let pendingPin = null;
 
-        // NEW: Zoom State
+        // NEW: Google Maps Style Navigation State
         let currentZoom = 1;
+        let currentPan = { x: 0, y: 0 };
         const MIN_ZOOM = 0.5;
         const MAX_ZOOM = 5;
         const ZOOM_STEP = 0.25;
 
-        // NEW: Touch/Pinch Zoom State
-        let initialPinchDistance = 0;
-        let initialZoom = 1;
+        // Touch/Pinch State
         let isPinching = false;
+        let isDragging = false;
+        let lastTouchDistance = 0;
+        let lastTouchCenter = { x: 0, y: 0 };
+        let lastPanPosition = { x: 0, y: 0 };
+        let touchStartTime = 0;
+        let initialPinchZoom = 1;
+        let initialPinchPan = { x: 0, y: 0 };
 
         // Layout Management
         let currentLayoutIndex = 0;
         let layoutCount = 1;
+        const MAX_LAYOUTS = 10;
 
         // Role Configuration
         const roleConfig = {
@@ -2846,7 +2887,7 @@
             showToast(message);
         }
 
-        // MODIFIED: Map Picker Functions - REMOVED GOOGLE MAPS TUTORIAL
+        // Map Picker Functions
         function openMapPicker(type) {
             if (type === 'manual') {
                 const lat = prompt('Enter Latitude:');
@@ -2872,7 +2913,6 @@
             document.getElementById('manualLat').value = '';
             document.getElementById('manualLng').value = '';
             
-            // If specific map type requested, switch to it
             if (type === 'google') {
                 switchMapTab('google');
             } else if (type === 'onemap') {
@@ -3105,7 +3145,7 @@
             const input = document.getElementById('layoutCount');
             let newValue = parseInt(input.value) + delta;
             if (newValue < 1) newValue = 1;
-            if (newValue > 10) newValue = 10;
+            if (newValue > MAX_LAYOUTS) newValue = MAX_LAYOUTS;
             input.value = newValue;
         }
 
@@ -3197,7 +3237,7 @@
             updatePinList();
         }
 
-        // MODIFIED: Load Layout Image with High Resolution Support
+        // Load Layout Image with High Resolution Support
         function loadLayoutImage(src) {
             planImageObj = new Image();
             planImageObj.onload = function() {
@@ -3213,12 +3253,11 @@
                 resizeCanvas();
                 renderPinsOverlay();
             };
-            // Store original high-res source
             planImageObj.src = src;
             planImageObj.dataset.originalSrc = src;
         }
 
-        // MODIFIED: PDF Rendering with Higher Resolution
+        // PDF Rendering with Higher Resolution
         async function loadLayoutDrawing(input) {
             if (!input.files || !input.files[0]) return;
             
@@ -3239,10 +3278,10 @@
                     layout.pdfData = arrayBuffer;
                     layout.pdfPages = [];
                     
-                    // Render all pages with higher resolution (scale 2.0 for better quality)
+                    // Render all pages with higher resolution
                     for (let i = 1; i <= numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 2.0 }); // INCREASED SCALE FOR HIGH RES
+                        const viewport = page.getViewport({ scale: 2.0 });
                         
                         const pageCanvas = document.createElement('canvas');
                         const pageCtx = pageCanvas.getContext('2d');
@@ -3254,7 +3293,6 @@
                             viewport: viewport
                         }).promise;
                         
-                        // Store as high quality JPEG
                         layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.95));
                     }
                     
@@ -3360,103 +3398,316 @@
             return allPins;
         }
 
-        // NEW: Zoom Functions
+        // GOOGLE MAPS STYLE ZOOM AND PAN FUNCTIONS
         function zoomIn() {
             if (currentZoom < MAX_ZOOM) {
-                currentZoom += ZOOM_STEP;
-                applyZoom();
+                const oldZoom = currentZoom;
+                currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
+                
+                // Zoom towards center of viewport
+                const wrapper = document.getElementById('canvasWrapper');
+                const centerX = wrapper.clientWidth / 2;
+                const centerY = wrapper.clientHeight / 2;
+                
+                // Adjust pan to zoom towards center
+                const zoomRatio = currentZoom / oldZoom;
+                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio;
+                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio;
+                
+                applyTransform();
             }
         }
 
         function zoomOut() {
             if (currentZoom > MIN_ZOOM) {
-                currentZoom -= ZOOM_STEP;
-                applyZoom();
+                const oldZoom = currentZoom;
+                currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
+                
+                // Zoom from center of viewport
+                const wrapper = document.getElementById('canvasWrapper');
+                const centerX = wrapper.clientWidth / 2;
+                const centerY = wrapper.clientHeight / 2;
+                
+                // Adjust pan to zoom from center
+                const zoomRatio = currentZoom / oldZoom;
+                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio;
+                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio;
+                
+                applyTransform();
             }
         }
 
         function resetZoom() {
             currentZoom = 1;
-            applyZoom();
+            currentPan = { x: 0, y: 0 };
+            applyTransform();
         }
 
-        function applyZoom() {
-            const canvas = document.getElementById('planCanvas');
-            const overlay = document.getElementById('pinsOverlay');
-            const zoomLevel = document.getElementById('zoomLevel');
-            
-            if (canvas && overlay) {
-                canvas.style.transform = `scale(${currentZoom})`;
-                overlay.style.transform = `scale(${currentZoom})`;
-                zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+        function applyTransform() {
+            const viewport = document.getElementById('canvasViewport');
+            if (viewport) {
+                viewport.style.transform = `translate(${currentPan.x}px, ${currentPan.y}px) scale(${currentZoom})`;
+                document.getElementById('zoomLevel').textContent = `${Math.round(currentZoom * 100)}%`;
             }
         }
 
-        // NEW: Pinch Zoom Functions for Mobile
-        function getPinchDistance(touches) {
-            return Math.hypot(
-                touches[0].pageX - touches[1].pageX,
-                touches[0].pageY - touches[1].pageY
-            );
+        // Google Maps Style Touch Handling
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getTouchCenter(touches) {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
         }
 
         function handleTouchStart(e) {
+            touchStartTime = Date.now();
+            
             if (e.touches.length === 2) {
+                // Two finger pinch start
                 isPinching = true;
-                initialPinchDistance = getPinchDistance(e.touches);
-                initialZoom = currentZoom;
+                isDragging = false;
+                lastTouchDistance = getTouchDistance(e.touches);
+                lastTouchCenter = getTouchCenter(e.touches);
+                initialPinchZoom = currentZoom;
+                initialPinchPan = { ...currentPan };
                 e.preventDefault();
+            } else if (e.touches.length === 1) {
+                // Single touch - could be drag or click
+                isDragging = true;
+                lastPanPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
             }
         }
 
         function handleTouchMove(e) {
             if (isPinching && e.touches.length === 2) {
                 e.preventDefault();
-                const currentDistance = getPinchDistance(e.touches);
-                const pinchRatio = currentDistance / initialPinchDistance;
                 
-                let newZoom = initialZoom * pinchRatio;
+                const currentDistance = getTouchDistance(e.touches);
+                const currentCenter = getTouchCenter(e.touches);
+                
+                // Calculate zoom based on pinch distance
+                const pinchRatio = currentDistance / lastTouchDistance;
+                let newZoom = initialPinchZoom * pinchRatio;
                 newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
                 
+                // Calculate how much the center moved (for panning while pinching)
+                const centerDeltaX = currentCenter.x - lastTouchCenter.x;
+                const centerDeltaY = currentCenter.y - lastTouchCenter.y;
+                
+                // Apply zoom from the center point between fingers
+                const zoomRatio = newZoom / currentZoom;
+                const wrapper = document.getElementById('canvasWrapper');
+                const rect = wrapper.getBoundingClientRect();
+                
+                // Convert center to be relative to wrapper
+                const centerX = currentCenter.x - rect.left;
+                const centerY = currentCenter.y - rect.top;
+                
+                // Adjust pan to zoom towards center point between fingers
+                currentPan.x = centerX - (centerX - currentPan.x) * zoomRatio + centerDeltaX;
+                currentPan.y = centerY - (centerY - currentPan.y) * zoomRatio + centerDeltaY;
+                
                 currentZoom = newZoom;
-                applyZoom();
+                applyTransform();
+                
+            } else if (isDragging && e.touches.length === 1 && !isPinching) {
+                // Two-finger drag to pan
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - lastPanPosition.x;
+                const deltaY = touch.clientY - lastPanPosition.y;
+                
+                currentPan.x += deltaX;
+                currentPan.y += deltaY;
+                
+                lastPanPosition = {
+                    x: touch.clientX,
+                    y: touch.clientY
+                };
+                
+                applyTransform();
             }
         }
 
         function handleTouchEnd(e) {
-            if (isPinching && e.touches.length < 2) {
+            const touchDuration = Date.now() - touchStartTime;
+            
+            if (e.touches.length < 2) {
                 isPinching = false;
-                initialPinchDistance = 0;
+            }
+            
+            if (e.touches.length === 0) {
+                isDragging = false;
+                
+                // Check if it was a tap (short duration, no movement)
+                if (touchDuration < 200 && !isPinching) {
+                    // This was a tap - handle pin placement
+                    handleCanvasTap(lastPanPosition);
+                }
             }
         }
 
-        // MODIFIED: Canvas and Drawing Functions with Zoom Support
+        function handleCanvasTap(position) {
+            if (!planImageObj) return;
+            
+            // Convert screen position to canvas position
+            const wrapper = document.getElementById('canvasWrapper');
+            const rect = wrapper.getBoundingClientRect();
+            
+            const x = (position.x - rect.left - currentPan.x) / currentZoom;
+            const y = (position.y - rect.top - currentPan.y) / currentZoom;
+            
+            // Check if within canvas bounds
+            if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) return;
+            
+            const relX = x / canvas.width;
+            const relY = y / canvas.height;
+            
+            pendingPin = {
+                id: Date.now(),
+                x: relX,
+                y: relY,
+                canvasX: x,
+                canvasY: y,
+                type: currentPinType,
+                color: pinTypes[currentPinType].color,
+                layoutIndex: currentLayoutIndex,
+                realCoords: currentReport.coordinates,
+                description: '',
+                timestamp: new Date().toLocaleString(),
+                linkedPhotoId: null
+            };
+            
+            if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
+                pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
+                finalizePin(pendingPin);
+            } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
+                openLinkPhotoModal();
+            } else {
+                pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
+                finalizePin(pendingPin);
+            }
+        }
+
+        // Canvas and Drawing Functions
         function initCanvas() {
             canvas = document.getElementById('planCanvas');
             ctx = canvas.getContext('2d');
             
-            canvas.addEventListener('click', handleCanvasClick);
+            // Add touch event listeners for Google Maps style navigation
+            const wrapper = document.getElementById('canvasWrapper');
+            wrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
+            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+            wrapper.addEventListener('touchend', handleTouchEnd);
+            wrapper.addEventListener('touchcancel', handleTouchEnd);
             
-            // Add mouse wheel zoom support
-            canvas.parentElement.addEventListener('wheel', handleWheelZoom, { passive: false });
+            // Mouse wheel zoom
+            wrapper.addEventListener('wheel', handleWheelZoom, { passive: false });
             
-            // Add pinch zoom support for mobile
-            const canvasWrapper = document.getElementById('canvasWrapper');
-            canvasWrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
-            canvasWrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
-            canvasWrapper.addEventListener('touchend', handleTouchEnd);
-            canvasWrapper.addEventListener('touchcancel', handleTouchEnd);
+            // Mouse drag to pan
+            let isMouseDown = false;
+            let lastMousePos = { x: 0, y: 0 };
+            
+            wrapper.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                lastMousePos = { x: e.clientX, y: e.clientY };
+                wrapper.style.cursor = 'grabbing';
+            });
+            
+            wrapper.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    const deltaX = e.clientX - lastMousePos.x;
+                    const deltaY = e.clientY - lastMousePos.y;
+                    currentPan.x += deltaX;
+                    currentPan.y += deltaY;
+                    lastMousePos = { x: e.clientX, y: e.clientY };
+                    applyTransform();
+                }
+            });
+            
+            wrapper.addEventListener('mouseup', () => {
+                isMouseDown = false;
+                wrapper.style.cursor = 'grab';
+            });
+            
+            wrapper.addEventListener('mouseleave', () => {
+                isMouseDown = false;
+                wrapper.style.cursor = 'grab';
+            });
+            
+            // Click to place pin
+            canvas.addEventListener('click', (e) => {
+                if (!planImageObj) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                
+                const relX = x / canvas.width;
+                const relY = y / canvas.height;
+                
+                pendingPin = {
+                    id: Date.now(),
+                    x: relX,
+                    y: relY,
+                    canvasX: x,
+                    canvasY: y,
+                    type: currentPinType,
+                    color: pinTypes[currentPinType].color,
+                    layoutIndex: currentLayoutIndex,
+                    realCoords: currentReport.coordinates,
+                    description: '',
+                    timestamp: new Date().toLocaleString(),
+                    linkedPhotoId: null
+                };
+                
+                if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
+                    pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
+                    finalizePin(pendingPin);
+                } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
+                    openLinkPhotoModal();
+                } else {
+                    pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
+                    finalizePin(pendingPin);
+                }
+            });
             
             window.addEventListener('resize', debounce(resizeCanvas, 250));
         }
 
         function handleWheelZoom(e) {
             e.preventDefault();
+            
+            const wrapper = document.getElementById('canvasWrapper');
+            const rect = wrapper.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const oldZoom = currentZoom;
+            
             if (e.deltaY < 0) {
-                zoomIn();
+                currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
             } else {
-                zoomOut();
+                currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
             }
+            
+            // Zoom towards mouse position
+            const zoomRatio = currentZoom / oldZoom;
+            currentPan.x = mouseX - (mouseX - currentPan.x) * zoomRatio;
+            currentPan.y = mouseY - (mouseY - currentPan.y) * zoomRatio;
+            
+            applyTransform();
         }
 
         function debounce(func, wait) {
@@ -3501,7 +3752,6 @@
             });
         }
 
-        // MODIFIED: Resize Canvas - Store original dimensions for zoom
         function resizeCanvas() {
             if (planImageObj && canvas) {
                 const container = document.getElementById('drawingContainer');
@@ -3517,50 +3767,6 @@
                 
                 redrawCanvas();
                 renderPinsOverlay();
-            }
-        }
-
-        // MODIFIED: Handle Canvas Click with Zoom Support - FIXED FOR ACCURATE PLACEMENT
-        function handleCanvasClick(e) {
-            if (!planImageObj) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            
-            // FIXED: Calculate click position accounting for zoom correctly
-            // The rect is already affected by CSS transform, so we need to calculate
-            // the position relative to the transformed element
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            const x = (e.clientX - rect.left) * scaleX;
-            const y = (e.clientY - rect.top) * scaleY;
-            
-            const relX = x / canvas.width;
-            const relY = y / canvas.height;
-            
-            pendingPin = {
-                id: Date.now(),
-                x: relX,
-                y: relY,
-                canvasX: x,
-                canvasY: y,
-                type: currentPinType,
-                color: pinTypes[currentPinType].color,
-                layoutIndex: currentLayoutIndex,
-                realCoords: currentReport.coordinates,
-                description: '',
-                timestamp: new Date().toLocaleString(),
-                linkedPhotoId: null
-            };
-            
-            if (currentPinType === 'photo' && selectedPhotoIndex !== null) {
-                pendingPin.linkedPhotoId = currentReport.photos[selectedPhotoIndex].id;
-                finalizePin(pendingPin);
-            } else if (currentPinType === 'photo' && currentReport.photos.length > 0) {
-                openLinkPhotoModal();
-            } else {
-                pendingPin.description = prompt(`Enter description for ${pinTypes[currentPinType].label}:`) || 'No description';
-                finalizePin(pendingPin);
             }
         }
 
@@ -3597,7 +3803,6 @@
             }
         }
 
-        // MODIFIED: Finalize Pin - FIXED TO ENSURE PIN DISPLAYS
         function finalizePin(pin) {
             const layout = currentReport.layouts[currentLayoutIndex];
             if (!layout.pins) layout.pins = [];
@@ -3631,11 +3836,6 @@
             document.querySelector(`[data-type="${type}"]`).classList.add('active');
         }
 
-        function drawPin(pin) {
-            // Pin is drawn as HTML overlay
-        }
-
-        // MODIFIED: Render Pins Overlay - FIXED TO ENSURE PINS DISPLAY
         function renderPinsOverlay() {
             const overlay = document.getElementById('pinsOverlay');
             overlay.innerHTML = '';
@@ -3761,7 +3961,6 @@
             showToast('Pin deleted');
         }
 
-        // MODIFIED: Export Annotated Layout with High Resolution
         function exportAnnotatedLayout() {
             const layout = currentReport.layouts[currentLayoutIndex];
             if (!layout || !layout.image) {
@@ -3774,7 +3973,6 @@
             
             const img = new Image();
             img.onload = function() {
-                // Use original high resolution
                 exportCanvas.width = img.naturalWidth || img.width;
                 exportCanvas.height = img.naturalHeight || img.height;
                 exportCtx.drawImage(img, 0, 0);
@@ -3824,7 +4022,6 @@
                 return;
             }
             
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 showToast('Please enter a valid email address');
@@ -3846,7 +4043,6 @@
             
             currentReport.teamMembers.push(member);
             
-            // Clear form
             document.getElementById('memberName').value = '';
             document.getElementById('memberEmail').value = '';
             document.getElementById('memberContact').value = '';
@@ -3872,8 +4068,6 @@
             
             const members = currentReport.teamMembers || [];
             count.textContent = `${members.length} member(s)`;
-            
-            // Enable/disable share button
             shareBtn.disabled = members.length === 0;
             
             if (members.length === 0) {
@@ -3890,7 +4084,6 @@
                 return;
             }
             
-            // Members list
             list.innerHTML = members.map(member => `
                 <div class="member-list-item">
                     <div class="collab-avatar" style="background: ${roleConfig[member.role].color};">
@@ -3909,7 +4102,6 @@
                 </div>
             `).join('');
             
-            // Share list preview
             shareList.innerHTML = members.map(member => `
                 <div class="email-item">
                     <div class="collab-avatar" style="background: ${roleConfig[member.role].color}; width: 32px; height: 32px; font-size: 0.75rem;">
@@ -3977,17 +4169,12 @@
             
             const message = document.getElementById('shareMessage').value;
             
-            // Simulate email sending
             showLoading(true);
             setTimeout(() => {
                 showLoading(false);
                 closeShareModal();
                 showToast(`Report shared with ${selectedEmails.length} member(s) via email!`);
                 addActivityLog(`Shared report with: ${selectedEmails.join(', ')}`);
-                
-                // In real implementation, this would send to backend
-                console.log('Sharing report with:', selectedEmails);
-                console.log('Message:', message);
             }, 1500);
         }
 
@@ -4047,7 +4234,7 @@
             }, 300);
         }
 
-        // MODIFIED: Preview Report - PRINT ALL LAYOUTS WITH CONTENT
+        // MODIFIED: Preview Report - PRINT ALL 10 LAYOUT CONTAINERS WITH CONTENT
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -4070,24 +4257,13 @@
                 </div>
             `}).join('');
             
-            // MODIFIED: Print ALL layouts with content (not just current one)
-            const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent);
-            
+            // Generate HTML for all 10 layout containers - only show those with content
             let layoutsHtml = '';
-            if (layoutsWithContent.length > 0) {
-                layoutsHtml = layoutsWithContent.map((layout, idx) => {
-                    const layoutNum = report.layouts.indexOf(layout) + 1;
+            for (let i = 0; i < MAX_LAYOUTS; i++) {
+                const layout = report.layouts && report.layouts[i] ? report.layouts[i] : null;
+                
+                if (layout && layout.hasContent && layout.image) {
                     const pins = layout.pins || [];
-                    
-                    let planHtml = '';
-                    if (layout.image) {
-                        // Use high resolution image for print
-                        planHtml = `
-                            <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 500px; border: 1px solid #e2e8f0;">
-                            </div>
-                        `;
-                    }
                     
                     let pinsTable = '';
                     if (pins.length > 0) {
@@ -4118,17 +4294,18 @@
                         `;
                     }
                     
-                    // MODIFIED: Each layout starts on new page
-                    return `
-                        <div class="plan-print-page">
+                    layoutsHtml += `
+                        <div class="print-layout-container" style="page-break-before: always;">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
-                                Site Plan - Layout ${layoutNum} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
+                                Site Plan - Layout ${i + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
-                            ${planHtml}
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <img src="${layout.image}" style="max-width: 100%; max-height: 500px; border: 1px solid #e2e8f0;">
+                            </div>
                             ${pinsTable}
                         </div>
                     `;
-                }).join('');
+                }
             }
             
             content.innerHTML = `
@@ -4184,15 +4361,10 @@
                         </div>
                     </div>
                     
-                    ${layoutsHtml ? `
-                    <div class="plan-print-container">
-                        <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📍 Site Plan Annotations (${layoutsWithContent.length} layout(s))</h2>
-                        ${layoutsHtml}
-                    </div>
-                    ` : ''}
+                    ${layoutsHtml}
                     
                     ${report.photos.length > 0 ? `
-                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📸 Site Photographs (${report.photos.length})</h2>
+                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px; page-break-before: always;">📸 Site Photographs (${report.photos.length})</h2>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                         ${photosHtml}
                     </div>
@@ -4242,12 +4414,13 @@
                 photos: [],
                 layouts: [],
                 collaborators: [],
-                teamMembers: currentReport.teamMembers // Keep team members
+                teamMembers: currentReport.teamMembers
             };
             
             layoutCount = 1;
             currentLayoutIndex = 0;
             currentZoom = 1;
+            currentPan = { x: 0, y: 0 };
             
             document.getElementById('projectName').value = '';
             document.getElementById('siteLocation').value = '';
@@ -4334,7 +4507,6 @@
             
             currentReport = JSON.parse(JSON.stringify(report));
             
-            // Ensure layouts array exists
             if (!currentReport.layouts) {
                 currentReport.layouts = [];
             }
@@ -4352,7 +4524,6 @@
                 updateGPSDisplay(report.coordinates);
             }
             
-            // Setup layouts
             layoutCount = currentReport.layouts.length || 1;
             document.getElementById('layoutCount').value = layoutCount;
             currentLayoutIndex = 0;
