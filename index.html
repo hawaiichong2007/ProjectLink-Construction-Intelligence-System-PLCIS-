@@ -660,7 +660,7 @@
             gap: 4px;
         }
 
-        /* Drawing Canvas */
+        /* Drawing Canvas - MODIFIED FOR ZOOM */
         .drawing-container {
             position: relative;
             width: 100%;
@@ -670,12 +670,15 @@
             border: 2px dashed #cbd5e1;
             margin-bottom: 1rem;
             min-height: 400px;
+            touch-action: none; /* Prevent default touch actions */
         }
 
         .drawing-canvas {
             width: 100%;
             display: block;
             cursor: crosshair;
+            transform-origin: top left;
+            transition: transform 0.2s ease-out;
         }
 
         .drawing-controls {
@@ -683,6 +686,50 @@
             gap: 0.5rem;
             margin-bottom: 1rem;
             flex-wrap: wrap;
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .zoom-level {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 4px 0;
         }
 
         /* PDF Page Navigation */
@@ -1108,31 +1155,7 @@
             display: block;
         }
 
-        /* Map Instructions */
-        .map-instructions {
-            background: #eff6ff;
-            border-left: 4px solid var(--primary);
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .map-instructions h4 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 0.9375rem;
-        }
-
-        .map-instructions ol {
-            margin: 0;
-            padding-left: 1.25rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .map-instructions li {
-            margin-bottom: 0.25rem;
-        }
+        /* REMOVED: Map Instructions - Client requested removal */
 
         /* Preview Image */
         .preview-image {
@@ -1331,7 +1354,7 @@
             background: var(--success);
         }
 
-        /* Print Styles - A4 Optimized */
+        /* Print Styles - A4 Optimized - MODIFIED TO PRINT ALL LAYOUTS */
         @media print {
             @page {
                 size: A4;
@@ -1344,7 +1367,7 @@
                 print-color-adjust: exact;
             }
 
-            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast {
+            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls {
                 display: none !important;
             }
 
@@ -1398,6 +1421,11 @@
 
             .plan-print-page:last-child {
                 page-break-after: auto;
+            }
+
+            /* Ensure all layouts print */
+            .layout-print-section {
+                page-break-before: always;
             }
         }
 
@@ -1524,11 +1552,13 @@
             font-weight: 700;
         }
 
-        /* Canvas Container with Pins Overlay */
+        /* Canvas Container with Pins Overlay - MODIFIED FOR ZOOM */
         .canvas-wrapper {
             position: relative;
             display: inline-block;
             width: 100%;
+            overflow: auto;
+            max-height: 70vh;
         }
 
         .pins-overlay {
@@ -1538,6 +1568,8 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            transform-origin: top left;
+            transition: transform 0.2s ease-out;
         }
 
         .plan-pin {
@@ -1895,6 +1927,20 @@
             border-radius: 8px;
             margin-top: 1rem;
         }
+
+        /* High Resolution Image Display */
+        .high-res-container {
+            width: 100%;
+            overflow: auto;
+            position: relative;
+        }
+
+        .high-res-image {
+            max-width: none;
+            width: auto;
+            height: auto;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -2153,13 +2199,13 @@
                 </div>
             </section>
 
-            <!-- Drawing Section -->
+            <!-- Drawing Section - MODIFIED WITH ZOOM CONTROLS -->
             <section id="drawing-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
                         Select number of layouts needed, upload plans, and mark locations. 
-                        <strong style="color: var(--primary);">Only layouts with content will be printed.</strong>
+                        <strong style="color: var(--primary);">Use zoom controls (+/-) to zoom in/out for precise pin placement. All layouts with content will be printed.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2187,7 +2233,7 @@
                         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('layoutInput').click()">
                             <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                             <div class="upload-text">Click to upload plan for Layout <span id="currentLayoutNum">1</span></div>
-                            <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB)</div>
+                            <div class="upload-hint">Supports: JPG, PNG, PDF (Max 10MB). High resolution images supported with zoom.</div>
                         </div>
 
                         <input type="file" id="layoutInput" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutDrawing(this)">
@@ -2239,6 +2285,7 @@
                             </button>
                         </div>
 
+                        <!-- MODIFIED: Drawing Container with Zoom Controls -->
                         <div class="drawing-container" id="drawingContainer">
                             <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
                                 <div style="font-size: 3rem; margin-bottom: 0.5rem;">
@@ -2252,6 +2299,20 @@
                             <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
                                 <canvas id="planCanvas" class="drawing-canvas"></canvas>
                                 <div class="pins-overlay" id="pinsOverlay"></div>
+                                
+                                <!-- Zoom Controls -->
+                                <div class="zoom-controls">
+                                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <div class="zoom-level" id="zoomLevel">100%</div>
+                                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">
+                                        <i class="fas fa-compress-arrows-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2435,7 +2496,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - MODIFIED WITH WORKING EMBEDS -->
+    <!-- Map Picker Modal - MODIFIED: REMOVED GOOGLE MAPS TUTORIAL -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2453,17 +2514,8 @@
             </div>
             
             <div class="map-container-full">
-                <!-- Google Maps Embed Panel -->
+                <!-- Google Maps Embed Panel - NO TUTORIAL -->
                 <div id="googleMapPanel" class="map-panel active">
-                    <div class="map-instructions">
-                        <h4><i class="fas fa-info-circle"></i> How to use Google Maps:</h4>
-                        <ol>
-                            <li>Use the map below to find your location</li>
-                            <li>Right-click on the map to see coordinates (shown at bottom)</li>
-                            <li>Or click "Show Your Location" button in the map</li>
-                            <li>Copy the coordinates and paste them below</li>
-                        </ol>
-                    </div>
                     <iframe id="googleMapFrame" class="map-iframe" 
                         src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
                         allowfullscreen="" 
@@ -2472,19 +2524,10 @@
                     </iframe>
                 </div>
                 
-                <!-- OneMap Embed Panel -->
+                <!-- OneMap Embed Panel - FIXED URL -->
                 <div id="oneMapPanel" class="map-panel">
-                    <div class="map-instructions">
-                        <h4><i class="fas fa-info-circle"></i> How to use OneMap:</h4>
-                        <ol>
-                            <li>Use the search box in the map to find your location</li>
-                            <li>Click on the map to place a marker</li>
-                            <li>Coordinates will be shown in the URL or popup</li>
-                            <li>Copy the coordinates and paste them below</li>
-                        </ol>
-                    </div>
                     <iframe id="oneMapFrame" class="map-iframe" 
-                        src="https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=15&marker=1.3147264,103.80988615&popupTitle=Selected%20Location&popupContent=Right-click%20to%20see%20coordinates" 
+                        src="https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=15&marker=1.3147264,103.80988615&popupTitle=Selected%20Location" 
                         allowfullscreen>
                     </iframe>
                 </div>
@@ -2596,6 +2639,12 @@
         let planImageObj = null;
         let canvasScale = 1;
         let pendingPin = null;
+
+        // NEW: Zoom State
+        let currentZoom = 1;
+        const MIN_ZOOM = 0.5;
+        const MAX_ZOOM = 5;
+        const ZOOM_STEP = 0.25;
 
         // Layout Management
         let currentLayoutIndex = 0;
@@ -2778,7 +2827,7 @@
             showToast(message);
         }
 
-        // MODIFIED: Map Picker Functions - Using official embed APIs
+        // MODIFIED: Map Picker Functions - REMOVED GOOGLE MAPS TUTORIAL
         function openMapPicker(type) {
             if (type === 'manual') {
                 const lat = prompt('Enter Latitude:');
@@ -3088,6 +3137,8 @@
 
         function switchToLayout(index) {
             currentLayoutIndex = index;
+            // Reset zoom when switching layouts
+            resetZoom();
             renderLayoutTabs();
             loadCurrentLayout();
         }
@@ -3126,6 +3177,7 @@
             updatePinList();
         }
 
+        // MODIFIED: Load Layout Image with High Resolution Support
         function loadLayoutImage(src) {
             planImageObj = new Image();
             planImageObj.onload = function() {
@@ -3134,12 +3186,18 @@
                 document.getElementById('pinTypeSelector').style.display = 'flex';
                 document.getElementById('pinListCard').style.display = 'block';
                 
+                // Reset zoom when loading new image
+                resetZoom();
+                
                 resizeCanvas();
                 renderPinsOverlay();
             };
+            // Store original high-res source
             planImageObj.src = src;
+            planImageObj.dataset.originalSrc = src;
         }
 
+        // MODIFIED: PDF Rendering with Higher Resolution
         async function loadLayoutDrawing(input) {
             if (!input.files || !input.files[0]) return;
             
@@ -3160,10 +3218,10 @@
                     layout.pdfData = arrayBuffer;
                     layout.pdfPages = [];
                     
-                    // Render all pages
+                    // Render all pages with higher resolution (scale 2.0 for better quality)
                     for (let i = 1; i <= numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 1.5 });
+                        const viewport = page.getViewport({ scale: 2.0 }); // INCREASED SCALE FOR HIGH RES
                         
                         const pageCanvas = document.createElement('canvas');
                         const pageCtx = pageCanvas.getContext('2d');
@@ -3175,7 +3233,8 @@
                             viewport: viewport
                         }).promise;
                         
-                        layout.pdfPages.push(pageCanvas.toDataURL('image/png'));
+                        // Store as high quality JPEG
+                        layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.95));
                     }
                     
                     layout.image = layout.pdfPages[0];
@@ -3280,13 +3339,58 @@
             return allPins;
         }
 
-        // Canvas and Drawing Functions
+        // NEW: Zoom Functions
+        function zoomIn() {
+            if (currentZoom < MAX_ZOOM) {
+                currentZoom += ZOOM_STEP;
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > MIN_ZOOM) {
+                currentZoom -= ZOOM_STEP;
+                applyZoom();
+            }
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const canvas = document.getElementById('planCanvas');
+            const overlay = document.getElementById('pinsOverlay');
+            const zoomLevel = document.getElementById('zoomLevel');
+            
+            if (canvas && overlay) {
+                canvas.style.transform = `scale(${currentZoom})`;
+                overlay.style.transform = `scale(${currentZoom})`;
+                zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        // MODIFIED: Canvas and Drawing Functions with Zoom Support
         function initCanvas() {
             canvas = document.getElementById('planCanvas');
             ctx = canvas.getContext('2d');
             
             canvas.addEventListener('click', handleCanvasClick);
+            
+            // Add mouse wheel zoom support
+            canvas.parentElement.addEventListener('wheel', handleWheelZoom, { passive: false });
+            
             window.addEventListener('resize', debounce(resizeCanvas, 250));
+        }
+
+        function handleWheelZoom(e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
         }
 
         function debounce(func, wait) {
@@ -3331,27 +3435,33 @@
             });
         }
 
+        // MODIFIED: Resize Canvas - Store original dimensions for zoom
         function resizeCanvas() {
             if (planImageObj && canvas) {
                 const container = document.getElementById('drawingContainer');
                 const aspectRatio = planImageObj.height / planImageObj.width;
                 
-                const maxWidth = container.clientWidth - 4;
-                canvas.width = maxWidth;
-                canvas.height = maxWidth * aspectRatio;
-                canvasScale = canvas.width / planImageObj.width;
+                // Set canvas to natural image size for high resolution
+                canvas.width = planImageObj.naturalWidth || planImageObj.width;
+                canvas.height = planImageObj.naturalHeight || planImageObj.height;
+                
+                // Store original dimensions
+                canvas.dataset.originalWidth = canvas.width;
+                canvas.dataset.originalHeight = canvas.height;
                 
                 redrawCanvas();
                 renderPinsOverlay();
             }
         }
 
+        // MODIFIED: Handle Canvas Click with Zoom Support
         function handleCanvasClick(e) {
             if (!planImageObj) return;
             
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // Calculate click position accounting for zoom
+            const x = (e.clientX - rect.left) / currentZoom;
+            const y = (e.clientY - rect.top) / currentZoom;
             
             const relX = x / canvas.width;
             const relY = y / canvas.height;
@@ -3575,6 +3685,7 @@
             showToast('Pin deleted');
         }
 
+        // MODIFIED: Export Annotated Layout with High Resolution
         function exportAnnotatedLayout() {
             const layout = currentReport.layouts[currentLayoutIndex];
             if (!layout || !layout.image) {
@@ -3587,8 +3698,9 @@
             
             const img = new Image();
             img.onload = function() {
-                exportCanvas.width = img.width;
-                exportCanvas.height = img.height;
+                // Use original high resolution
+                exportCanvas.width = img.naturalWidth || img.width;
+                exportCanvas.height = img.naturalHeight || img.height;
                 exportCtx.drawImage(img, 0, 0);
                 
                 if (layout.pins) {
@@ -3617,7 +3729,7 @@
                 
                 const link = document.createElement('a');
                 link.download = `PLCIS_Layout${currentLayoutIndex + 1}_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
-                link.href = exportCanvas.toDataURL();
+                link.href = exportCanvas.toDataURL('image/png');
                 link.click();
                 showToast('Annotated layout exported!');
             };
@@ -3859,7 +3971,7 @@
             }, 300);
         }
 
-        // Preview Report - Only shows layouts with content
+        // MODIFIED: Preview Report - PRINT ALL LAYOUTS WITH CONTENT
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -3882,7 +3994,7 @@
                 </div>
             `}).join('');
             
-            // Only include layouts with content
+            // MODIFIED: Print ALL layouts with content (not just current one)
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent);
             
             let layoutsHtml = '';
@@ -3893,9 +4005,10 @@
                     
                     let planHtml = '';
                     if (layout.image) {
+                        // Use high resolution image for print
                         planHtml = `
                             <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
+                                <img src="${layout.image}" style="max-width: 100%; max-height: 500px; border: 1px solid #e2e8f0;">
                             </div>
                         `;
                     }
@@ -3929,6 +4042,7 @@
                         `;
                     }
                     
+                    // MODIFIED: Each layout starts on new page
                     return `
                         <div class="plan-print-page">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
@@ -4057,6 +4171,7 @@
             
             layoutCount = 1;
             currentLayoutIndex = 0;
+            currentZoom = 1;
             
             document.getElementById('projectName').value = '';
             document.getElementById('siteLocation').value = '';
