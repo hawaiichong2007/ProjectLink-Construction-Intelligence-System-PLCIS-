@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* [All previous CSS styles remain exactly the same] */
+        /* [Previous CSS styles remain the same] */
         * {
             margin: 0;
             padding: 0;
@@ -1052,7 +1052,7 @@
             color: var(--danger);
         }
 
-        /* Map Modal Specific */
+        /* Map Modal Specific - MODIFIED FOR WORKING EMBEDS */
         .map-modal-content {
             max-width: 95vw;
             height: 90vh;
@@ -1062,6 +1062,7 @@
             flex: 1;
             position: relative;
             min-height: 500px;
+            background: #f0f0f0;
         }
 
         .map-iframe {
@@ -1105,6 +1106,32 @@
 
         .map-panel.active {
             display: block;
+        }
+
+        /* Map Instructions */
+        .map-instructions {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .map-instructions h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        .map-instructions ol {
+            margin: 0;
+            padding-left: 1.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .map-instructions li {
+            margin-bottom: 0.25rem;
         }
 
         /* Preview Image */
@@ -1426,31 +1453,6 @@
             background: #94a3b8;
         }
 
-        /* OneMap specific styles */
-        .onemap-controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .onemap-search {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .onemap-search input {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            width: 200px;
-        }
-
         /* PDF Export Button */
         .export-actions {
             display: flex;
@@ -1721,31 +1723,7 @@
             border-radius: 50%;
         }
 
-        /* Map Error Message */
-        .map-error {
-            padding: 2rem;
-            text-align: center;
-            color: var(--danger);
-            background: #fee2e2;
-            border-radius: 8px;
-            margin: 1rem;
-        }
-
-        .map-error i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        /* OneMap Container */
-        .onemap-container {
-            width: 100%;
-            height: 100%;
-            min-height: 500px;
-            border: none;
-        }
-
-        /* NEW: Team Member Form Styles */
+        /* Team Member Form Styles */
         .member-form {
             background: #f8fafc;
             padding: 1rem;
@@ -1810,7 +1788,7 @@
             color: white;
         }
 
-        /* NEW: Layout Selection Styles */
+        /* Layout Selection Styles */
         .layout-selector {
             display: flex;
             align-items: center;
@@ -1832,101 +1810,6 @@
             border-radius: 6px;
             text-align: center;
             font-weight: 600;
-        }
-
-        .layout-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .layout-card {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            transition: all 0.3s;
-        }
-
-        .layout-card.active {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .layout-card.has-content {
-            border-color: var(--success);
-        }
-
-        .layout-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .layout-number {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.125rem;
-        }
-
-        .layout-status {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            background: #e2e8f0;
-            color: var(--text-secondary);
-        }
-
-        .layout-status.filled {
-            background: #d1fae5;
-            color: var(--success);
-        }
-
-        .layout-upload {
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-        }
-
-        .layout-upload:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .layout-preview {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .layout-preview img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-
-        .layout-remove {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: var(--danger);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
         }
 
         .layout-tabs {
@@ -2270,7 +2153,7 @@
                 </div>
             </section>
 
-            <!-- Drawing Section - MODIFIED FOR MULTI-LAYOUT -->
+            <!-- Drawing Section -->
             <section id="drawing-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
@@ -2384,7 +2267,7 @@
                 </div>
             </section>
 
-            <!-- Collaboration Section - MODIFIED FOR TEAM MEMBER MANAGEMENT -->
+            <!-- Collaboration Section -->
             <section id="collaboration-section" class="section">
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-users"></i> Team Member Management</h2>
@@ -2552,7 +2435,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - MODIFIED FOR IFRAME EMBEDDING -->
+    <!-- Map Picker Modal - MODIFIED WITH WORKING EMBEDS -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2570,11 +2453,40 @@
             </div>
             
             <div class="map-container-full">
+                <!-- Google Maps Embed Panel -->
                 <div id="googleMapPanel" class="map-panel active">
-                    <iframe id="googleMapFrame" class="map-iframe" src="https://www.google.com/maps" allowfullscreen></iframe>
+                    <div class="map-instructions">
+                        <h4><i class="fas fa-info-circle"></i> How to use Google Maps:</h4>
+                        <ol>
+                            <li>Use the map below to find your location</li>
+                            <li>Right-click on the map to see coordinates (shown at bottom)</li>
+                            <li>Or click "Show Your Location" button in the map</li>
+                            <li>Copy the coordinates and paste them below</li>
+                        </ol>
+                    </div>
+                    <iframe id="googleMapFrame" class="map-iframe" 
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
+                
+                <!-- OneMap Embed Panel -->
                 <div id="oneMapPanel" class="map-panel">
-                    <iframe id="oneMapFrame" class="map-iframe" src="https://www.onemap.gov.sg/" allowfullscreen></iframe>
+                    <div class="map-instructions">
+                        <h4><i class="fas fa-info-circle"></i> How to use OneMap:</h4>
+                        <ol>
+                            <li>Use the search box in the map to find your location</li>
+                            <li>Click on the map to place a marker</li>
+                            <li>Coordinates will be shown in the URL or popup</li>
+                            <li>Copy the coordinates and paste them below</li>
+                        </ol>
+                    </div>
+                    <iframe id="oneMapFrame" class="map-iframe" 
+                        src="https://www.onemap.gov.sg/amm/amm.html?mapStyle=Default&zoomLevel=15&marker=1.3147264,103.80988615&popupTitle=Selected%20Location&popupContent=Right-click%20to%20see%20coordinates" 
+                        allowfullscreen>
+                    </iframe>
                 </div>
             </div>
             
@@ -2670,9 +2582,9 @@
             issues: '',
             nextSteps: '',
             photos: [],
-            layouts: [], // NEW: Array of layout objects
+            layouts: [],
             collaborators: [],
-            teamMembers: [] // NEW: Array of team member objects
+            teamMembers: []
         };
 
         let reports = JSON.parse(localStorage.getItem('plcis_reports') || '[]');
@@ -2685,7 +2597,7 @@
         let canvasScale = 1;
         let pendingPin = null;
 
-        // NEW: Layout Management
+        // Layout Management
         let currentLayoutIndex = 0;
         let layoutCount = 1;
 
@@ -2866,7 +2778,7 @@
             showToast(message);
         }
 
-        // MODIFIED: Map Picker Functions - Using iframe embedding
+        // MODIFIED: Map Picker Functions - Using official embed APIs
         function openMapPicker(type) {
             if (type === 'manual') {
                 const lat = prompt('Enter Latitude:');
@@ -2891,6 +2803,13 @@
             // Reset coordinate inputs
             document.getElementById('manualLat').value = '';
             document.getElementById('manualLng').value = '';
+            
+            // If specific map type requested, switch to it
+            if (type === 'google') {
+                switchMapTab('google');
+            } else if (type === 'onemap') {
+                switchMapTab('onemap');
+            }
         }
 
         function switchMapTab(tab) {
@@ -3113,7 +3032,7 @@
             }
         }
 
-        // NEW: Layout Management Functions
+        // Layout Management Functions
         function adjustLayoutCount(delta) {
             const input = document.getElementById('layoutCount');
             let newValue = parseInt(input.value) + delta;
@@ -3705,7 +3624,7 @@
             img.src = layout.image;
         }
 
-        // NEW: Team Member Management
+        // Team Member Management
         function addTeamMember() {
             const name = document.getElementById('memberName').value.trim();
             const email = document.getElementById('memberEmail').value.trim();
@@ -3816,7 +3735,7 @@
             `).join('');
         }
 
-        // NEW: Share Report Functions
+        // Share Report Functions
         function openShareModal() {
             const members = currentReport.teamMembers || [];
             if (members.length === 0) {
@@ -3940,7 +3859,7 @@
             }, 300);
         }
 
-        // MODIFIED: Preview Report - Only shows layouts with content
+        // Preview Report - Only shows layouts with content
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
