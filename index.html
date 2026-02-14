@@ -688,24 +688,26 @@
             flex-wrap: wrap;
         }
 
-        /* Zoom Controls */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
+        /* MODIFIED: Zoom Controls - Moved to top outside container */
+        .zoom-controls-container {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f1f5f9;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 4px;
         }
 
         .zoom-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             border-radius: 6px;
             background: white;
@@ -713,7 +715,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: var(--text);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.2s;
@@ -725,11 +727,17 @@
         }
 
         .zoom-level {
-            text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.875rem;
             font-weight: 600;
             color: var(--text-secondary);
-            padding: 4px 0;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .zoom-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: auto;
         }
 
         /* PDF Page Navigation */
@@ -1367,7 +1375,7 @@
                 print-color-adjust: exact;
             }
 
-            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls {
+            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls-container {
                 display: none !important;
             }
 
@@ -1559,6 +1567,7 @@
             width: 100%;
             overflow: auto;
             max-height: 70vh;
+            touch-action: none; /* Enable custom touch handling */
         }
 
         .pins-overlay {
@@ -2205,7 +2214,7 @@
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
                         Select number of layouts needed, upload plans, and mark locations. 
-                        <strong style="color: var(--primary);">Use zoom controls (+/-) to zoom in/out for precise pin placement. All layouts with content will be printed.</strong>
+                        <strong style="color: var(--primary);">Use zoom controls or pinch to zoom for precise pin placement. All layouts with content will be printed.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2285,7 +2294,26 @@
                             </button>
                         </div>
 
-                        <!-- MODIFIED: Drawing Container with Zoom Controls -->
+                        <!-- MODIFIED: Zoom Controls - Moved outside plan container -->
+                        <div class="zoom-controls-container" id="zoomControlsContainer" style="display: none;">
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="zoom-level" id="zoomLevel">100%</div>
+                                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">
+                                    <i class="fas fa-compress-arrows-alt"></i>
+                                </button>
+                            </div>
+                            <div class="zoom-hint">
+                                <i class="fas fa-hand-pointer"></i> Pinch to zoom on mobile
+                            </div>
+                        </div>
+
+                        <!-- MODIFIED: Drawing Container with Pinch Zoom Support -->
                         <div class="drawing-container" id="drawingContainer">
                             <div class="map-placeholder" id="planPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-secondary);">
                                 <div style="font-size: 3rem; margin-bottom: 0.5rem;">
@@ -2299,20 +2327,6 @@
                             <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
                                 <canvas id="planCanvas" class="drawing-canvas"></canvas>
                                 <div class="pins-overlay" id="pinsOverlay"></div>
-                                
-                                <!-- Zoom Controls -->
-                                <div class="zoom-controls">
-                                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <div class="zoom-level" id="zoomLevel">100%</div>
-                                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">
-                                        <i class="fas fa-compress-arrows-alt"></i>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -2645,6 +2659,11 @@
         const MIN_ZOOM = 0.5;
         const MAX_ZOOM = 5;
         const ZOOM_STEP = 0.25;
+
+        // NEW: Touch/Pinch Zoom State
+        let initialPinchDistance = 0;
+        let initialZoom = 1;
+        let isPinching = false;
 
         // Layout Management
         let currentLayoutIndex = 0;
@@ -3159,6 +3178,7 @@
             document.getElementById('pinTypeSelector').style.display = 'none';
             document.getElementById('pinListCard').style.display = 'none';
             document.getElementById('layoutPdfNav').style.display = 'none';
+            document.getElementById('zoomControlsContainer').style.display = 'none';
             
             planImageObj = null;
             
@@ -3185,6 +3205,7 @@
                 document.getElementById('canvasWrapper').style.display = 'block';
                 document.getElementById('pinTypeSelector').style.display = 'flex';
                 document.getElementById('pinListCard').style.display = 'block';
+                document.getElementById('zoomControlsContainer').style.display = 'flex';
                 
                 // Reset zoom when loading new image
                 resetZoom();
@@ -3371,6 +3392,44 @@
             }
         }
 
+        // NEW: Pinch Zoom Functions for Mobile
+        function getPinchDistance(touches) {
+            return Math.hypot(
+                touches[0].pageX - touches[1].pageX,
+                touches[0].pageY - touches[1].pageY
+            );
+        }
+
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                initialPinchDistance = getPinchDistance(e.touches);
+                initialZoom = currentZoom;
+                e.preventDefault();
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (isPinching && e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = getPinchDistance(e.touches);
+                const pinchRatio = currentDistance / initialPinchDistance;
+                
+                let newZoom = initialZoom * pinchRatio;
+                newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+                
+                currentZoom = newZoom;
+                applyZoom();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (isPinching && e.touches.length < 2) {
+                isPinching = false;
+                initialPinchDistance = 0;
+            }
+        }
+
         // MODIFIED: Canvas and Drawing Functions with Zoom Support
         function initCanvas() {
             canvas = document.getElementById('planCanvas');
@@ -3380,6 +3439,13 @@
             
             // Add mouse wheel zoom support
             canvas.parentElement.addEventListener('wheel', handleWheelZoom, { passive: false });
+            
+            // Add pinch zoom support for mobile
+            const canvasWrapper = document.getElementById('canvasWrapper');
+            canvasWrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvasWrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvasWrapper.addEventListener('touchend', handleTouchEnd);
+            canvasWrapper.addEventListener('touchcancel', handleTouchEnd);
             
             window.addEventListener('resize', debounce(resizeCanvas, 250));
         }
@@ -3454,14 +3520,20 @@
             }
         }
 
-        // MODIFIED: Handle Canvas Click with Zoom Support
+        // MODIFIED: Handle Canvas Click with Zoom Support - FIXED FOR ACCURATE PLACEMENT
         function handleCanvasClick(e) {
             if (!planImageObj) return;
             
             const rect = canvas.getBoundingClientRect();
-            // Calculate click position accounting for zoom
-            const x = (e.clientX - rect.left) / currentZoom;
-            const y = (e.clientY - rect.top) / currentZoom;
+            
+            // FIXED: Calculate click position accounting for zoom correctly
+            // The rect is already affected by CSS transform, so we need to calculate
+            // the position relative to the transformed element
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
             
             const relX = x / canvas.width;
             const relY = y / canvas.height;
@@ -3525,21 +3597,24 @@
             }
         }
 
+        // MODIFIED: Finalize Pin - FIXED TO ENSURE PIN DISPLAYS
         function finalizePin(pin) {
             const layout = currentReport.layouts[currentLayoutIndex];
             if (!layout.pins) layout.pins = [];
             
             layout.pins.push(pin);
             
+            // Clear photo selection if pin was linked to a photo
             if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
                 selectedPhotoIndex = null;
                 document.getElementById('selectedPhotoInfo').style.display = 'none';
                 renderPhotos();
             }
             
-            drawPin(pin);
-            updatePinList();
+            // Force redraw and update
+            redrawCanvas();
             renderPinsOverlay();
+            updatePinList();
             renderLayoutTabs();
             
             const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
@@ -3560,12 +3635,13 @@
             // Pin is drawn as HTML overlay
         }
 
+        // MODIFIED: Render Pins Overlay - FIXED TO ENSURE PINS DISPLAY
         function renderPinsOverlay() {
             const overlay = document.getElementById('pinsOverlay');
             overlay.innerHTML = '';
             
             const layout = currentReport.layouts[currentLayoutIndex];
-            if (!layout || !layout.pins) return;
+            if (!layout || !layout.pins || layout.pins.length === 0) return;
             
             layout.pins.forEach((pin, index) => {
                 const pinEl = document.createElement('div');
@@ -4193,6 +4269,7 @@
             document.getElementById('pinTypeSelector').style.display = 'none';
             document.getElementById('pinListCard').style.display = 'none';
             document.getElementById('layoutPdfNav').style.display = 'none';
+            document.getElementById('zoomControlsContainer').style.display = 'none';
             
             initializeLayouts();
             renderPhotos();
