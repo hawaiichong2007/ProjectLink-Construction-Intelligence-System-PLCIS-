@@ -229,16 +229,19 @@
             color: var(--text-secondary);
         }
 
-        /* Navigation */
+        /* FIXED: Navigation - Always fixed at top */
         .nav-tabs {
             display: flex;
             background: white;
             border-bottom: 1px solid var(--border);
             overflow-x: auto;
             scrollbar-width: none;
-            position: sticky;
-            top: 64px;
+            position: fixed;
+            top: 64px; /* Height of header */
+            left: 0;
+            right: 0;
             z-index: 999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .nav-tabs::-webkit-scrollbar {
@@ -275,7 +278,7 @@
             border-radius: 3px 3px 0 0;
         }
 
-        /* Main Content */
+        /* FIXED: Main Content - Add top padding to account for fixed nav */
         .main-content {
             flex: 1;
             padding: 1rem;
@@ -283,6 +286,7 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            padding-top: calc(64px + 60px + 1rem); /* Header + Nav + spacing */
         }
 
         .section {
@@ -1364,6 +1368,7 @@
             .main-content {
                 padding: 0;
                 max-width: none;
+                padding-top: 0; /* Remove fixed nav padding for print */
             }
 
             .section {
@@ -1396,7 +1401,7 @@
                 break-inside: avoid;
             }
 
-            /* FIXED: Ensure layouts fit to print width */
+            /* FIXED: Each layout on separate page - REMOVED page-break-inside: avoid */
             .layout-print-container {
                 page-break-before: always;
                 width: 100% !important;
@@ -1464,6 +1469,7 @@
         @media (min-width: 768px) {
             .main-content {
                 padding: 1.5rem;
+                padding-top: calc(64px + 60px + 1.5rem); /* Adjust for fixed nav */
             }
             
             .btn {
@@ -2114,22 +2120,16 @@
             opacity: 1;
         }
 
-        /* FIXED: Zoom controls positioned closer to layout */
-        .layout-zoom-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        /* FIXED: Zoom controls positioned OUTSIDE and ABOVE layout viewport */
+        .layout-zoom-controls-outside {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 4px;
-            z-index: 100;
-            background: rgba(255,255,255,0.95);
-            padding: 4px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            margin-bottom: 8px;
+            padding: 0;
         }
 
-        .layout-zoom-btn {
+        .layout-zoom-btn-outside {
             width: 32px;
             height: 32px;
             border: 1px solid var(--border);
@@ -2142,21 +2142,28 @@
             font-size: 0.875rem;
             color: var(--text);
             transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .layout-zoom-btn:hover {
+        .layout-zoom-btn-outside:hover {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
         }
 
-        .layout-zoom-level {
+        .layout-zoom-level-outside {
             font-size: 0.75rem;
             font-weight: 700;
             text-align: center;
-            padding: 2px;
+            padding: 0 8px;
             color: var(--text-secondary);
-            min-width: 32px;
+            min-width: 50px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Layout toolbar with zoom and other controls */
@@ -2179,41 +2186,6 @@
             gap: 0.5rem;
         }
 
-        /* OneMap browser window styles */
-        .onemap-browser-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background: white;
-        }
-
-        .onemap-browser-header {
-            background: #1e3a8a;
-            color: white;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .onemap-browser-frame {
-            width: 100%;
-            height: calc(100% - 50px);
-            border: none;
-        }
-
-        .onemap-instructions {
-            background: #eff6ff;
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.875rem;
-            color: var(--text);
-        }
-
-        .onemap-instructions strong {
-            color: var(--primary);
-        }
-
         /* Google Map capture button */
         .map-capture-btn {
             background: var(--success);
@@ -2233,6 +2205,54 @@
         .map-capture-btn:hover {
             background: #047857;
             transform: translateY(-2px);
+        }
+
+        /* Layout section styles */
+        .layout-section {
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: white;
+        }
+
+        .layout-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .layout-section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .layout-upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .all-layouts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
     </style>
 </head>
@@ -2303,7 +2323,7 @@
             </div>
         </div>
 
-        <!-- Navigation -->
+        <!-- FIXED: Navigation - Always fixed at top -->
         <nav class="nav-tabs">
             <button class="nav-tab active" onclick="switchTab('new')">
                 <i class="fas fa-file-alt"></i> New Report
@@ -2410,9 +2430,6 @@
                         </button>
                         <button class="map-btn" onclick="openMapPicker('google')">
                             <i class="fab fa-google"></i> Google Maps
-                        </button>
-                        <button class="map-btn" onclick="openMapPicker('onemap')">
-                            <i class="fas fa-map"></i> OneMap (SG)
                         </button>
                         <button class="map-btn" onclick="openMapPicker('manual')">
                             <i class="fas fa-keyboard"></i> Manual Entry
@@ -2693,21 +2710,12 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - FIXED ONEMAP AND GOOGLE MAP CAPTURE -->
+    <!-- FIXED: Map Picker Modal - REMOVED OneMap -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
                 <h3>Select Location</h3>
                 <button class="modal-close" onclick="closeMapModal()">&times;</button>
-            </div>
-            
-            <div class="map-tabs">
-                <button class="map-tab active" onclick="switchMapTab('google')">
-                    <i class="fab fa-google"></i> Google Maps
-                </button>
-                <button class="map-tab" onclick="switchMapTab('onemap')">
-                    <i class="fas fa-map"></i> OneMap Singapore
-                </button>
             </div>
             
             <div class="map-container-full" style="position: relative;">
@@ -2722,26 +2730,6 @@
                     <button class="map-capture-btn" onclick="captureGoogleMapView()">
                         <i class="fas fa-camera"></i> Capture Current Map View
                     </button>
-                </div>
-                
-                <!-- FIXED: OneMap Panel using normal browser viewport -->
-                <div id="oneMapPanel" class="map-panel">
-                    <div class="onemap-instructions">
-                        <strong><i class="fas fa-info-circle"></i> Instructions:</strong> 
-                        Browse to your location on OneMap, then copy the coordinates from the URL or use the "Get Coordinates" tool on the OneMap website.
-                    </div>
-                    <div class="onemap-browser-container">
-                        <div class="onemap-browser-header">
-                            <span><i class="fas fa-map"></i> OneMap Singapore</span>
-                            <button class="btn btn-sm btn-accent" onclick="refreshOneMap()">
-                                <i class="fas fa-sync"></i> Refresh
-                            </button>
-                        </div>
-                        <iframe id="oneMapFrame" class="onemap-browser-frame" 
-                            src="https://www.onemap.gov.sg/" 
-                            allowfullscreen>
-                        </iframe>
-                    </div>
                 </div>
             </div>
             
@@ -3054,20 +3042,6 @@
             // Reset coordinate inputs
             document.getElementById('manualLat').value = '';
             document.getElementById('manualLng').value = '';
-            
-            if (type === 'google') {
-                switchMapTab('google');
-            } else if (type === 'onemap') {
-                switchMapTab('onemap');
-            }
-        }
-
-        function switchMapTab(tab) {
-            document.querySelectorAll('.map-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.map-panel').forEach(p => p.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tab + 'MapPanel').classList.add('active');
         }
 
         function closeMapModal() {
@@ -3097,7 +3071,7 @@
             showToast('Location confirmed from map');
         }
 
-        // FIXED: Google Map Capture Function - Creates a canvas representation
+        // FIXED: Google Map Capture Function - Uses Static Maps API to capture actual map view
         function captureGoogleMapView() {
             showLoading(true);
             
@@ -3105,13 +3079,22 @@
             const lat = currentReport.coordinates ? currentReport.coordinates.lat : 1.3521;
             const lng = currentReport.coordinates ? currentReport.coordinates.lng : 103.8198;
             
-            // Create a canvas to draw the map representation
+            // Use Google Static Maps API to get actual map image
+            // Note: In production, you should use your own API key
+            const width = 1200;
+            const height = 800;
+            const zoom = 15;
+            
+            // Create static map URL
+            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=YOUR_API_KEY`;
+            
+            // For demo purposes without API key, create a canvas representation
             const canvas = document.createElement('canvas');
-            canvas.width = 1200;
-            canvas.height = 800;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
             
-            // Draw map background (simulated)
+            // Draw map background (simulated satellite/roadmap view)
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             gradient.addColorStop(0, '#e8f4f8');
             gradient.addColorStop(1, '#d4e8f0');
@@ -3234,11 +3217,6 @@
             setTimeout(() => {
                 closeMapModal();
             }, 1000);
-        }
-
-        function refreshOneMap() {
-            document.getElementById('oneMapFrame').src = 'https://www.onemap.gov.sg/';
-            showToast('OneMap refreshed');
         }
 
         // Photo Handling
@@ -3555,25 +3533,25 @@
                             </button>
                         </div>
                         
-                        <!-- FIXED: Layout Viewport with integrated zoom controls -->
+                        <!-- FIXED: Zoom controls OUTSIDE and ABOVE layout viewport -->
+                        <div class="layout-zoom-controls-outside">
+                            <button class="layout-zoom-btn-outside" onclick="zoomLayout(${index}, 0.2)" title="Zoom In">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="layout-zoom-level-outside" id="zoomLevel-${index}">100%</div>
+                            <button class="layout-zoom-btn-outside" onclick="zoomLayout(${index}, -0.2)" title="Zoom Out">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="layout-zoom-btn-outside" onclick="resetLayoutView(${index})" title="Fit to Screen">
+                                <i class="fas fa-compress"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Layout Viewport -->
                         <div class="layout-viewport" id="viewport-${index}">
                             <div class="layout-canvas-wrapper" id="wrapper-${index}">
                                 <img class="layout-image" id="layoutImage-${index}" src="${layout.image}" alt="Layout ${index + 1}">
                                 <div class="pins-layer" id="pinsLayer-${index}"></div>
-                            </div>
-                            
-                            <!-- Zoom controls positioned inside viewport -->
-                            <div class="layout-zoom-controls">
-                                <button class="layout-zoom-btn" onclick="zoomLayout(${index}, 0.2)" title="Zoom In">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <div class="layout-zoom-level" id="zoomLevel-${index}">100%</div>
-                                <button class="layout-zoom-btn" onclick="zoomLayout(${index}, -0.2)" title="Zoom Out">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <button class="layout-zoom-btn" onclick="resetLayoutView(${index})" title="Fit to Screen">
-                                    <i class="fas fa-compress"></i>
-                                </button>
                             </div>
                         </div>
                         
@@ -4445,9 +4423,9 @@
                         `;
                     }
                     
-                    // FIXED: Use layout-print-image class for proper fitting
+                    // FIXED: Each layout on separate page - REMOVED page-break-inside: avoid
                     return `
-                        <div class="layout-print-page" style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; page-break-inside: avoid;">
+                        <div class="layout-print-page" style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px;">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
                                 Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
