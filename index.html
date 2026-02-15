@@ -57,15 +57,21 @@
             flex-direction: column;
         }
 
+        /* FIXED: Sticky Header Container - Wraps both header and nav */
+        .sticky-header-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
         /* Header */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
             color: white;
             padding: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .header-content {
@@ -75,6 +81,8 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .logo {
@@ -123,6 +131,7 @@
             font-size: 0.875rem;
             cursor: pointer;
             transition: background 0.3s;
+            white-space: nowrap;
         }
 
         .user-badge:hover {
@@ -229,18 +238,14 @@
             color: var(--text-secondary);
         }
 
-        /* FIXED: Navigation - Always fixed at top */
+        /* FIXED: Navigation - Now part of sticky container, no fixed positioning needed */
         .nav-tabs {
             display: flex;
             background: white;
             border-bottom: 1px solid var(--border);
             overflow-x: auto;
             scrollbar-width: none;
-            position: fixed;
-            top: 64px; /* Height of header */
-            left: 0;
-            right: 0;
-            z-index: 999;
+            position: relative; /* Changed from fixed to relative */
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
@@ -278,7 +283,7 @@
             border-radius: 3px 3px 0 0;
         }
 
-        /* FIXED: Main Content - Add top padding to account for fixed nav */
+        /* FIXED: Main Content - No need for extra top padding since sticky container handles it */
         .main-content {
             flex: 1;
             padding: 1rem;
@@ -286,7 +291,6 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
-            padding-top: calc(64px + 60px + 1rem); /* Header + Nav + spacing */
         }
 
         .section {
@@ -1368,7 +1372,6 @@
             .main-content {
                 padding: 0;
                 max-width: none;
-                padding-top: 0; /* Remove fixed nav padding for print */
             }
 
             .section {
@@ -1401,26 +1404,19 @@
                 break-inside: avoid;
             }
 
-            /* FIXED: Each layout on separate page - REMOVED page-break-inside: avoid */
+            /* Layout print without page break */
             .layout-print-container {
-                page-break-before: always;
                 width: 100% !important;
                 max-width: 190mm !important;
             }
 
             .layout-print-page {
-                page-break-after: always;
                 margin-bottom: 20px;
                 width: 100% !important;
             }
 
-            .layout-print-page:last-child {
-                page-break-after: auto;
-            }
-
             .print-layout-container {
                 display: block !important;
-                page-break-before: always;
                 width: 100% !important;
             }
 
@@ -1428,7 +1424,6 @@
                 display: none !important;
             }
 
-            /* FIXED: Ensure layout images fit within print boundaries */
             .layout-print-image {
                 max-width: 100% !important;
                 max-height: 250mm !important;
@@ -1469,7 +1464,6 @@
         @media (min-width: 768px) {
             .main-content {
                 padding: 1.5rem;
-                padding-top: calc(64px + 60px + 1.5rem); /* Adjust for fixed nav */
             }
             
             .btn {
@@ -2258,23 +2252,45 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">🏗️</div>
-                    <div class="logo-text">
-                        <div class="logo-title">PLCIS</div>
-                        <div class="logo-subtitle">ProjectLink Construction Intelligence System</div>
+        <!-- FIXED: Sticky Header Container wraps both header and nav -->
+        <div class="sticky-header-container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">🏗️</div>
+                        <div class="logo-text">
+                            <div class="logo-title">PLCIS</div>
+                            <div class="logo-subtitle">ProjectLink Construction Intelligence System</div>
+                        </div>
+                    </div>
+                    <div class="user-badge" onclick="openRoleSelector()">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="currentRoleDisplay">Select Role</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
                     </div>
                 </div>
-                <div class="user-badge" onclick="openRoleSelector()">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="currentRoleDisplay">Select Role</span>
-                    <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
-                </div>
-            </div>
-        </header>
+            </header>
+
+            <!-- FIXED: Navigation - Now part of sticky container, no fixed positioning needed -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('new')">
+                    <i class="fas fa-file-alt"></i> New Report
+                </button>
+                <button class="nav-tab" onclick="switchTab('photos')">
+                    <i class="fas fa-camera"></i> Photos
+                </button>
+                <button class="nav-tab" onclick="switchTab('drawing')">
+                    <i class="fas fa-drafting-compass"></i> Site Plan
+                </button>
+                <button class="nav-tab" onclick="switchTab('collaboration')">
+                    <i class="fas fa-users"></i> Team
+                </button>
+                <button class="nav-tab" onclick="switchTab('reports')">
+                    <i class="fas fa-folder-open"></i> Reports
+                </button>
+            </nav>
+        </div>
 
         <!-- Role Selector Modal -->
         <div id="roleSelector" class="role-selector">
@@ -2322,25 +2338,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- FIXED: Navigation - Always fixed at top -->
-        <nav class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('new')">
-                <i class="fas fa-file-alt"></i> New Report
-            </button>
-            <button class="nav-tab" onclick="switchTab('photos')">
-                <i class="fas fa-camera"></i> Photos
-            </button>
-            <button class="nav-tab" onclick="switchTab('drawing')">
-                <i class="fas fa-drafting-compass"></i> Site Plan
-            </button>
-            <button class="nav-tab" onclick="switchTab('collaboration')">
-                <i class="fas fa-users"></i> Team
-            </button>
-            <button class="nav-tab" onclick="switchTab('reports')">
-                <i class="fas fa-folder-open"></i> Reports
-            </button>
-        </nav>
 
         <!-- Main Content -->
         <main class="main-content">
