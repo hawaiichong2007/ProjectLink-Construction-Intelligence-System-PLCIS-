@@ -7,10 +7,10 @@
     <title>ProjectLink Construction Intelligence System (PLCIS) - Fixed Version</title>
     
     <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js "></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js  "></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css  ">
     
     <style>
         /* [Previous CSS styles remain the same] */
@@ -1481,38 +1481,24 @@
                 break-inside: avoid;
             }
 
-            /* FIXED: Layout print with separate container for each layout - each on separate page */
-            /* REMOVED page-break-inside: avoid to allow each layout to take its own page */
-            .layout-print-wrapper {
+            /* FIXED: Layout print with page break for each layout */
+            .layout-print-container {
                 width: 100% !important;
                 max-width: 190mm !important;
-                /* Force page break after each layout */
-                break-after: page;
-                page-break-after: always;
-                /* Ensure proper display for page breaks */
-                display: block;
-                position: relative;
-                /* Allow content to break naturally within the layout */
-                break-inside: auto;
-                page-break-inside: auto;
-                margin-bottom: 0;
-            }
-
-            /* Remove page break for the last layout */
-            .layout-print-wrapper:last-child {
-                break-after: auto;
-                page-break-after: auto;
             }
 
             .layout-print-page {
+                margin-bottom: 20px;
                 width: 100% !important;
-                border: 2px solid #e2e8f0;
-                border-radius: 8px;
-                padding: 15px;
-                background: white;
-                /* Ensure layout content stays together */
-                break-inside: auto;
-                page-break-inside: auto;
+                /* Force page break after each layout */
+                page-break-after: always;
+                break-after: page;
+            }
+
+            /* Remove page break for the last layout */
+            .layout-print-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
             }
 
             .print-layout-container {
@@ -1526,7 +1512,7 @@
 
             .layout-print-image {
                 max-width: 100% !important;
-                max-height: 240mm !important;
+                max-height: 250mm !important;
                 width: auto !important;
                 height: auto !important;
                 object-fit: contain !important;
@@ -1535,83 +1521,23 @@
             }
 
             .layout-viewport, .layout-canvas-wrapper {
-                display: none !important; /* Hide interactive viewport in print */
+                transform: none !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
             }
 
-            .layout-print-only {
-                display: block !important; /* Show print-only version */
+            .layout-image {
+                max-width: 100% !important;
+                height: auto !important;
             }
 
             .pins-layer {
-                display: none !important; /* Hide interactive pins in print */
+                display: block !important;
             }
 
             .pin-marker {
-                display: none !important;
-            }
-
-            /* Print-specific pin table styling */
-            .print-pins-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 0.875rem;
-                margin-top: 15px;
-            }
-
-            .print-pins-table th {
-                background: #1e3a8a;
-                color: white;
-                padding: 8px;
-                text-align: center;
-                border: 1px solid #e2e8f0;
-            }
-
-            .print-pins-table td {
-                padding: 8px;
-                border: 1px solid #e2e8f0;
-                text-align: center;
-            }
-
-            .print-pin-dot {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                margin: 0 auto;
-                color: white;
-                font-weight: bold;
-                font-size: 12px;
-                line-height: 20px;
-                text-align: center;
-            }
-
-            /* FIXED: Hide pin list in print mode */
-            .pin-list {
-                display: none !important;
-            }
-
-            /* FIXED: Ensure layout sections are always visible in print */
-            .layout-section {
-                display: block !important;
-                break-inside: auto;
-                page-break-inside: auto;
-            }
-
-            /* FIXED: Hide layout toolbars in print */
-            .layout-toolbar,
-            .layout-zoom-controls-outside,
-            .pin-type-selector,
-            .pdf-nav,
-            .layout-section-header .btn {
-                display: none !important;
-            }
-
-            /* FIXED: Show layout content in print */
-            .all-layouts-container {
-                display: block !important;
-            }
-
-            .layout-upload-zone {
-                display: none !important;
+                transform: translate(-50%, -100%) scale(0.8) !important;
             }
         }
 
@@ -2369,8 +2295,7 @@
             padding: 1rem;
             background: white;
             /* Ensure each layout section can be printed separately */
-            break-inside: auto;
-            page-break-inside: auto;
+            page-break-inside: avoid;
         }
 
         .layout-section-header {
@@ -2410,17 +2335,6 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-        }
-
-        /* Print-only layout display (hidden on screen, visible in print) */
-        .layout-print-only {
-            display: none;
-        }
-
-        @media print {
-            .layout-print-only {
-                display: block !important;
-            }
         }
     </style>
 </head>
@@ -2634,7 +2548,7 @@
                         <i class="fas fa-save"></i> Save Site Report
                     </button>
                     <button class="btn btn-outline" onclick="previewReport()">
-                        <i class="fas fa-eye"></i> Preview A4 Layout
+                        i class="fas fa-eye"></i> Preview A4 Layout
                     </button>
                 </div>
             </section>
@@ -2893,7 +2807,7 @@
                 <!-- Google Maps Embed Panel with Capture -->
                 <div id="googleMapPanel" class="map-panel active">
                     <iframe id="googleMapFrame" class="map-iframe" 
-                        src="https://www.google.com/maps/embed?pb= !1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
+                        src="https://www.google.com/maps/embed?pb=  !1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
                         allowfullscreen="" 
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade">
@@ -2980,7 +2894,7 @@
 
     <script>
         // PDF.js Worker Setup
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js ';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js  ';
 
         // Global State
         let currentReport = {
@@ -3257,7 +3171,7 @@
             const zoom = 15;
             
             // Create static map URL
-            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center= ${lat},${lng}&zoom=${zoom}&size=${width}x${height}&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=YOUR_API_KEY`;
+            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=  ${lat},${lng}&zoom=${zoom}&size=${width}x${height}&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=YOUR_API_KEY`;
             
             // For demo purposes without API key, create a canvas representation
             const canvas = document.createElement('canvas');
@@ -4531,12 +4445,12 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with separate container for each layout - each prints on separate page
+        // FIXED: Preview Report with photo descriptions and proper layout fitting
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
             
-            // Include photo descriptions in report
+            // FIXED: Include photo descriptions in report
             const photosHtml = report.photos.map((photo, idx) => {
                 const linkedPin = getAllPinsFromReport(report).find(p => p.linkedPhotoId === photo.id);
                 return `
@@ -4556,7 +4470,7 @@
                 </div>
             `}).join('');
             
-            // FIXED: Generate HTML for all layouts with content - each in separate wrapper for page break
+            // Generate HTML for all layouts with content - FIXED for print fitting
             let layoutsHtml = '';
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
             
@@ -4568,23 +4482,23 @@
                     let pinsTable = '';
                     if (pins.length > 0) {
                         pinsTable = `
-                            <table class="print-pins-table">
-                                <tr>
-                                    <th style="width: 50px;">Pin</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                    <th style="width: 80px;">Photo</th>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 15px;">
+                                <tr style="background: #1e3a8a; color: white;">
+                                    <th style="padding: 8px; text-align: center; width: 50px;">Pin</th>
+                                    <th style="padding: 8px;">Type</th>
+                                    <th style="padding: 8px;">Description</th>
+                                    <th style="padding: 8px; text-align: center; width: 80px;">Photo</th>
                                 </tr>
                                 ${pins.map(pin => {
                                     const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
                                     return `
                                         <tr>
-                                            <td>
-                                                <div class="print-pin-dot" style="background: ${pin.color};">${pins.indexOf(pin) + 1}</div>
+                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
+                                                <div style="width: 24px; height: 24px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 12px; line-height: 24px;">${pins.indexOf(pin) + 1}</div>
                                             </td>
-                                            <td style="text-align: left;">${pinTypes[pin.type].label}</td>
-                                            <td style="text-align: left;">${pin.description || 'N/A'}</td>
-                                            <td>
+                                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pinTypes[pin.type].label}</td>
+                                            <td style="border: 1px solid #e2e8f0; padding: 8px;">${pin.description || 'N/A'}</td>
+                                            <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">
                                                 ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
                                             </td>
                                         </tr>
@@ -4594,18 +4508,17 @@
                         `;
                     }
                     
-                    // FIXED: Each layout in separate wrapper with page break after
+                    // FIXED: Each layout on separate page - REMOVED page-break-inside: avoid
+                    // FIXED: Add page-break-before: always for all layouts after the first one
                     return `
-                        <div class="layout-print-wrapper">
-                            <div class="layout-print-page">
-                                <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
-                                    Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
-                                </h3>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <img src="${layout.image}" class="layout-print-image" style="max-height: 240mm; width: auto; height: auto; object-fit: contain; border: 1px solid #e2e8f0;">
-                                </div>
-                                ${pinsTable}
+                        <div class="layout-print-page" style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; ${idx > 0 ? 'page-break-before: always;' : ''}">
+                            <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
+                                Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
+                            </h3>
+                            <div style="text-align: center; margin-bottom: 15px; overflow: hidden;">
+                                <img src="${layout.image}" class="layout-print-image" style="max-width: 100%; max-height: 500px; width: auto; height: auto; object-fit: contain; border: 1px solid #e2e8f0;">
                             </div>
+                            ${pinsTable}
                         </div>
                     `;
                 }).join('');
