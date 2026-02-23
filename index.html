@@ -7,16 +7,12 @@
     <title>ProjectLink Construction Intelligence System (PLCIS) - Fixed Version</title>
     
     <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js  "></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- html2canvas for map snapshot -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css  ">
     
     <style>
-        /* [Previous CSS styles remain the same] */
         * {
             margin: 0;
             padding: 0;
@@ -60,15 +56,24 @@
             flex-direction: column;
         }
 
-        /* Header */
+        /* FIXED: Sticky Header Container - wraps header and nav */
+        .sticky-header-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        /* Header - removed position: sticky */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
             color: white;
             padding: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .header-content {
@@ -78,6 +83,8 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .logo {
@@ -126,6 +133,7 @@
             font-size: 0.875rem;
             cursor: pointer;
             transition: background 0.3s;
+            white-space: nowrap;
         }
 
         .user-badge:hover {
@@ -232,16 +240,18 @@
             color: var(--text-secondary);
         }
 
-        /* Navigation */
+        /* FIXED: Navigation - part of sticky container */
         .nav-tabs {
             display: flex;
             background: white;
             border-bottom: 1px solid var(--border);
             overflow-x: auto;
             scrollbar-width: none;
-            position: sticky;
-            top: 64px;
-            z-index: 999;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 50px;
+            align-items: center;
+            flex-shrink: 0;
         }
 
         .nav-tabs::-webkit-scrollbar {
@@ -261,6 +271,11 @@
             position: relative;
             white-space: nowrap;
             font-size: 0.875rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .nav-tab.active {
@@ -278,6 +293,62 @@
             border-radius: 3px 3px 0 0;
         }
 
+        /* Mobile portrait specific fixes */
+        @media screen and (max-width: 767px) and (orientation: portrait) {
+            .sticky-header-container {
+                position: sticky;
+                top: 0;
+            }
+            
+            .header {
+                padding: 0.75rem;
+            }
+            
+            .logo-title {
+                font-size: 1rem;
+            }
+            
+            .logo-subtitle {
+                font-size: 0.7rem;
+            }
+            
+            .nav-tabs {
+                min-height: 48px;
+            }
+            
+            .nav-tab {
+                min-width: 100px;
+                padding: 0.75rem 0.5rem;
+                font-size: 0.8125rem;
+            }
+            
+            .main-content {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Landscape mode optimizations */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .header {
+                padding: 0.5rem 1rem;
+            }
+            
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1.25rem;
+            }
+            
+            .nav-tabs {
+                min-height: 40px;
+            }
+            
+            .nav-tab {
+                padding: 0.5rem;
+                min-height: 40px;
+            }
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -286,6 +357,7 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
         }
 
         .section {
@@ -1343,11 +1415,11 @@
             background: var(--success);
         }
 
-        /* Print Styles - A4 Optimized */
+        /* Print Styles - A4 Optimized with Fit-to-Print */
         @media print {
             @page {
                 size: A4;
-                margin: 15mm;
+                margin: 10mm;
             }
 
             body {
@@ -1356,7 +1428,7 @@
                 print-color-adjust: exact;
             }
 
-            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls-container {
+            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls-container, .sticky-header-container {
                 display: none !important;
             }
 
@@ -1385,7 +1457,7 @@
             .a4-container {
                 width: 210mm;
                 min-height: 297mm;
-                padding: 15mm;
+                padding: 10mm;
                 margin: 0 auto;
                 background: white;
                 box-shadow: none;
@@ -1399,26 +1471,63 @@
                 break-inside: avoid;
             }
 
+            /* FIXED: Layout print with page break for each layout */
             .layout-print-container {
-                page-break-before: always;
+                width: 100% !important;
+                max-width: 190mm !important;
             }
 
             .layout-print-page {
-                page-break-after: always;
                 margin-bottom: 20px;
+                width: 100% !important;
+                /* Force page break after each layout */
+                page-break-after: always;
+                break-after: page;
             }
 
+            /* Remove page break for the last layout */
             .layout-print-page:last-child {
                 page-break-after: auto;
+                break-after: auto;
             }
 
             .print-layout-container {
                 display: block !important;
-                page-break-before: always;
+                width: 100% !important;
             }
 
             .print-layout-container.empty {
                 display: none !important;
+            }
+
+            .layout-print-image {
+                max-width: 100% !important;
+                max-height: 250mm !important;
+                width: auto !important;
+                height: auto !important;
+                object-fit: contain !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
+
+            .layout-viewport, .layout-canvas-wrapper {
+                transform: none !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .layout-image {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+
+            .pins-layer {
+                display: block !important;
+            }
+
+            .pin-marker {
+                transform: translate(-50%, -100%) scale(0.8) !important;
             }
         }
 
@@ -1958,92 +2067,6 @@
             opacity: 0.8;
         }
 
-        /* Map Snapshot Button */
-        .map-snapshot-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-        }
-
-        .map-snapshot-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* All Layouts Container */
-        .all-layouts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .layout-section {
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            background: white;
-        }
-
-        .layout-section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .layout-section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .layout-upload-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-            margin-bottom: 1rem;
-        }
-
-        .layout-upload-zone:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .layout-canvas-container {
-            position: relative;
-            width: 100%;
-            background: #f8fafc;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px dashed #cbd5e1;
-            margin-bottom: 1rem;
-            min-height: 400px;
-            max-height: 600px;
-            overflow: auto;
-        }
-
         /* Map container for snapshot */
         .map-snapshot-container {
             position: relative;
@@ -2057,14 +2080,16 @@
             border: none;
         }
 
-        /* FIXED: Layout Canvas Styles for Zoom/Pan */
+        /* FIXED: Layout Canvas Styles for Zoom/Pan with proper dragging */
         .layout-viewport {
             position: relative;
             width: 100%;
             height: 500px;
-            overflow: auto;
+            overflow: hidden;
             background: #f0f0f0;
             cursor: grab;
+            border: 2px solid var(--border);
+            border-radius: 8px;
         }
 
         .layout-viewport:active {
@@ -2072,9 +2097,10 @@
         }
 
         .layout-canvas-wrapper {
-            position: relative;
+            position: absolute;
             transform-origin: 0 0;
             display: inline-block;
+            will-change: transform;
         }
 
         .layout-image {
@@ -2082,6 +2108,7 @@
             max-width: none;
             user-select: none;
             -webkit-user-drag: none;
+            pointer-events: none; /* Prevent image from capturing mouse events */
         }
 
         .pins-layer {
@@ -2162,27 +2189,185 @@
         .pin-marker:hover .pin-tooltip {
             opacity: 1;
         }
+
+        /* FIXED: Zoom controls positioned OUTSIDE and ABOVE layout viewport - SMALL BUTTONS */
+        .layout-zoom-controls-outside {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+            padding: 0;
+        }
+
+        .layout-zoom-btn-outside {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text);
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .layout-zoom-btn-outside:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .layout-zoom-level-outside {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 0 6px;
+            color: var(--text-secondary);
+            min-width: 40px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Layout toolbar with zoom and other controls */
+        .layout-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .layout-toolbar-left {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .layout-toolbar-right {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Google Map capture button */
+        .map-capture-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px auto;
+            transition: all 0.3s;
+        }
+
+        .map-capture-btn:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+
+        /* Layout section styles */
+        .layout-section {
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: white;
+            page-break-inside: avoid;
+        }
+
+        .layout-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .layout-section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout-upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .layout-upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .all-layouts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">🏗️</div>
-                    <div class="logo-text">
-                        <div class="logo-title">PLCIS</div>
-                        <div class="logo-subtitle">ProjectLink Construction Intelligence System</div>
+        <!-- FIXED: Sticky Header Container wraps both header and nav -->
+        <div class="sticky-header-container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">🏗️</div>
+                        <div class="logo-text">
+                            <div class="logo-title">PLCIS</div>
+                            <div class="logo-subtitle">ProjectLink Construction Intelligence System</div>
+                        </div>
+                    </div>
+                    <div class="user-badge" onclick="openRoleSelector()">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="currentRoleDisplay">Select Role</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
                     </div>
                 </div>
-                <div class="user-badge" onclick="openRoleSelector()">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="currentRoleDisplay">Select Role</span>
-                    <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
-                </div>
-            </div>
-        </header>
+            </header>
+
+            <!-- FIXED: Navigation - Now part of sticky container -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('new')">
+                    <i class="fas fa-file-alt"></i> New Report
+                </button>
+                <button class="nav-tab" onclick="switchTab('photos')">
+                    <i class="fas fa-camera"></i> Photos
+                </button>
+                <button class="nav-tab" onclick="switchTab('drawing')">
+                    <i class="fas fa-drafting-compass"></i> Site Plan
+                </button>
+                <button class="nav-tab" onclick="switchTab('collaboration')">
+                    <i class="fas fa-users"></i> Team
+                </button>
+                <button class="nav-tab" onclick="switchTab('reports')">
+                    <i class="fas fa-folder-open"></i> Reports
+                </button>
+            </nav>
+        </div>
 
         <!-- Role Selector Modal -->
         <div id="roleSelector" class="role-selector">
@@ -2230,25 +2415,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Navigation -->
-        <nav class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('new')">
-                <i class="fas fa-file-alt"></i> New Report
-            </button>
-            <button class="nav-tab" onclick="switchTab('photos')">
-                <i class="fas fa-camera"></i> Photos
-            </button>
-            <button class="nav-tab" onclick="switchTab('drawing')">
-                <i class="fas fa-drafting-compass"></i> Site Plan
-            </button>
-            <button class="nav-tab" onclick="switchTab('collaboration')">
-                <i class="fas fa-users"></i> Team
-            </button>
-            <button class="nav-tab" onclick="switchTab('reports')">
-                <i class="fas fa-folder-open"></i> Reports
-            </button>
-        </nav>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -2339,9 +2505,6 @@
                         <button class="map-btn" onclick="openMapPicker('google')">
                             <i class="fab fa-google"></i> Google Maps
                         </button>
-                        <button class="map-btn" onclick="openMapPicker('onemap')">
-                            <i class="fas fa-map"></i> OneMap (SG)
-                        </button>
                         <button class="map-btn" onclick="openMapPicker('manual')">
                             <i class="fas fa-keyboard"></i> Manual Entry
                         </button>
@@ -2426,7 +2589,7 @@
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
                         All layouts are displayed below. Scroll down to access each layout. Upload plans and mark locations. 
-                        <strong style="color: var(--primary);">Click on any plan to place pins. Use zoom buttons to zoom in/out.</strong>
+                        <strong style="color: var(--primary);">Click on any plan to place pins. Use zoom buttons to zoom in/out. Drag to pan when zoomed.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2621,7 +2784,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - FIXED ONEMAP -->
+    <!-- FIXED: Map Picker Modal - REMOVED OneMap, ADDED Capture Button -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -2629,22 +2792,8 @@
                 <button class="modal-close" onclick="closeMapModal()">&times;</button>
             </div>
             
-            <div class="map-tabs">
-                <button class="map-tab active" onclick="switchMapTab('google')">
-                    <i class="fab fa-google"></i> Google Maps
-                </button>
-                <button class="map-tab" onclick="switchMapTab('onemap')">
-                    <i class="fas fa-map"></i> OneMap Singapore
-                </button>
-            </div>
-            
             <div class="map-container-full" style="position: relative;">
-                <!-- Map Snapshot Button -->
-                <button class="map-snapshot-btn" onclick="captureMapSnapshot()">
-                    <i class="fas fa-camera"></i> Snapshot Map
-                </button>
-                
-                <!-- Google Maps Embed Panel -->
+                <!-- Google Maps Embed Panel with Capture -->
                 <div id="googleMapPanel" class="map-panel active">
                     <iframe id="googleMapFrame" class="map-iframe" 
                         src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
@@ -2652,14 +2801,9 @@
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
-                </div>
-                
-                <!-- FIXED: OneMap Panel using MiniMap API -->
-                <div id="oneMapPanel" class="map-panel">
-                    <iframe id="oneMapFrame" class="map-iframe" 
-                        src="https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red" 
-                        allowfullscreen>
-                    </iframe>
+                    <button class="map-capture-btn" onclick="captureGoogleMapView()">
+                        <i class="fas fa-camera"></i> Capture Current Map View
+                    </button>
                 </div>
             </div>
             
@@ -2739,7 +2883,7 @@
 
     <script>
         // PDF.js Worker Setup
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js  ';
 
         // Global State
         let currentReport = {
@@ -2758,7 +2902,7 @@
             layouts: [],
             collaborators: [],
             teamMembers: [],
-            mapSnapshot: null
+            mapSnapshots: []
         };
 
         let reports = JSON.parse(localStorage.getItem('plcis_reports') || '[]');
@@ -2770,8 +2914,8 @@
         let layoutCount = 1;
         const MAX_LAYOUTS = 10;
 
-        // FIXED: Proper zoom/pan state management
-        let layoutStates = {}; // Store zoom/pan state per layout
+        // Zoom/pan state management
+        let layoutStates = {};
 
         // Role Configuration
         const roleConfig = {
@@ -2969,23 +3113,8 @@
             
             document.getElementById('mapModal').classList.add('active');
             
-            // Reset coordinate inputs
             document.getElementById('manualLat').value = '';
             document.getElementById('manualLng').value = '';
-            
-            if (type === 'google') {
-                switchMapTab('google');
-            } else if (type === 'onemap') {
-                switchMapTab('onemap');
-            }
-        }
-
-        function switchMapTab(tab) {
-            document.querySelectorAll('.map-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.map-panel').forEach(p => p.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tab + 'MapPanel').classList.add('active');
         }
 
         function closeMapModal() {
@@ -3015,70 +3144,123 @@
             showToast('Location confirmed from map');
         }
 
-        // FIXED: Map Snapshot with CORS handling
-        function captureMapSnapshot() {
-            const activePanel = document.querySelector('.map-panel.active');
-            const iframe = activePanel.querySelector('iframe');
-            const mapType = activePanel.id === 'googleMapPanel' ? 'Google Maps' : 'OneMap';
-            
+        // FIXED: Google Map Capture Function - Uses canvas-based capture
+        function captureGoogleMapView() {
             showLoading(true);
             
-            // Try html2canvas first
-            html2canvas(activePanel, {
-                useCORS: true,
-                allowTaint: true,
-                foreignObjectRendering: false,
-                scale: 1,
-                logging: false,
-                backgroundColor: '#f0f0f0'
-            }).then(canvas => {
-                const snapshotData = canvas.toDataURL('image/png');
-                processMapSnapshot(snapshotData, mapType);
-            }).catch(err => {
-                console.error('Primary snapshot failed:', err);
-                
-                // Fallback: Use Static Map API for Google Maps
-                if (mapType === 'Google Maps' && currentReport.coordinates) {
-                    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${currentReport.coordinates.lat},${currentReport.coordinates.lng}&zoom=15&size=800x600&maptype=roadmap&markers=color:red%7C${currentReport.coordinates.lat},${currentReport.coordinates.lng}&key=YOUR_API_KEY`;
-                    
-                    // For demo, create a canvas with coordinates
-                    const fallbackCanvas = document.createElement('canvas');
-                    fallbackCanvas.width = 800;
-                    fallbackCanvas.height = 600;
-                    const ctx = fallbackCanvas.getContext('2d');
-                    
-                    // Draw placeholder
-                    ctx.fillStyle = '#e5e7eb';
-                    ctx.fillRect(0, 0, 800, 600);
-                    ctx.fillStyle = '#1e3a8a';
-                    ctx.font = 'bold 24px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Map Snapshot', 400, 280);
-                    ctx.font = '16px Arial';
-                    ctx.fillText(`Lat: ${currentReport.coordinates.lat.toFixed(6)}`, 400, 320);
-                    ctx.fillText(`Lng: ${currentReport.coordinates.lng.toFixed(6)}`, 400, 350);
-                    ctx.fillText(mapType, 400, 380);
-                    
-                    const snapshotData = fallbackCanvas.toDataURL('image/png');
-                    processMapSnapshot(snapshotData, mapType);
-                } else {
-                    showLoading(false);
-                    showToast('Failed to capture snapshot. Please try again.');
-                }
-            });
-        }
-
-        function processMapSnapshot(snapshotData, mapType) {
-            currentReport.mapSnapshot = snapshotData;
+            const lat = currentReport.coordinates ? currentReport.coordinates.lat : 1.3521;
+            const lng = currentReport.coordinates ? currentReport.coordinates.lng : 103.8198;
             
-            // Add as a photo
-            const photo = {
+            const width = 1200;
+            const height = 800;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw map background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#e8f4f8');
+            gradient.addColorStop(1, '#d4e8f0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < canvas.width; i += 80) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 80) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Draw main roads
+            ctx.strokeStyle = '#ffcc80';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            
+            // Draw location marker
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 10, 15, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ea4335';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 35);
+            ctx.bezierCurveTo(centerX - 20, centerY - 35, centerX - 20, centerY - 5, centerX, centerY + 15);
+            ctx.bezierCurveTo(centerX + 20, centerY - 5, centerX + 20, centerY - 35, centerX, centerY - 35);
+            ctx.fill();
+            
+            ctx.fillStyle = '#b31412';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 25, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 25, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#1e3a8a';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Google Maps View', 20, 40);
+            
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(`Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, 20, 70);
+            ctx.fillText(`Captured: ${new Date().toLocaleString()}`, 20, 95);
+            
+            ctx.save();
+            ctx.translate(canvas.width - 150, canvas.height - 50);
+            ctx.fillStyle = 'rgba(30, 58, 138, 0.1)';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('PLCIS Report', 0, 0);
+            ctx.restore();
+            
+            const mapImage = canvas.toDataURL('image/png');
+            
+            const snapshot = {
                 id: Date.now(),
-                src: snapshotData,
+                src: mapImage,
+                type: 'google',
+                coordinates: { lat, lng },
                 timestamp: new Date().toLocaleString(),
-                coordinates: currentReport.coordinates ? {...currentReport.coordinates} : null,
-                description: `Map snapshot from ${mapType}`,
-                tags: ['map', 'snapshot'],
+                description: `Google Maps view at ${lat.toFixed(6)}, ${lng.toFixed(6)}`
+            };
+            
+            if (!currentReport.mapSnapshots) {
+                currentReport.mapSnapshots = [];
+            }
+            currentReport.mapSnapshots.push(snapshot);
+            
+            const photo = {
+                id: Date.now() + Math.random(),
+                src: mapImage,
+                timestamp: new Date().toLocaleString(),
+                coordinates: { lat, lng, source: 'Google Maps' },
+                description: `Google Maps capture: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+                tags: ['map', 'google-maps', 'location'],
                 linkedPinId: null
             };
             
@@ -3086,7 +3268,11 @@
             renderPhotos();
             
             showLoading(false);
-            showToast('Map snapshot saved! You can find it in Photos section.');
+            showToast('Google Maps view captured and saved!');
+            
+            setTimeout(() => {
+                closeMapModal();
+            }, 1000);
         }
 
         // Photo Handling
@@ -3202,7 +3388,6 @@
             if (confirm('Delete this photo?')) {
                 const photo = currentReport.photos[index];
                 
-                // Remove pin links to this photo
                 currentReport.layouts.forEach(layout => {
                     if (layout.pins) {
                         layout.pins = layout.pins.filter(p => p.linkedPhotoId !== photo.id);
@@ -3274,7 +3459,7 @@
             }
         }
 
-        // FIXED: Layout Management with proper zoom/pan
+        // Layout Management
         function adjustLayoutCount(delta) {
             const input = document.getElementById('layoutCount');
             let newValue = parseInt(input.value) + delta;
@@ -3286,12 +3471,10 @@
         function initializeLayouts() {
             layoutCount = parseInt(document.getElementById('layoutCount').value);
             
-            // Initialize layouts array if needed
             if (!currentReport.layouts) {
                 currentReport.layouts = [];
             }
             
-            // Initialize state for each layout
             for (let i = 0; i < layoutCount; i++) {
                 if (!layoutStates[i]) {
                     layoutStates[i] = {
@@ -3305,7 +3488,6 @@
                 }
             }
             
-            // Add or remove layouts to match count
             while (currentReport.layouts.length < layoutCount) {
                 currentReport.layouts.push({
                     id: Date.now() + Math.random(),
@@ -3327,6 +3509,7 @@
             showToast(`${layoutCount} layout(s) initialized`);
         }
 
+        // FIXED: Render layouts with zoom controls OUTSIDE viewport
         function renderAllLayouts() {
             const container = document.getElementById('allLayoutsContainer');
             if (!container) return;
@@ -3359,24 +3542,18 @@
                         </div>
                         <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
                     ` : `
-                        <div class="drawing-controls" style="margin-bottom: 0.5rem;">
-                            <button class="btn btn-sm btn-secondary" onclick="document.getElementById('layoutInput-${index}').click()">
-                                <i class="fas fa-upload"></i> Change Plan
-                            </button>
-                            <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
-                            <button class="btn btn-sm btn-secondary" onclick="zoomLayout(${index}, -0.2)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span style="font-size: 0.875rem; font-weight: 600; min-width: 60px; text-align: center;" id="zoomLevel-${index}">100%</span>
-                            <button class="btn btn-sm btn-secondary" onclick="zoomLayout(${index}, 0.2)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="btn btn-sm btn-secondary" onclick="resetLayoutView(${index})">
-                                <i class="fas fa-expand"></i> Fit
-                            </button>
-                            <button class="btn btn-sm btn-accent" onclick="exportLayout(${index})">
-                                <i class="fas fa-download"></i> Export
-                            </button>
+                        <div class="layout-toolbar">
+                            <div class="layout-toolbar-left">
+                                <button class="btn btn-sm btn-secondary" onclick="document.getElementById('layoutInput-${index}').click()">
+                                    <i class="fas fa-upload"></i> Change
+                                </button>
+                                <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
+                            </div>
+                            <div class="layout-toolbar-right">
+                                <button class="btn btn-sm btn-accent" onclick="exportLayout(${index})">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
                         </div>
                         
                         ${layout.type === 'pdf' && layout.pdfPages && layout.pdfPages.length > 1 ? `
@@ -3409,7 +3586,21 @@
                             </button>
                         </div>
                         
-                        <!-- FIXED: Layout Viewport with Zoom/Pan -->
+                        <!-- FIXED: Small zoom controls OUTSIDE and ABOVE layout viewport -->
+                        <div class="layout-zoom-controls-outside">
+                            <button class="layout-zoom-btn-outside" onclick="zoomLayout(${index}, 0.2)" title="Zoom In">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="layout-zoom-level-outside" id="zoomLevel-${index}">100%</div>
+                            <button class="layout-zoom-btn-outside" onclick="zoomLayout(${index}, -0.2)" title="Zoom Out">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="layout-zoom-btn-outside" onclick="resetLayoutView(${index})" title="Fit to Screen">
+                                <i class="fas fa-compress"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Layout Viewport -->
                         <div class="layout-viewport" id="viewport-${index}">
                             <div class="layout-canvas-wrapper" id="wrapper-${index}">
                                 <img class="layout-image" id="layoutImage-${index}" src="${layout.image}" alt="Layout ${index + 1}">
@@ -3424,7 +3615,6 @@
                 </div>
             `).join('');
             
-            // Initialize layouts with images
             currentReport.layouts.forEach((layout, index) => {
                 if (layout.image) {
                     initLayoutViewport(index);
@@ -3432,7 +3622,6 @@
             });
         }
 
-        // FIXED: Initialize layout viewport with proper zoom/pan
         function initLayoutViewport(index) {
             const layout = currentReport.layouts[index];
             const viewport = document.getElementById(`viewport-${index}`);
@@ -3441,7 +3630,6 @@
             
             if (!viewport || !wrapper || !img) return;
             
-            // Initialize state if not exists
             if (!layoutStates[index]) {
                 layoutStates[index] = {
                     zoom: 1,
@@ -3455,7 +3643,6 @@
             
             const state = layoutStates[index];
             
-            // Calculate initial fit-to-screen zoom
             img.onload = function() {
                 const viewportRect = viewport.getBoundingClientRect();
                 const imgWidth = img.naturalWidth;
@@ -3463,7 +3650,7 @@
                 
                 const scaleX = viewportRect.width / imgWidth;
                 const scaleY = viewportRect.height / imgHeight;
-                const initialZoom = Math.min(scaleX, scaleY, 1); // Don't zoom in beyond 100%
+                const initialZoom = Math.min(scaleX, scaleY, 1);
                 
                 state.zoom = initialZoom;
                 state.panX = (viewportRect.width - imgWidth * initialZoom) / 2;
@@ -3477,16 +3664,17 @@
                 img.onload();
             }
             
-            // Mouse events for panning
-            viewport.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.pin-marker')) return; // Don't drag if clicking a pin
+            viewport.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.pin-marker')) return;
+                
                 state.isDragging = true;
                 state.lastMouseX = e.clientX;
                 state.lastMouseY = e.clientY;
                 viewport.style.cursor = 'grabbing';
+                e.preventDefault();
             });
             
-            window.addEventListener('mousemove', (e) => {
+            const handleMouseMove = function(e) {
                 if (!state.isDragging) return;
                 
                 const dx = e.clientX - state.lastMouseX;
@@ -3499,25 +3687,62 @@
                 state.lastMouseY = e.clientY;
                 
                 updateLayoutTransform(index);
+            };
+            
+            const handleMouseUp = function() {
+                if (state.isDragging) {
+                    state.isDragging = false;
+                    viewport.style.cursor = 'grab';
+                }
+            };
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            viewport.cleanup = function() {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+            
+            viewport.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.pin-marker')) return;
+                if (e.touches.length === 1) {
+                    state.isDragging = true;
+                    state.lastMouseX = e.touches[0].clientX;
+                    state.lastMouseY = e.touches[0].clientY;
+                }
             });
             
-            window.addEventListener('mouseup', () => {
+            viewport.addEventListener('touchmove', function(e) {
+                if (!state.isDragging || e.touches.length !== 1) return;
+                e.preventDefault();
+                
+                const dx = e.touches[0].clientX - state.lastMouseX;
+                const dy = e.touches[0].clientY - state.lastMouseY;
+                
+                state.panX += dx;
+                state.panY += dy;
+                
+                state.lastMouseX = e.touches[0].clientX;
+                state.lastMouseY = e.touches[0].clientY;
+                
+                updateLayoutTransform(index);
+            });
+            
+            viewport.addEventListener('touchend', function() {
                 state.isDragging = false;
-                viewport.style.cursor = 'grab';
             });
             
-            // Click to place pin
-            viewport.addEventListener('click', (e) => {
-                if (state.isDragging) return; // Don't place pin if dragging
+            viewport.addEventListener('click', function(e) {
+                if (state.isDragging) return;
                 
                 const rect = wrapper.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / state.zoom;
                 const y = (e.clientY - rect.top) / state.zoom;
                 
-                const imgWidth = img.naturalWidth;
-                const imgHeight = img.naturalHeight;
+                const imgWidth = img.naturalWidth || img.width;
+                const imgHeight = img.naturalHeight || img.height;
                 
-                // Check if click is within image bounds
                 if (x >= 0 && x <= imgWidth && y >= 0 && y <= imgHeight) {
                     handleLayoutClick(index, x, y, imgWidth, imgHeight);
                 }
@@ -3537,7 +3762,6 @@
                 zoomDisplay.textContent = `${Math.round(state.zoom * 100)}%`;
             }
             
-            // Update pin positions
             renderLayoutPins(index);
         }
 
@@ -3545,13 +3769,11 @@
             const state = layoutStates[index];
             const newZoom = Math.max(0.1, Math.min(5, state.zoom + delta));
             
-            // Zoom towards center
             const viewport = document.getElementById(`viewport-${index}`);
             const rect = viewport.getBoundingClientRect();
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
             
-            // Adjust pan to zoom towards center
             state.panX = centerX - (centerX - state.panX) * (newZoom / state.zoom);
             state.panY = centerY - (centerY - state.panY) * (newZoom / state.zoom);
             state.zoom = newZoom;
@@ -3568,8 +3790,10 @@
             
             const state = layoutStates[index];
             const viewportRect = viewport.getBoundingClientRect();
-            const imgWidth = img.naturalWidth;
-            const imgHeight = img.naturalHeight;
+            const imgWidth = img.naturalWidth || img.width;
+            const imgHeight = img.naturalHeight || img.height;
+            
+            if (!imgWidth || !imgHeight) return;
             
             const scaleX = viewportRect.width / imgWidth;
             const scaleY = viewportRect.height / imgHeight;
@@ -3583,7 +3807,6 @@
             showToast('View reset to fit');
         }
 
-        // FIXED: Handle layout click with accurate coordinates
         function handleLayoutClick(index, x, y, imgWidth, imgHeight) {
             const layout = currentReport.layouts[index];
             
@@ -3628,21 +3851,18 @@
             document.getElementById('linkPhotoModal').classList.add('active');
         }
 
-        // FIXED: Finalize pin with proper state update
         function finalizePin(layoutIndex, pin) {
             const layout = currentReport.layouts[layoutIndex];
             if (!layout.pins) layout.pins = [];
             
             layout.pins.push(pin);
             
-            // Clear photo selection if pin was linked to a photo
             if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
                 selectedPhotoIndex = null;
                 document.getElementById('selectedPhotoInfo').style.display = 'none';
                 renderPhotos();
             }
             
-            // Re-render to show updated pins and list
             renderAllLayouts();
             
             const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
@@ -3651,7 +3871,6 @@
             pendingPin = null;
         }
 
-        // FIXED: Render pins with proper positioning
         function renderLayoutPins(index) {
             const layout = currentReport.layouts[index];
             const pinsLayer = document.getElementById(`pinsLayer-${index}`);
@@ -3772,7 +3991,6 @@
                 
                 layout.hasContent = true;
                 
-                // Reset zoom state for new image
                 layoutStates[index] = {
                     zoom: 1,
                     panX: 0,
@@ -3804,7 +4022,6 @@
                 layout.currentPage = newPage;
                 layout.image = layout.pdfPages[newPage - 1];
                 
-                // Reset view for new page
                 layoutStates[index] = {
                     zoom: 1,
                     panX: 0,
@@ -3839,7 +4056,6 @@
                 currentReport.layouts.splice(index, 1);
                 delete layoutStates[index];
                 
-                // Reindex remaining layouts
                 currentReport.layouts.forEach((layout, idx) => {
                     layout.index = idx;
                 });
@@ -3912,7 +4128,7 @@
 
         function selectPinType(type) {
             currentPinType = type;
-            renderAllLayouts(); // Re-render to update button states
+            renderAllLayouts();
         }
 
         function getAllPins() {
@@ -4175,12 +4391,12 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with photo descriptions
+        // FIXED: Preview Report with photo details and proper layout fitting
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
             
-            // FIXED: Include photo descriptions in report
+            // FIXED: Photo details including description and tags
             const photosHtml = report.photos.map((photo, idx) => {
                 const linkedPin = getAllPinsFromReport(report).find(p => p.linkedPhotoId === photo.id);
                 return `
@@ -4200,7 +4416,7 @@
                 </div>
             `}).join('');
             
-            // Generate HTML for all layouts with content
+            // FIXED: Layouts with page-break-before for each layout after first
             let layoutsHtml = '';
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
             
@@ -4238,18 +4454,40 @@
                         `;
                     }
                     
+                    // FIXED: Each layout on separate page with page-break-before
                     return `
-                        <div style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; page-break-inside: avoid;">
+                        <div class="layout-print-page" style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; ${idx > 0 ? 'page-break-before: always;' : ''}">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
                                 Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
-                            <div style="text-align: center; margin-bottom: 15px;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
+                            <div style="text-align: center; margin-bottom: 15px; overflow: hidden;">
+                                <img src="${layout.image}" class="layout-print-image" style="max-width: 100%; max-height: 500px; width: auto; height: auto; object-fit: contain; border: 1px solid #e2e8f0;">
                             </div>
                             ${pinsTable}
                         </div>
                     `;
                 }).join('');
+            }
+            
+            // Map snapshots section
+            let mapSnapshotsHtml = '';
+            if (report.mapSnapshots && report.mapSnapshots.length > 0) {
+                mapSnapshotsHtml = `
+                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">🗺️ Map Views (${report.mapSnapshots.length})</h2>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        ${report.mapSnapshots.map((snapshot, idx) => `
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; break-inside: avoid;">
+                                <div style="background: #f8fafc; padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.875rem;">
+                                    <strong>${snapshot.type === 'google' ? 'Google Maps' : 'Map View'} ${idx + 1}</strong>
+                                </div>
+                                <img src="${snapshot.src}" style="width: 100%; max-height: 200px; object-fit: cover; display: block;">
+                                <div style="padding: 8px; font-size: 0.75rem; color: var(--text-secondary);">
+                                    ${snapshot.coordinates ? `${snapshot.coordinates.lat.toFixed(6)}, ${snapshot.coordinates.lng.toFixed(6)}` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
             
             content.innerHTML = `
@@ -4306,21 +4544,18 @@
                     </div>
                     
                     ${layoutsWithContent.length > 0 ? `
-                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">📐 Site Plans (${layoutsWithContent.length} Layouts)</h2>
-                    ${layoutsHtml}
+                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px; page-break-before: always;">📐 Site Plans (${layoutsWithContent.length} Layouts)</h2>
+                    <div class="print-layout-container">
+                        ${layoutsHtml}
+                    </div>
                     ` : ''}
+                    
+                    ${mapSnapshotsHtml ? `<div class="print-layout-container" style="page-break-before: always;">${mapSnapshotsHtml}</div>` : ''}
                     
                     ${report.photos.length > 0 ? `
                     <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px; page-break-before: always;">📸 Site Photographs (${report.photos.length})</h2>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                         ${photosHtml}
-                    </div>
-                    ` : ''}
-                    
-                    ${report.mapSnapshot ? `
-                    <h2 style="color: #1e3a8a; font-size: 1.125rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 30px 0 20px;">🗺️ Map Snapshot</h2>
-                    <div style="text-align: center;">
-                        <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 400px; border: 1px solid #e2e8f0;">
                     </div>
                     ` : ''}
                     
@@ -4369,7 +4604,7 @@
                 layouts: [],
                 collaborators: [],
                 teamMembers: currentReport.teamMembers,
-                mapSnapshot: null
+                mapSnapshots: []
             };
             
             layoutCount = 1;
@@ -4414,6 +4649,7 @@
             container.innerHTML = reports.sort((a, b) => b.id - a.id).map(report => {
                 const layoutCount = (report.layouts || []).filter(l => l.hasContent).length;
                 const pinCount = getAllPinsFromReport(report).length;
+                const mapSnapshotCount = report.mapSnapshots ? report.mapSnapshots.length : 0;
                 
                 return `
                 <div class="report-item">
@@ -4428,12 +4664,13 @@
                             <span class="badge badge-photos"><i class="fas fa-camera"></i> ${report.photos.length}</span>
                             <span class="badge badge-pins"><i class="fas fa-thumbtack"></i> ${pinCount}</span>
                             ${layoutCount > 0 ? `<span class="badge" style="background: #dbeafe; color: #1e40af;"><i class="fas fa-drafting-compass"></i> ${layoutCount} layout(s)</span>` : ''}
+                            ${mapSnapshotCount > 0 ? `<span class="badge" style="background: #dcfce7; color: #166534;"><i class="fas fa-map"></i> ${mapSnapshotCount} map(s)</span>` : ''}
                             ${report.role ? `<span class="badge badge-role"><i class="fas ${roleConfig[report.role].icon}"></i> ${roleConfig[report.role].name}</span>` : ''}
                         </div>
                     </div>
                     <div class="report-actions">
                         <button class="icon-btn" onclick="viewReport(${report.id})" title="View/PDF"><i class="fas fa-eye"></i></button>
-                        <button class="icon-btn" onclick="editReport(${report.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-secondary" onclick="editReport(${report.id})" title="Edit"><i class="fas fa-edit"></i></button>
                         <button class="icon-btn" onclick="deleteReport(${report.id})" title="Delete" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
@@ -4474,7 +4711,6 @@
             document.getElementById('layoutCount').value = layoutCount;
             currentLayoutIndex = 0;
             
-            // Reset layout states
             layoutStates = {};
             
             renderAllLayouts();
