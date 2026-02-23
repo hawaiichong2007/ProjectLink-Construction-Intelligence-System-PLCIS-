@@ -7,10 +7,10 @@
     <title>ProjectLink Construction Intelligence System (PLCIS) - Fixed Version</title>
     
     <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js  "></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js   "></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css  ">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css   ">
     
     <style>
         * {
@@ -1471,7 +1471,7 @@
                 break-inside: avoid;
             }
 
-            /* FIXED: Layout print with page break for each layout */
+            /* FIXED: Layout print without page break for each layout */
             .layout-print-container {
                 width: 100% !important;
                 max-width: 190mm !important;
@@ -1480,17 +1480,13 @@
             .layout-print-page {
                 margin-bottom: 20px;
                 width: 100% !important;
-                /* Force page break after each layout */
-                page-break-after: always;
-                break-after: page;
+                /* REMOVED: page-break-before: always */
+                /* REMOVED: page-break-after: always */
+                /* REMOVED: break-after: page */
             }
 
-            /* Remove page break for the last layout */
-            .layout-print-page:last-child {
-                page-break-after: auto;
-                break-after: auto;
-            }
-
+            /* REMOVED: Remove page break for the last layout - no longer needed */
+            
             .print-layout-container {
                 display: block !important;
                 width: 100% !important;
@@ -2796,7 +2792,7 @@
                 <!-- Google Maps Embed Panel with Capture -->
                 <div id="googleMapPanel" class="map-panel active">
                     <iframe id="googleMapFrame" class="map-iframe" 
-                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
+                        src="https://www.google.com/maps/embed?pb= !1m14!1m12!1m3!1d255281.19891806847!2d103.80988615!3d1.3147264!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssg!4v1704067200000!5m2!1sen!2ssg" 
                         allowfullscreen="" 
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade">
@@ -2883,7 +2879,7 @@
 
     <script>
         // PDF.js Worker Setup
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js  ';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js   ';
 
         // Global State
         let currentReport = {
@@ -4287,7 +4283,7 @@
                     <div class="collab-avatar" style="background: ${roleConfig[member.role].color}; width: 32px; height: 32px; font-size: 0.75rem;">
                         ${member.name.charAt(0).toUpperCase()}
                     </div>
-                    <div class="email-info">
+                    div class="email-info">
                         <div class="email-name">${member.name}</div>
                         <div class="email-address">${member.email}</div>
                     </div>
@@ -4391,7 +4387,7 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with photo details and proper layout fitting
+        // FIXED: Preview Report with photo details and proper layout fitting - REMOVED page-break-before for layouts
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -4416,7 +4412,7 @@
                 </div>
             `}).join('');
             
-            // FIXED: Layouts with page-break-before for each layout after first
+            // FIXED: Layouts WITHOUT page-break-before for each layout
             let layoutsHtml = '';
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
             
@@ -4454,14 +4450,14 @@
                         `;
                     }
                     
-                    // FIXED: Each layout on separate page with page-break-before
+                    // REMOVED: page-break-before: always from inline style
                     return `
-                        <div class="layout-print-page" style="margin-bottom: 30px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; ${idx > 0 ? 'page-break-before: always;' : ''}">
+                        <div class="layout-print-page" style="margin-bottom: 20px; width: 100% !important;">
                             <h3 style="color: #1e3a8a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
                                 Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
                             <div style="text-align: center; margin-bottom: 15px; overflow: hidden;">
-                                <img src="${layout.image}" class="layout-print-image" style="max-width: 100%; max-height: 500px; width: auto; height: auto; object-fit: contain; border: 1px solid #e2e8f0;">
+                                <img src="${layout.image}" class="layout-print-image" style="max-width: 100%; max-height: 250mm; width: auto; height: auto; object-fit: contain; border: 1px solid #e2e8f0;">
                             </div>
                             ${pinsTable}
                         </div>
