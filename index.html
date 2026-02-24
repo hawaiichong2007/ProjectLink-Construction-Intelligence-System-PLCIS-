@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1e3a8a">
     <title>ProjectLink Construction Intelligence System (PLCIS) - Fixed Version</title>
     
@@ -16,6 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
+        /* [Previous CSS styles remain the same] */
         * {
             margin: 0;
             padding: 0;
@@ -42,6 +43,8 @@
             --rto: #10b981;
             --re: #ef4444;
             --pm: #6366f1;
+            --header-height: 60px;
+            --nav-height: 52px;
         }
 
         body {
@@ -50,29 +53,34 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior-y: none;
         }
 
         .app-container {
             max-width: 100%;
             min-height: 100vh;
+            min-height: 100svh; /* Use small viewport height for mobile */
             display: flex;
             flex-direction: column;
-            /* FIXED: Adjusted padding for compact header */
-            padding-top: 110px; /* 50px header + 60px nav */
+            /* Add padding-top to account for fixed header and nav */
+            padding-top: calc(var(--header-height) + var(--nav-height));
         }
 
         /* Header - FIXED at top - REDUCED HEIGHT */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            height: 50px; /* REDUCED from 64px */
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
         }
 
         .header-content {
@@ -82,24 +90,23 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
-            height: 100%;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem; /* REDUCED gap */
+            gap: 0.5rem;
         }
 
         .logo-icon {
-            width: 32px; /* REDUCED from 40px */
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: var(--accent);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem; /* REDUCED from 1.5rem */
+            font-size: 1.25rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
@@ -109,14 +116,14 @@
         }
 
         .logo-title {
-            font-size: 1rem; /* REDUCED from 1.1rem */
+            font-size: 1rem;
             font-weight: 800;
             letter-spacing: -0.5px;
             line-height: 1.2;
         }
 
         .logo-subtitle {
-            font-size: 0.65rem; /* REDUCED from 0.75rem */
+            font-size: 0.7rem;
             opacity: 0.9;
             font-weight: 500;
         }
@@ -126,9 +133,9 @@
             align-items: center;
             gap: 0.5rem;
             background: rgba(255,255,255,0.15);
-            padding: 0.375rem 0.75rem; /* REDUCED padding */
+            padding: 0.4rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.8125rem; /* REDUCED from 0.875rem */
+            font-size: 0.8125rem;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -162,6 +169,7 @@
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
+            max-height: 90dvh;
             overflow-y: auto;
             animation: slideUp 0.3s;
         }
@@ -237,7 +245,7 @@
             color: var(--text-secondary);
         }
 
-        /* Navigation - FIXED - REDUCED HEIGHT */
+        /* Navigation - FIXED at top below header - REDUCED HEIGHT */
         .nav-tabs {
             display: flex;
             background: white;
@@ -245,12 +253,15 @@
             overflow-x: auto;
             scrollbar-width: none;
             position: fixed;
-            top: 50px; /* EXACTLY below header (50px) */
+            top: var(--header-height); /* Exactly below header */
             left: 0;
             right: 0;
             z-index: 999;
-            height: 60px; /* REDUCED from 64px */
+            height: var(--nav-height);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            /* Ensure it stays at exact position */
+            transform: translateZ(0);
+            will-change: transform;
         }
 
         .nav-tabs::-webkit-scrollbar {
@@ -259,8 +270,8 @@
 
         .nav-tab {
             flex: 1;
-            min-width: 100px; /* REDUCED from 120px */
-            padding: 0.75rem 0.5rem; /* REDUCED from 1rem */
+            min-width: 120px;
+            padding: 0.875rem 0.5rem;
             background: none;
             border: none;
             color: var(--text-secondary);
@@ -269,7 +280,11 @@
             transition: all 0.3s;
             position: relative;
             white-space: nowrap;
-            font-size: 0.8125rem; /* REDUCED from 0.875rem */
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
         }
 
         .nav-tab.active {
@@ -1053,6 +1068,7 @@
             max-width: 900px;
             width: 100%;
             max-height: 90vh;
+            max-height: 90dvh;
             overflow: hidden;
             animation: modalSlide 0.3s;
             display: flex;
@@ -1108,6 +1124,7 @@
         .map-modal-content {
             max-width: 95vw;
             height: 90vh;
+            height: 90dvh;
         }
 
         .map-container-full {
@@ -1166,6 +1183,7 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             max-height: 60vh;
+            max-height: 60dvh;
             object-fit: contain;
             background: #f8fafc;
         }
@@ -1407,51 +1425,38 @@
                 box-shadow: none;
             }
 
-            /* FIXED: Layout section - plan view on one page, pins on next if needed */
+            /* Ensure layouts fit the page when printing */
             .layout-section {
                 page-break-before: always;
                 page-break-inside: avoid;
                 width: 100%;
-                max-width: 190mm;
+                max-width: 190mm; /* Fit within A4 margins */
                 margin: 0 auto 20px auto;
                 border: 2px solid #e2e8f0;
                 padding: 15px;
-                /* Ensure layout fits on max 2 pages */
-                max-height: 574mm; /* 2 x 297mm - margins */
             }
 
             .layout-section:first-of-type {
                 page-break-before: auto;
             }
 
-            /* FIXED: Plan view always fully shown on one page */
+            /* Fit layout image to page width */
             .layout-viewport {
                 height: auto !important;
-                max-height: 250mm; /* Fit within one A4 page */
+                max-height: 250mm;
                 overflow: visible;
-                page-break-after: avoid; /* Keep with header */
             }
 
             .layout-canvas-wrapper {
                 transform: none !important;
                 width: 100% !important;
-                max-height: 240mm;
             }
 
             .layout-image {
                 max-width: 100% !important;
                 width: 100% !important;
                 height: auto !important;
-                max-height: 230mm; /* Ensure fits on one page */
                 display: block;
-                object-fit: contain;
-            }
-
-            /* Pin list on separate page if needed */
-            .pin-list {
-                page-break-before: auto; /* Allow break to next page */
-                max-height: none;
-                overflow: visible;
             }
 
             /* Ensure pins are visible in print */
@@ -1552,6 +1557,11 @@
 
         /* Responsive */
         @media (min-width: 768px) {
+            :root {
+                --header-height: 64px;
+                --nav-height: 56px;
+            }
+
             .main-content {
                 padding: 1.5rem;
             }
@@ -1566,6 +1576,34 @@
 
             .report-actions {
                 flex-direction: row;
+            }
+
+            .nav-tab {
+                padding: 1rem 0.5rem;
+                font-size: 0.875rem;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+
+            .logo-title {
+                font-size: 1.1rem;
+            }
+
+            .logo-subtitle {
+                font-size: 0.75rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .user-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
             }
         }
 
@@ -2182,14 +2220,16 @@
             border: none;
         }
 
-        /* FIXED: Layout Canvas Styles for Zoom/Pan - FIXED DRAG TO TOP/LEFT */
+        /* FIXED: Layout Canvas Styles for Zoom/Pan - CRITICAL FIXES HERE */
         .layout-viewport {
             position: relative;
             width: 100%;
             height: 500px;
-            overflow: hidden; /* Changed from auto to hidden for proper pan control */
+            overflow: auto; /* Changed from hidden to auto to allow scrolling */
             background: #f0f0f0;
             cursor: grab;
+            /* Enable touch scrolling but prevent browser zooming */
+            touch-action: pan-x pan-y;
         }
 
         .layout-viewport:active {
@@ -2197,11 +2237,12 @@
         }
 
         .layout-canvas-wrapper {
-            position: absolute; /* Changed from relative to absolute for proper panning */
-            top: 0;
-            left: 0;
+            position: relative;
             transform-origin: 0 0;
-            display: block;
+            display: inline-block;
+            /* Ensure wrapper can be larger than viewport when zoomed */
+            min-width: 100%;
+            min-height: 100%;
         }
 
         .layout-image {
@@ -2209,6 +2250,9 @@
             max-width: none;
             user-select: none;
             -webkit-user-drag: none;
+            /* Ensure image maintains its natural size */
+            width: auto;
+            height: auto;
         }
 
         .pins-layer {
@@ -2553,7 +2597,7 @@
                     <h2 class="card-title"><i class="fas fa-drafting-compass"></i> Site Plan Annotation</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-secondary);">
                         All layouts are displayed below. Scroll down to access each layout. Upload plans and mark locations. 
-                        <strong style="color: var(--primary);">Click on any plan to place pins. Use zoom buttons to zoom in/out. Drag to pan around.</strong>
+                        <strong style="color: var(--primary);">Click on any plan to place pins. Use zoom buttons to zoom in/out. Drag to pan when zoomed.</strong>
                     </p>
 
                     <!-- Layout Count Selector -->
@@ -2838,7 +2882,7 @@
 
     <!-- PDF Preview Modal -->
     <div id="pdfModal" class="modal">
-        <div class="modal-content" style="max-width: 95vw; max-height: 95vh;">
+        <div class="modal-content" style="max-width: 95vw; max-height: 95vh; max-height: 95dvh;">
             <div class="modal-header">
                 <h3>A4 Print Preview</h3>
                 <button class="modal-close" onclick="closePdfModal()">&times;</button>
@@ -2897,7 +2941,7 @@
         let layoutCount = 1;
         const MAX_LAYOUTS = 10;
 
-        // FIXED: Proper zoom/pan state management with boundary constraints
+        // FIXED: Proper zoom/pan state management with bounds checking
         let layoutStates = {}; // Store zoom/pan state per layout
 
         // Role Configuration
@@ -3532,7 +3576,7 @@
                             </button>
                         </div>
                         
-                        <!-- FIXED: Layout Viewport with Zoom/Pan - FIXED DRAG TO TOP/LEFT -->
+                        <!-- FIXED: Layout Viewport with Zoom/Pan - CRITICAL FIXES HERE -->
                         <div class="layout-viewport" id="viewport-${index}">
                             <div class="layout-canvas-wrapper" id="wrapper-${index}">
                                 <img class="layout-image" id="layoutImage-${index}" src="${layout.image}" alt="Layout ${index + 1}">
@@ -3555,7 +3599,7 @@
             });
         }
 
-        // FIXED: Initialize layout viewport with proper zoom/pan and boundary constraints
+        // FIXED: Initialize layout viewport with proper zoom/pan and bounds checking
         function initLayoutViewport(index) {
             const layout = currentReport.layouts[index];
             const viewport = document.getElementById(`viewport-${index}`);
@@ -3592,8 +3636,9 @@
                 state.panX = (viewportRect.width - imgWidth * initialZoom) / 2;
                 state.panY = (viewportRect.height - imgHeight * initialZoom) / 2;
                 
-                // Constrain initial position
-                constrainPan(index);
+                // Ensure pan values are within bounds
+                constrainPan(index, imgWidth, imgHeight);
+                
                 updateLayoutTransform(index);
                 renderLayoutPins(index);
             };
@@ -3623,8 +3668,12 @@
                 state.lastMouseX = e.clientX;
                 state.lastMouseY = e.clientY;
                 
-                // FIXED: Constrain pan to keep image visible
-                constrainPan(index);
+                // Apply constraints
+                const img = document.getElementById(`layoutImage-${index}`);
+                if (img && img.naturalWidth) {
+                    constrainPan(index, img.naturalWidth, img.naturalHeight);
+                }
+                
                 updateLayoutTransform(index);
             });
             
@@ -3634,29 +3683,34 @@
             });
             
             // Touch events for mobile
+            let touchStartX, touchStartY;
+            
             viewport.addEventListener('touchstart', (e) => {
                 if (e.target.closest('.pin-marker')) return;
-                if (e.touches.length === 1) {
-                    state.isDragging = true;
-                    state.lastMouseX = e.touches[0].clientX;
-                    state.lastMouseY = e.touches[0].clientY;
-                }
-            }, { passive: false });
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                state.isDragging = true;
+            }, { passive: true });
             
             viewport.addEventListener('touchmove', (e) => {
-                if (!state.isDragging || e.touches.length !== 1) return;
-                e.preventDefault();
-                
-                const dx = e.touches[0].clientX - state.lastMouseX;
-                const dy = e.touches[0].clientY - state.lastMouseY;
+                if (!state.isDragging) return;
+                e.preventDefault(); // Prevent page scroll
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
                 
                 state.panX += dx;
                 state.panY += dy;
                 
-                state.lastMouseX = e.touches[0].clientX;
-                state.lastMouseY = e.touches[0].clientY;
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
                 
-                constrainPan(index);
+                const img = document.getElementById(`layoutImage-${index}`);
+                if (img && img.naturalWidth) {
+                    constrainPan(index, img.naturalWidth, img.naturalHeight);
+                }
+                
                 updateLayoutTransform(index);
             }, { passive: false });
             
@@ -3682,31 +3736,30 @@
             });
         }
 
-        // FIXED: Constrain pan to prevent losing the image
-        function constrainPan(index) {
-            const layout = currentReport.layouts[index];
-            const viewport = document.getElementById(`viewport-${index}`);
-            const img = document.getElementById(`layoutImage-${index}`);
+        // FIXED: Constrain pan values to keep image within viewport
+        function constrainPan(index, imgWidth, imgHeight) {
             const state = layoutStates[index];
-            
-            if (!viewport || !img || !state) return;
+            const viewport = document.getElementById(`viewport-${index}`);
+            if (!viewport) return;
             
             const viewportRect = viewport.getBoundingClientRect();
-            const imgWidth = img.naturalWidth * state.zoom;
-            const imgHeight = img.naturalHeight * state.zoom;
+            const scaledWidth = imgWidth * state.zoom;
+            const scaledHeight = imgHeight * state.zoom;
             
-            // Allow some overscroll but keep at least 50px visible
-            const minVisible = 50;
+            // Allow some overscroll for better UX, but not too much
+            const maxOverscrollX = Math.min(viewportRect.width * 0.25, 100);
+            const maxOverscrollY = Math.min(viewportRect.height * 0.25, 100);
             
-            // Constrain X
-            const maxPanX = viewportRect.width - minVisible;
-            const minPanX = minVisible - imgWidth;
-            state.panX = Math.max(minPanX, Math.min(maxPanX, state.panX));
+            // Constrain X: allow dragging so at least some part of image is visible
+            const minX = Math.min(viewportRect.width - scaledWidth + maxOverscrollX, maxOverscrollX);
+            const maxX = Math.max(-maxOverscrollX, viewportRect.width - maxOverscrollX - scaledWidth);
             
-            // Constrain Y
-            const maxPanY = viewportRect.height - minVisible;
-            const minPanY = minVisible - imgHeight;
-            state.panY = Math.max(minPanY, Math.min(maxPanY, state.panY));
+            // Constrain Y: same logic
+            const minY = Math.min(viewportRect.height - scaledHeight + maxOverscrollY, maxOverscrollY);
+            const maxY = Math.max(-maxOverscrollY, viewportRect.height - maxOverscrollY - scaledHeight);
+            
+            state.panX = Math.max(minX, Math.min(maxX, state.panX));
+            state.panY = Math.max(minY, Math.min(maxY, state.panY));
         }
 
         function updateLayoutTransform(index) {
@@ -3730,19 +3783,23 @@
             const state = layoutStates[index];
             const newZoom = Math.max(0.1, Math.min(5, state.zoom + delta));
             
-            // Zoom towards center
             const viewport = document.getElementById(`viewport-${index}`);
-            const rect = viewport.getBoundingClientRect();
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
+            const img = document.getElementById(`layoutImage-${index}`);
+            if (!viewport || !img) return;
+            
+            const viewportRect = viewport.getBoundingClientRect();
+            
+            // Zoom towards center
+            const centerX = viewportRect.width / 2;
+            const centerY = viewportRect.height / 2;
             
             // Adjust pan to zoom towards center
             state.panX = centerX - (centerX - state.panX) * (newZoom / state.zoom);
             state.panY = centerY - (centerY - state.panY) * (newZoom / state.zoom);
             state.zoom = newZoom;
             
-            // FIXED: Constrain after zoom
-            constrainPan(index);
+            // Apply constraints after zoom
+            constrainPan(index, img.naturalWidth, img.naturalHeight);
             updateLayoutTransform(index);
         }
 
@@ -4201,7 +4258,7 @@
             if (members.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state" style="padding: 1rem;">
-                        <p style="font-size: 0.875rem;">No team members added yet.</p>
+                        p style="font-size: 0.875rem;">No team members added yet.</p>
                     </div>
                 `;
                 shareList.innerHTML = `
@@ -4362,7 +4419,7 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with photo details and fitted layouts - MAX 2 PAGES PER LAYOUT
+        // FIXED: Preview Report with photo details and fitted layouts
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -4387,7 +4444,7 @@
                 </div>
             `}).join('');
             
-            // Generate HTML for all layouts with content - FIXED to fit max 2 pages
+            // Generate HTML for all layouts with content - FIXED to fit page
             let layoutsHtml = '';
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
             
@@ -4426,18 +4483,13 @@
                     }
                     
                     return `
-                        <!-- FIXED: Layout section - plan view on page 1, pins table on page 2 if needed -->
                         <div style="margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 15px; page-break-inside: avoid; max-width: 100%;">
                             <h3 style="color: #1e3a8a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; font-size: 12pt;">
                                 Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
-                            
-                            <!-- FIXED: Plan view always fully shown on one page -->
-                            <div style="text-align: center; margin-bottom: 10px; page-break-after: avoid;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 220mm; height: auto; width: auto; max-width: 100%; border: 1px solid #e2e8f0; object-fit: contain;">
+                            <div style="text-align: center; margin-bottom: 10px;">
+                                <img src="${layout.image}" style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0;">
                             </div>
-                            
-                            <!-- Pin table on next page if it doesn't fit -->
                             ${pinsTable}
                         </div>
                     `;
