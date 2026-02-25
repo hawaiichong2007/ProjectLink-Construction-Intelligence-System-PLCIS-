@@ -3945,6 +3945,7 @@
             });
         }
 
+        // FIXED: Load layout file with HIGH RESOLUTION rendering (scale 3.0 for 300 DPI equivalent)
         async function loadLayoutFile(index, input) {
             if (!input.files || !input.files[0]) return;
             
@@ -3965,21 +3966,28 @@
                     layout.pdfData = arrayBuffer;
                     layout.pdfPages = [];
                     
+                    // FIXED: Increased scale from 2.0 to 3.0 for higher resolution (300 DPI equivalent)
                     for (let i = 1; i <= numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 2.0 });
+                        const viewport = page.getViewport({ scale: 3.0 }); // Increased from 2.0 to 3.0
                         
                         const pageCanvas = document.createElement('canvas');
                         const pageCtx = pageCanvas.getContext('2d');
                         pageCanvas.width = viewport.width;
                         pageCanvas.height = viewport.height;
                         
+                        // Enable high quality rendering
+                        pageCtx.imageSmoothingEnabled = true;
+                        pageCtx.imageSmoothingQuality = 'high';
+                        
                         await page.render({
                             canvasContext: pageCtx,
-                            viewport: viewport
+                            viewport: viewport,
+                            background: 'white'
                         }).promise;
                         
-                        layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.95));
+                        // Use maximum quality for JPEG output
+                        layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.98)); // Increased quality from 0.95 to 0.98
                     }
                     
                     layout.image = layout.pdfPages[0];
@@ -4404,7 +4412,7 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with photo details and fitted layouts
+        // FIXED: Preview Report with photo details and fitted layouts - ENSURES LAYOUTS SHOW
         function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -4429,7 +4437,7 @@
                 </div>
             `}).join('');
             
-            // Generate HTML for all layouts with content - FIXED to fit page
+            // FIXED: Generate HTML for all layouts with content - ENSURES IMAGES DISPLAY
             let layoutsHtml = '';
             const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
             
@@ -4467,18 +4475,28 @@
                         `;
                     }
                     
+                    // FIXED: Ensure layout image displays with proper styling and crossOrigin handling
                     return `
                         <div style="margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 15px; page-break-inside: avoid; max-width: 100%;">
                             <h3 style="color: #1e3a8a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; font-size: 12pt;">
                                 Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
                             </h3>
-                            <div style="text-align: center; margin-bottom: 10px;">
-                                <img src="${layout.image}" style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0;">
+                            <div style="text-align: center; margin-bottom: 10px; background: #f8fafc; padding: 10px;">
+                                <img src="${layout.image}" 
+                                     style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0; display: block; margin: 0 auto;" 
+                                     crossorigin="anonymous"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                     onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                                <div style="display: none; padding: 20px; color: #dc2626; font-weight: bold;">
+                                    <i class="fas fa-exclamation-triangle"></i> Layout image failed to load. Please re-upload the layout.
+                                </div>
                             </div>
                             ${pinsTable}
                         </div>
                     `;
                 }).join('');
+            } else {
+                layoutsHtml = '<p style="color: #64748b; font-style: italic;">No site plans uploaded.</p>';
             }
             
             content.innerHTML = `
