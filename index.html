@@ -16,14 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        /* [Previous CSS styles remain the same] */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        /* CSS Variables */
         :root {
             --primary: #1e3a8a;
             --primary-light: #3b82f6;
@@ -47,6 +40,13 @@
             --nav-height: 48px;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg);
@@ -60,11 +60,10 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            /* FIXED: Dynamic padding based on actual header + nav heights */
             padding-top: calc(var(--header-height) + var(--nav-height));
         }
 
-        /* Header - FIXED at top with reduced height */
+        /* Header - FIXED at top */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
             color: white;
@@ -89,2235 +88,422 @@
             width: 100%;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+        .logo { display: flex; align-items: center; gap: 0.5rem; }
+        .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; }
+        .logo-subtitle { font-size: 0.7rem; opacity: 0.9; font-weight: 500; }
 
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo-title {
-            font-size: 1rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-        }
-
-        .logo-subtitle {
-            font-size: 0.7rem;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-
-        .user-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255,255,255,0.15);
-            padding: 0.4rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8125rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .user-badge:hover {
-            background: rgba(255,255,255,0.25);
-        }
+        .user-badge { display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.15); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.8125rem; cursor: pointer; transition: background 0.3s; }
+        .user-badge:hover { background: rgba(255,255,255,0.25); }
 
         /* Role Selector */
-        .role-selector {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 5000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .role-selector.active {
-            display: flex;
-        }
-
-        .role-modal {
-            background: white;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .role-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            text-align: center;
-        }
-
-        .role-header h2 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .role-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            padding: 1.5rem;
-        }
-
-        .role-card {
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .role-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .role-card.selected {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .role-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.75rem;
-            font-size: 1.5rem;
-            color: white;
-        }
-
+        .role-selector { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .role-selector.active { display: flex; }
+        .role-modal { background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .role-header { padding: 1.5rem; border-bottom: 1px solid var(--border); text-align: center; }
+        .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding: 1.5rem; }
+        .role-card { border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .role-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .role-card.selected { border-color: var(--primary); background: #eff6ff; }
+        .role-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.5rem; color: white; }
         .role-engineer { background: var(--engineer); }
         .role-supervisor { background: var(--supervisor); }
         .role-client { background: var(--client); }
         .role-rto { background: var(--rto); }
         .role-re { background: var(--re); }
         .role-pm { background: var(--pm); }
+        .role-name { font-weight: 700; margin-bottom: 0.25rem; }
+        .role-desc { font-size: 0.75rem; color: var(--text-secondary); }
 
-        .role-name {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .role-desc {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Navigation - FIXED at top below header with reduced height */
-        .nav-tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-            scrollbar-width: none;
-            position: fixed;
-            /* FIXED: Position exactly below header using CSS variable */
-            top: var(--header-height);
-            left: 0;
-            right: 0;
-            z-index: 999;
-            height: var(--nav-height);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .nav-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .nav-tab {
-            flex: 1;
-            min-width: 100px;
-            /* FIXED: Reduced padding for smaller height */
-            padding: 0.75rem 0.5rem;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            white-space: nowrap;
-            font-size: 0.8125rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-        }
-
-        .nav-tab i {
-            font-size: 0.875rem;
-        }
-
-        .nav-tab.active {
-            color: var(--primary);
-        }
-
-        .nav-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 3px 3px 0 0;
-        }
+        /* Navigation */
+        .nav-tabs { display: flex; background: white; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; position: fixed; top: var(--header-height); left: 0; right: 0; z-index: 999; height: var(--nav-height); box-shadow: 0 2px 4px rgba(0,0,0,0.05); -webkit-overflow-scrolling: touch; }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tab { flex: 1; min-width: 100px; padding: 0.75rem 0.5rem; background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; transition: all 0.3s; position: relative; white-space: nowrap; font-size: 0.8125rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
+        .nav-tab i { font-size: 0.875rem; }
+        .nav-tab.active { color: var(--primary); }
+        .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
 
         /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .section {
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .main-content { flex: 1; padding: 1rem; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .section { display: none; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Cards */
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+        .card { background: var(--card); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .card-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
 
         /* Form Elements */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text);
-            font-size: 0.875rem;
-        }
-
-        .form-input, .form-textarea, .form-select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
-            background: white;
-        }
-
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text); font-size: 0.875rem; }
+        .form-input, .form-textarea, .form-select { width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; transition: all 0.3s; font-family: inherit; background: white; }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
+        .form-textarea { min-height: 100px; resize: vertical; }
 
         /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1e40af;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #047857;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-accent {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-accent:hover {
-            background: #d97706;
-        }
-
-        .btn-secondary {
-            background: #f1f5f9;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: all 0.3s; width: 100%; margin-bottom: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1e40af; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #047857; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-accent:hover { background: #d97706; }
+        .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
 
         /* Grid Layout */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 
         /* GPS Status */
-        .gps-status {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .gps-status.accurate {
-            background: #d1fae5;
-            color: var(--success);
-            border: 1px solid #a7f3d0;
-        }
-
-        .gps-status.inaccurate {
-            background: #fef3c7;
-            color: var(--warning);
-            border: 1px solid #fde68a;
-        }
-
-        .gps-status.error {
-            background: #fee2e2;
-            color: var(--danger);
-            border: 1px solid #fecaca;
-        }
-
-        .gps-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
+        .gps-status { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600; font-size: 0.875rem; }
+        .gps-status.accurate { background: #d1fae5; color: var(--success); border: 1px solid #a7f3d0; }
+        .gps-status.inaccurate { background: #fef3c7; color: var(--warning); border: 1px solid #fde68a; }
+        .gps-status.error { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+        .gps-dot { width: 12px; height: 12px; border-radius: 50%; animation: pulse 2s infinite; }
         .gps-status.accurate .gps-dot { background: var(--success); }
         .gps-status.inaccurate .gps-dot { background: var(--warning); }
         .gps-status.error .gps-dot { background: var(--danger); animation: none; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         /* Coordinate Display */
-        .coord-display {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--primary);
-        }
-
-        .coord-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .coord-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .coord-label {
-            color: var(--text-secondary);
-        }
-
-        .coord-value {
-            font-weight: 700;
-            color: var(--primary);
-        }
+        .coord-display { background: #f8fafc; padding: 1rem; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.875rem; margin-bottom: 1rem; border-left: 4px solid var(--primary); }
+        .coord-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .coord-row:last-child { margin-bottom: 0; }
+        .coord-label { color: var(--text-secondary); }
+        .coord-value { font-weight: 700; color: var(--primary); }
 
         /* Map Selection Buttons */
-        .map-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .map-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .map-btn:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .map-btn.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
+        .map-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+        .map-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; background: white; cursor: pointer; transition: all 0.3s; font-weight: 600; font-size: 0.875rem; }
+        .map-btn:hover { border-color: var(--primary); background: #eff6ff; }
+        .map-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
 
         /* Photo Grid */
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .photo-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: transform 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .photo-item:hover {
-            transform: scale(1.02);
-            border-color: var(--primary);
-        }
-
-        .photo-item.selected {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
-        }
-
-        .photo-item.has-pin {
-            border-color: var(--success);
-        }
-
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--accent);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            font-weight: 700;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .photo-pin-badge {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: var(--success);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .photo-delete {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: var(--danger);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            font-size: 1rem;
-            line-height: 1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .photo-item:hover .photo-delete {
-            opacity: 1;
-        }
-
-        .photo-gps-badge {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: var(--success);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .photo-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s; border: 2px solid transparent; }
+        .photo-item:hover { transform: scale(1.02); border-color: var(--primary); }
+        .photo-item.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3); }
+        .photo-item.has-pin { border-color: var(--success); }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .photo-pin-badge { position: absolute; top: 8px; left: 8px; background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .photo-delete { position: absolute; bottom: 8px; right: 8px; background: var(--danger); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 1rem; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
+        .photo-item:hover .photo-delete { opacity: 1; }
+        .photo-gps-badge { position: absolute; bottom: 8px; left: 8px; background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 
         /* Drawing Controls */
-        .drawing-controls {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
+        .drawing-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
 
-        /* Zoom Controls - SMALL and OUTSIDE layout viewport at TOP */
-        .zoom-controls-container {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
-            padding: 0.25rem;
-            background: #f1f5f9;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            width: fit-content;
-            position: absolute;
-            top: -40px; /* Position outside and above the layout */
-            right: 0;
-            z-index: 100;
-        }
-
-        .zoom-controls {
-            display: flex;
-            gap: 2px;
-        }
-
-        .zoom-btn {
-            width: 28px;
-            height: 28px;
-            border: none;
-            border-radius: 4px;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: var(--text);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
-
-        .zoom-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .zoom-level {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .zoom-hint {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            margin-left: auto;
-        }
+        /* Zoom Controls */
+        .zoom-controls-container { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem; padding: 0.25rem; background: #f1f5f9; border-radius: 6px; border: 1px solid var(--border); width: fit-content; position: absolute; top: -40px; right: 0; z-index: 100; }
+        .zoom-controls { display: flex; gap: 2px; }
+        .zoom-btn { width: 28px; height: 28px; border: none; border-radius: 4px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s; }
+        .zoom-btn:hover { background: var(--primary); color: white; }
+        .zoom-level { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); min-width: 40px; text-align: center; }
+        .zoom-hint { font-size: 0.65rem; color: var(--text-secondary); margin-left: auto; }
 
         /* PDF Page Navigation */
-        .pdf-nav {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            padding: 0.75rem;
-            background: #f1f5f9;
-            border-bottom: 1px solid var(--border);
-        }
+        .pdf-nav { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 0.75rem; background: #f1f5f9; border-bottom: 1px solid var(--border); }
+        .pdf-nav-btn { padding: 0.5rem 1rem; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .pdf-nav-btn:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
+        .pdf-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pdf-page-info { font-weight: 600; color: var(--text); min-width: 100px; text-align: center; }
 
-        .pdf-nav-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .pdf-nav-btn:hover:not(:disabled) {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .pdf-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pdf-page-info {
-            font-weight: 600;
-            color: var(--text);
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .pin-legend {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            flex-wrap: wrap;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-
-        .legend-item:hover {
-            background: white;
-        }
-
-        .legend-item.active {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .legend-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 0 1px #cbd5e1;
-        }
-
-        .legend-text {
-            font-weight: 500;
-        }
+        .pin-legend { display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.875rem; flex-wrap: wrap; padding: 1rem; background: #f8fafc; border-radius: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.3s; }
+        .legend-item:hover { background: white; }
+        .legend-item.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .legend-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1; }
+        .legend-text { font-weight: 500; }
 
         /* Pin List */
-        .pin-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .pin-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: #f8fafc;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
-        }
-
-        .pin-item:hover {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .pin-item.linked {
-            border-left: 4px solid var(--success);
-        }
-
-        .pin-number {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            flex-shrink: 0;
-        }
-
-        .pin-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .pin-type {
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .pin-desc {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .pin-photo-link {
-            font-size: 0.75rem;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            margin-top: 0.25rem;
-            font-weight: 600;
-        }
-
-        .pin-gps {
-            font-size: 0.75rem;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            margin-top: 0.25rem;
-        }
-
-        .pin-actions {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .pin-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            background: white;
-            color: var(--text-secondary);
-        }
-
-        .pin-btn:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        .pin-btn.link-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
+        .pin-list { max-height: 400px; overflow-y: auto; }
+        .pin-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid var(--border); transition: all 0.3s; }
+        .pin-item:hover { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .pin-item.linked { border-left: 4px solid var(--success); }
+        .pin-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.875rem; flex-shrink: 0; }
+        .pin-info { flex: 1; min-width: 0; }
+        .pin-type { font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem; }
+        .pin-desc { font-size: 0.8125rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pin-photo-link { font-size: 0.75rem; color: var(--success); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.25rem; font-weight: 600; }
+        .pin-gps { font-size: 0.75rem; color: var(--success); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.25rem; }
+        .pin-actions { display: flex; gap: 0.25rem; }
+        .pin-btn { width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; background: white; color: var(--text-secondary); }
+        .pin-btn:hover { background: var(--danger); color: white; }
+        .pin-btn.link-btn:hover { background: var(--primary); color: white; }
 
         /* Report List */
-        .report-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .report-item {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            transition: all 0.3s;
-        }
-
-        .report-item:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .report-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .report-info h3 {
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-
-        .report-meta {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .report-badges {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .badge-photos {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-pins {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-role {
-            background: #f3e8ff;
-            color: #7c3aed;
-        }
-
-        .report-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-direction: column;
-        }
-
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            border: none;
-            background: #f1f5f9;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            color: var(--text-secondary);
-        }
-
-        .icon-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
+        .report-list { display: flex; flex-direction: column; gap: 1rem; }
+        .report-item { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; transition: all 0.3s; }
+        .report-item:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .report-info { flex: 1; min-width: 0; }
+        .report-info h3 { font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .report-meta { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+        .report-badges { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; }
+        .badge-photos { background: #dbeafe; color: #1e40af; }
+        .badge-pins { background: #dcfce7; color: #166534; }
+        .badge-role { background: #f3e8ff; color: #7c3aed; }
+        .report-actions { display: flex; gap: 0.5rem; flex-direction: column; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; color: var(--text-secondary); }
+        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
 
         /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
-            animation: modalSlide 0.3s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        @keyframes modalSlide {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8fafc;
-        }
-
-        .modal-header h3 {
-            font-size: 1.25rem;
-            color: var(--primary);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .modal-close:hover {
-            background: #f1f5f9;
-            color: var(--danger);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; padding: 1rem; overflow-y: auto; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; animation: modalSlide 0.3s; display: flex; flex-direction: column; }
+        @keyframes modalSlide { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .modal-header h3 { font-size: 1.25rem; color: var(--primary); }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+        .modal-close { background: none; border: none; font-size: 1.75rem; cursor: pointer; color: var(--text-secondary); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.3s; }
+        .modal-close:hover { background: #f1f5f9; color: var(--danger); }
 
         /* Map Modal Specific */
-        .map-modal-content {
-            max-width: 95vw;
-            height: 90vh;
-        }
-
-        .map-container-full {
-            flex: 1;
-            position: relative;
-            min-height: 500px;
-            background: #f0f0f0;
-        }
-
-        .map-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            min-height: 500px;
-        }
-
-        .map-tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .map-tab {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-secondary);
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .map-tab.active {
-            color: var(--primary);
-            background: #eff6ff;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .map-panel {
-            display: none;
-            height: 100%;
-        }
-
-        .map-panel.active {
-            display: block;
-        }
+        .map-modal-content { max-width: 95vw; height: 90vh; }
+        .map-container-full { flex: 1; position: relative; min-height: 500px; background: #f0f0f0; }
+        .map-iframe { width: 100%; height: 100%; border: none; min-height: 500px; }
+        .map-tabs { display: flex; background: white; border-bottom: 1px solid var(--border); }
+        .map-tab { flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-secondary); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .map-tab.active { color: var(--primary); background: #eff6ff; border-bottom: 2px solid var(--primary); }
+        .map-panel { display: none; height: 100%; }
+        .map-panel.active { display: block; }
 
         /* Preview Image */
-        .preview-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            max-height: 60vh;
-            object-fit: contain;
-            background: #f8fafc;
-        }
+        .preview-image { width: 100%; border-radius: 8px; margin-bottom: 1rem; max-height: 60vh; object-fit: contain; background: #f8fafc; }
 
         /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.95);
-            z-index: 3000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.3; }
 
         /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #1e293b;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            z-index: 4000;
-            opacity: 0;
-            transition: all 0.3s;
-            font-weight: 500;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 1rem 2rem; border-radius: 8px; z-index: 4000; opacity: 0; transition: all 0.3s; font-weight: 500; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         /* PDF Preview Styles */
-        .pdf-preview {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .a4-preview {
-            background: white;
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            padding: 20mm;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: relative;
-        }
+        .pdf-preview { background: #f8fafc; padding: 2rem; border-radius: 8px; margin-bottom: 1rem; }
+        .a4-preview { background: white; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 20mm; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
 
         /* File Upload Zone */
-        .upload-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-        }
-
-        .upload-zone:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .upload-zone.has-file {
-            border-color: var(--success);
-            background: #f0fdf4;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .upload-text {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.5rem;
-        }
-
-        .upload-hint {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s; background: #f8fafc; }
+        .upload-zone:hover { border-color: var(--primary); background: #eff6ff; }
+        .upload-zone.has-file { border-color: var(--success); background: #f0fdf4; }
+        .upload-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--text-secondary); }
+        .upload-text { font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+        .upload-hint { font-size: 0.875rem; color: var(--text-secondary); }
 
         /* Collaboration Panel */
-        .collab-panel {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .collab-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .collab-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .collab-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .collab-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-        }
-
-        .collab-info {
-            flex: 1;
-        }
-
-        .collab-name {
-            font-weight: 600;
-            font-size: 0.9375rem;
-        }
-
-        .collab-role {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-        }
-
-        .collab-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-
-        /* Print Styles - A4 Optimized with FIT layout and photo details */
-        @media print {
-            @page {
-                size: A4;
-                margin: 10mm;
-            }
-
-            body {
-                background: white;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                padding-top: 0 !important;
-            }
-
-            .no-print, .header, .nav-tabs, .btn, .icon-btn, .modal, .loading-overlay, .toast, .zoom-controls-container, .layout-upload-zone, .drawing-controls, .pin-type-selector, .layout-section-header button {
-                display: none !important;
-            }
-
-            .app-container {
-                display: block;
-                padding-top: 0 !important;
-            }
-
-            .main-content {
-                padding: 0;
-                max-width: none;
-            }
-
-            .section {
-                display: block !important;
-                animation: none;
-            }
-
-            .card {
-                break-inside: avoid;
-                box-shadow: none;
-                border: 1px solid #e2e8f0;
-                margin-bottom: 1rem;
-                page-break-inside: avoid;
-            }
-
-            .a4-container {
-                width: 210mm;
-                min-height: 297mm;
-                padding: 10mm;
-                margin: 0 auto;
-                background: white;
-                box-shadow: none;
-            }
-
-            /* Ensure layouts fit the page when printing */
-            .layout-section {
-                page-break-before: always;
-                page-break-inside: avoid;
-                width: 100%;
-                max-width: 190mm; /* Fit within A4 margins */
-                margin: 0 auto 20px auto;
-                border: 2px solid #e2e8f0;
-                padding: 15px;
-            }
-
-            .layout-section:first-of-type {
-                page-break-before: auto;
-            }
-
-            /* Fit layout image to page width */
-            .layout-viewport {
-                height: auto !important;
-                max-height: 250mm;
-                overflow: visible;
-            }
-
-            .layout-canvas-wrapper {
-                transform: none !important;
-                width: 100% !important;
-            }
-
-            .layout-image {
-                max-width: 100% !important;
-                width: 100% !important;
-                height: auto !important;
-                display: block;
-            }
-
-            /* Ensure pins are visible in print */
-            .pins-layer {
-                display: block !important;
-            }
-
-            .pin-marker {
-                transform: translate(-50%, -100%) scale(0.8) !important;
-            }
-
-            /* Photo grid for print - 2 columns with details */
-            .photo-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .photo-item {
-                break-inside: avoid;
-                border: 1px solid #e2e8f0;
-                page-break-inside: avoid;
-            }
-
-            /* Print photo details clearly */
-            .photo-print-details {
-                font-size: 9pt;
-                color: #333;
-                margin-top: 5px;
-                padding: 5px;
-                background: #f8fafc;
-                border-top: 1px solid #e2e8f0;
-            }
-
-            .photo-print-details strong {
-                color: var(--primary);
-            }
-
-            /* Pin list styling for print */
-            .pin-list {
-                max-height: none;
-                overflow: visible;
-            }
-
-            .pin-item {
-                break-inside: avoid;
-                page-break-inside: avoid;
-                font-size: 9pt;
-            }
-
-            /* Layout print container improvements */
-            .all-layouts-container {
-                gap: 20px;
-            }
-
-            .layout-print-container {
-                page-break-before: always;
-            }
-
-            .layout-print-page {
-                page-break-after: always;
-                margin-bottom: 20px;
-            }
-
-            .layout-print-page:last-child {
-                page-break-after: auto;
-            }
-
-            .print-layout-container {
-                display: block !important;
-                page-break-before: always;
-            }
-
-            .print-layout-container.empty {
-                display: none !important;
-            }
-
-            /* Ensure text is readable in print */
-            body {
-                font-size: 11pt;
-                line-height: 1.4;
-            }
-
-            h2 {
-                font-size: 14pt;
-                margin-top: 15px;
-                margin-bottom: 10px;
-            }
-
-            h3 {
-                font-size: 12pt;
-            }
-        }
+        .collab-panel { background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .collab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .collab-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .collab-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid var(--border); }
+        .collab-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.875rem; }
+        .collab-info { flex: 1; }
+        .collab-name { font-weight: 600; font-size: 0.9375rem; }
+        .collab-role { font-size: 0.8125rem; color: var(--text-secondary); }
+        .collab-status { width: 10px; height: 10px; border-radius: 50%; background: var(--success); }
 
         /* Hidden file input */
-        .file-input {
-            display: none;
-        }
+        .file-input { display: none; }
 
         /* Responsive - FIXED for phone portrait */
         @media (max-width: 768px) {
-            :root {
-                --header-height: 52px;
-                --nav-height: 44px;
-            }
-
-            .header {
-                padding: 0.5rem 0.75rem;
-            }
-
-            .logo-icon {
-                width: 32px;
-                height: 32px;
-                font-size: 1.1rem;
-            }
-
-            .logo-title {
-                font-size: 0.9rem;
-            }
-
-            .logo-subtitle {
-                font-size: 0.65rem;
-            }
-
-            .user-badge {
-                padding: 0.35rem 0.6rem;
-                font-size: 0.75rem;
-            }
-
-            .nav-tab {
-                min-width: 80px;
-                padding: 0.5rem 0.25rem;
-                font-size: 0.75rem;
-            }
-
-            .nav-tab i {
-                font-size: 0.8rem;
-            }
-
-            .main-content {
-                padding: 0.75rem;
-            }
+            :root { --header-height: 52px; --nav-height: 44px; }
+            .header { padding: 0.5rem 0.75rem; }
+            .logo-icon { width: 32px; height: 32px; font-size: 1.1rem; }
+            .logo-title { font-size: 0.9rem; }
+            .logo-subtitle { font-size: 0.65rem; }
+            .user-badge { padding: 0.35rem 0.6rem; font-size: 0.75rem; }
+            .nav-tab { min-width: 80px; padding: 0.5rem 0.25rem; font-size: 0.75rem; }
+            .nav-tab i { font-size: 0.8rem; }
+            .main-content { padding: 0.75rem; }
         }
 
         /* Animations */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .slide-up {
-            animation: slideUp 0.3s ease-out;
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        .slide-up { animation: slideUp 0.3s ease-out; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         /* Export Actions */
-        .export-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-outline {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-        }
+        .export-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
 
         /* Pin Link Modal */
-        .photo-select-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.75rem;
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .photo-select-item {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .photo-select-item:hover {
-            transform: scale(1.05);
-            border-color: var(--primary);
-        }
-
-        .photo-select-item.selected {
-            border-color: var(--success);
-            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.2);
-        }
-
-        .photo-select-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-select-number {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: var(--accent);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
+        .photo-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; max-height: 400px; overflow-y: auto; padding: 1rem; }
+        .photo-select-item { aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; border: 3px solid transparent; transition: all 0.3s; position: relative; }
+        .photo-select-item:hover { transform: scale(1.05); border-color: var(--primary); }
+        .photo-select-item.selected { border-color: var(--success); box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.2); }
+        .photo-select-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-select-number { position: absolute; top: 4px; right: 4px; background: var(--accent); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
 
         /* Canvas Container with Pins Overlay - FIXED FOR ZOOM/PAN */
-        .canvas-wrapper {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            overflow: hidden;
-            background: #e5e7eb;
-            touch-action: none;
-        }
-
-        .canvas-viewport {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-origin: 0 0;
-            transition: transform 0.1s ease-out;
-        }
-
-        .pins-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .plan-pin {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            transform: translate(-50%, -100%);
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 10;
-            transition: transform 0.2s;
-        }
-
-        .plan-pin:hover {
-            transform: translate(-50%, -100%) scale(1.2);
-            z-index: 20;
-        }
-
-        .plan-pin-marker {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .plan-pin-head {
-            width: 24px;
-            height: 24px;
-            border-radius: 50% 50% 50% 0;
-            background: var(--color, #3b82f6);
-            position: absolute;
-            transform: rotate(-45deg);
-            left: 4px;
-            top: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .plan-pin-number {
-            transform: rotate(45deg);
-            color: white;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .plan-pin-photo-badge {
-            position: absolute;
-            bottom: -4px;
-            right: -4px;
-            background: var(--accent);
-            color: white;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            border: 2px solid white;
-        }
-
-        .plan-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            margin-bottom: 8px;
-            z-index: 30;
-        }
-
-        .plan-pin:hover .plan-tooltip {
-            opacity: 1;
-        }
+        .canvas-wrapper { position: relative; width: 100%; height: 600px; overflow: hidden; background: #e5e7eb; touch-action: none; }
+        .canvas-viewport { position: absolute; top: 0; left: 0; transform-origin: 0 0; transition: transform 0.1s ease-out; }
+        .pins-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .plan-pin { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -100%); cursor: pointer; pointer-events: auto; z-index: 10; transition: transform 0.2s; }
+        .plan-pin:hover { transform: translate(-50%, -100%) scale(1.2); z-index: 20; }
+        .plan-pin-marker { width: 100%; height: 100%; position: relative; }
+        .plan-pin-head { width: 24px; height: 24px; border-radius: 50% 50% 50% 0; background: var(--color, #3b82f6); position: absolute; transform: rotate(-45deg); left: 4px; top: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        .plan-pin-number { transform: rotate(45deg); color: white; font-weight: 700; font-size: 12px; }
+        .plan-pin-photo-badge { position: absolute; bottom: -4px; right: -4px; background: var(--accent); color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; }
+        .plan-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.875rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: 8px; z-index: 30; }
+        .plan-pin:hover .plan-tooltip { opacity: 1; }
 
         /* Link Photo Modal */
-        .link-photo-modal .modal-content {
-            max-width: 600px;
-        }
+        .link-photo-modal .modal-content { max-width: 600px; }
 
         /* Photo Link Indicator in Pin List */
-        .pin-photo-thumb {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            object-fit: cover;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .pin-photo-thumb:hover {
-            transform: scale(1.1);
-            border-color: var(--primary);
-        }
+        .pin-photo-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 2px solid var(--border); cursor: pointer; transition: all 0.3s; }
+        .pin-photo-thumb:hover { transform: scale(1.1); border-color: var(--primary); }
 
         /* Multi-page PDF Thumbnails */
-        .pdf-thumbnails {
-            display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding: 0.5rem;
-            background: #f1f5f9;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .pdf-thumb {
-            width: 80px;
-            height: 100px;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            flex-shrink: 0;
-            position: relative;
-            background: white;
-        }
-
-        .pdf-thumb.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2);
-        }
-
-        .pdf-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .pdf-thumb-page {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .pdf-thumbnails { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem; background: #f1f5f9; border-radius: 8px; margin-bottom: 1rem; }
+        .pdf-thumb { width: 80px; height: 100px; border-radius: 6px; overflow: hidden; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; position: relative; background: white; }
+        .pdf-thumb.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2); }
+        .pdf-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .pdf-thumb-page { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
 
         /* Pin Type Selector */
-        .pin-type-selector {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .pin-type-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border);
-            background: white;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .pin-type-btn.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .pin-type-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+        .pin-type-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .pin-type-btn { padding: 0.5rem 1rem; border: 2px solid var(--border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem; }
+        .pin-type-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+        .pin-type-dot { width: 12px; height: 12px; border-radius: 50%; }
 
         /* Team Member Form Styles */
-        .member-form {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-        }
-
-        .member-form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-
-        @media (min-width: 768px) {
-            .member-form-grid {
-                grid-template-columns: 1fr 1fr 1fr auto;
-            }
-        }
-
-        .member-list-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            margin-bottom: 0.5rem;
-        }
-
-        .member-info {
-            flex: 1;
-        }
-
-        .member-name {
-            font-weight: 600;
-            font-size: 0.9375rem;
-        }
-
-        .member-details {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-        }
-
-        .member-delete {
-            width: 32px;
-            height: 32px;
-            border: none;
-            border-radius: 6px;
-            background: #fee2e2;
-            color: var(--danger);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .member-delete:hover {
-            background: var(--danger);
-            color: white;
-        }
+        .member-form { background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border); }
+        .member-form-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+        @media (min-width: 768px) { .member-form-grid { grid-template-columns: 1fr 1fr 1fr auto; } }
+        .member-list-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: white; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.5rem; }
+        .member-info { flex: 1; }
+        .member-name { font-weight: 600; font-size: 0.9375rem; }
+        .member-details { font-size: 0.8125rem; color: var(--text-secondary); }
+        .member-delete { width: 32px; height: 32px; border: none; border-radius: 6px; background: #fee2e2; color: var(--danger); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .member-delete:hover { background: var(--danger); color: white; }
 
         /* Layout Selection Styles */
-        .layout-selector {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .layout-input-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .layout-input {
-            width: 80px;
-            padding: 0.5rem;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .layout-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-        }
-
-        .layout-tab {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border);
-            background: white;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-
-        .layout-tab.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .layout-tab.has-content {
-            border-color: var(--success);
-            color: var(--success);
-        }
+        .layout-selector { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .layout-input-group { display: flex; align-items: center; gap: 0.5rem; }
+        .layout-input { width: 80px; padding: 0.5rem; border: 2px solid var(--border); border-radius: 6px; text-align: center; font-weight: 600; }
+        .layout-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .layout-tab { padding: 0.5rem 1rem; border: 2px solid var(--border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.875rem; font-weight: 600; white-space: nowrap; transition: all 0.3s; }
+        .layout-tab.active { border-color: var(--primary); background: var(--primary); color: white; }
+        .layout-tab.has-content { border-color: var(--success); color: var(--success); }
 
         /* Email Share Modal */
-        .email-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .email-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .email-item:hover {
-            background: #f8fafc;
-        }
-
-        .email-item.selected {
-            background: #eff6ff;
-            border-color: var(--primary);
-        }
-
-        .email-checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary);
-        }
-
-        .email-info {
-            flex: 1;
-        }
-
-        .email-name {
-            font-weight: 600;
-        }
-
-        .email-address {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .share-summary {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
+        .email-list { max-height: 300px; overflow-y: auto; }
+        .email-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.3s; }
+        .email-item:hover { background: #f8fafc; }
+        .email-item.selected { background: #eff6ff; border-color: var(--primary); }
+        .email-checkbox { width: 20px; height: 20px; accent-color: var(--primary); }
+        .email-info { flex: 1; }
+        .email-name { font-weight: 600; }
+        .email-address { font-size: 0.875rem; color: var(--text-secondary); }
+        .share-summary { background: #f8fafc; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
 
         /* High Resolution Image Display */
-        .high-res-container {
-            width: 100%;
-            overflow: auto;
-            position: relative;
-        }
-
-        .high-res-image {
-            max-width: none;
-            width: auto;
-            height: auto;
-            display: block;
-        }
+        .high-res-container { width: 100%; overflow: auto; position: relative; }
+        .high-res-image { max-width: none; width: auto; height: auto; display: block; }
 
         /* Navigation Hint Overlay */
-        .nav-hint {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            z-index: 100;
-            pointer-events: none;
-            opacity: 0.8;
-        }
+        .nav-hint { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.875rem; z-index: 100; pointer-events: none; opacity: 0.8; }
 
         /* Map Snapshot Button */
-        .map-snapshot-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-        }
-
-        .map-snapshot-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
+        .map-snapshot-btn { position: absolute; top: 10px; right: 10px; z-index: 100; background: white; border: 2px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s; }
+        .map-snapshot-btn:hover { background: var(--primary); color: white; }
 
         /* All Layouts Container */
-        .all-layouts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .layout-section {
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            background: white;
-            position: relative; /* For zoom controls positioning */
-            margin-top: 40px; /* Space for zoom controls */
-        }
-
-        .layout-section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .layout-section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .layout-upload-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-            margin-bottom: 1rem;
-        }
-
-        .layout-upload-zone:hover {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .layout-canvas-container {
-            position: relative;
-            width: 100%;
-            background: #f8fafc;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px dashed #cbd5e1;
-            margin-bottom: 1rem;
-            min-height: 400px;
-            max-height: 600px;
-            overflow: auto;
-        }
+        .all-layouts-container { display: flex; flex-direction: column; gap: 2rem; }
+        .layout-section { border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; background: white; position: relative; margin-top: 40px; }
+        .layout-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+        .layout-section-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+        .layout-upload-zone { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s; background: #f8fafc; margin-bottom: 1rem; }
+        .layout-upload-zone:hover { border-color: var(--primary); background: #eff6ff; }
+        .layout-canvas-container { position: relative; width: 100%; background: #f8fafc; border-radius: 8px; overflow: hidden; border: 2px dashed #cbd5e1; margin-bottom: 1rem; min-height: 400px; max-height: 600px; overflow: auto; }
 
         /* Map container for snapshot */
-        .map-snapshot-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        #googleMapFrame, #oneMapFrame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .map-snapshot-container { position: relative; width: 100%; height: 100%; }
+        #googleMapFrame, #oneMapFrame { width: 100%; height: 100%; border: none; }
 
         /* FIXED: Layout Canvas Styles for Zoom/Pan with boundary constraints */
-        .layout-viewport {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            overflow: hidden; /* Changed from auto to hidden for proper panning */
-            background: #f0f0f0;
-            cursor: grab;
-            touch-action: none; /* Prevent default touch actions */
-        }
+        .layout-viewport { position: relative; width: 100%; height: 500px; overflow: hidden; background: #f0f0f0; cursor: grab; touch-action: none; }
+        .layout-viewport:active { cursor: grabbing; }
+        .layout-canvas-wrapper { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+        .layout-image { display: block; max-width: none; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+        .pins-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .pin-marker { position: absolute; width: 28px; height: 28px; transform: translate(-50%, -100%); cursor: pointer; pointer-events: auto; z-index: 10; }
+        .pin-marker:hover { transform: translate(-50%, -100%) scale(1.2); z-index: 20; }
+        .pin-head { width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        .pin-number { transform: rotate(45deg); color: white; font-weight: 700; font-size: 11px; }
+        .pin-photo-indicator { position: absolute; bottom: -2px; right: -2px; background: var(--accent); color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 2px solid white; }
+        .pin-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; margin-bottom: 4px; }
+        .pin-marker:hover .pin-tooltip { opacity: 1; }
 
-        .layout-viewport:active {
-            cursor: grabbing;
-        }
-
-        .layout-canvas-wrapper {
-            position: absolute; /* Changed from relative to absolute for proper panning */
-            top: 0;
-            left: 0;
-            transform-origin: 0 0;
-            will-change: transform; /* Performance optimization */
-        }
-
-        .layout-image {
-            display: block;
-            max-width: none;
-            user-select: none;
-            -webkit-user-drag: none;
-            pointer-events: none; /* Prevent image from intercepting mouse events */
-        }
-
-        .pins-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .pin-marker {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            transform: translate(-50%, -100%);
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 10;
-        }
-
-        .pin-marker:hover {
-            transform: translate(-50%, -100%) scale(1.2);
-            z-index: 20;
-        }
-
-        .pin-head {
-            width: 24px;
-            height: 24px;
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pin-number {
-            transform: rotate(45deg);
-            color: white;
-            font-weight: 700;
-            font-size: 11px;
-        }
-
-        .pin-photo-indicator {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            background: var(--accent);
-            color: white;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            border: 2px solid white;
-        }
-
-        .pin-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: white;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-            margin-bottom: 4px;
-        }
-
-        .pin-marker:hover .pin-tooltip {
-            opacity: 1;
+        /* Print Styles - A4 Optimized */
+        @media print {
+            @page { size: A4; margin: 10mm; }
+            
+            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding-top: 0 !important; }
+            
+            /* Hide everything except the modal content */
+            .no-print, .header, .nav-tabs, .btn, .icon-btn, .loading-overlay, .toast, .zoom-controls-container, .layout-upload-zone, .drawing-controls, .pin-type-selector, .layout-section-header button, .app-container, .main-content { display: none !important; }
+            
+            /* Ensure modal is visible and full screen */
+            .modal { 
+                display: block !important; 
+                position: static; 
+                background: white; 
+                padding: 0; 
+                overflow: visible;
+            }
+            
+            .modal-content { 
+                max-width: 100% !important; 
+                max-height: none !important; 
+                box-shadow: none; 
+                border-radius: 0;
+                display: block !important;
+            }
+            
+            .modal-header { display: none !important; } /* Hide header in print */
+            .modal-body { padding: 0 !important; overflow: visible !important; }
+            
+            .a4-preview { 
+                box-shadow: none; 
+                width: 100% !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+            }
+            
+            /* Ensure images don't break across pages badly */
+            img { max-width: 100% !important; }
+            
+            /* Layout specific print styles */
+            .print-layout-container { 
+                page-break-before: always; 
+                margin-bottom: 20px;
+            }
+            
+            .print-layout-container:first-of-type {
+                page-break-before: auto;
+            }
         }
     </style>
 </head>
@@ -2811,7 +997,7 @@
                     </iframe>
                 </div>
                 
-                <!-- FIXED: OneMap Panel using MiniMap API -->
+                <!-- OneMap Panel using MiniMap API -->
                 <div id="oneMapPanel" class="map-panel">
                     <iframe id="oneMapFrame" class="map-iframe" 
                         src="https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red" 
@@ -2926,9 +1112,8 @@
         let currentLayoutIndex = 0;
         let layoutCount = 1;
         const MAX_LAYOUTS = 10;
-
-        // FIXED: Proper zoom/pan state management with boundary constraints
-        let layoutStates = {}; // Store zoom/pan state per layout
+        let layoutStates = {};
+        let pendingPin = null;
 
         // Role Configuration
         const roleConfig = {
@@ -3126,7 +1311,6 @@
             
             document.getElementById('mapModal').classList.add('active');
             
-            // Reset coordinate inputs
             document.getElementById('manualLat').value = '';
             document.getElementById('manualLng').value = '';
             
@@ -3172,7 +1356,7 @@
             showToast('Location confirmed from map');
         }
 
-        // FIXED: Map Snapshot with CORS handling
+        // Map Snapshot with CORS handling
         function captureMapSnapshot() {
             const activePanel = document.querySelector('.map-panel.active');
             const iframe = activePanel.querySelector('iframe');
@@ -3180,7 +1364,6 @@
             
             showLoading(true);
             
-            // Try html2canvas first
             html2canvas(activePanel, {
                 useCORS: true,
                 allowTaint: true,
@@ -3194,17 +1377,12 @@
             }).catch(err => {
                 console.error('Primary snapshot failed:', err);
                 
-                // Fallback: Use Static Map API for Google Maps
                 if (mapType === 'Google Maps' && currentReport.coordinates) {
-                    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${currentReport.coordinates.lat},${currentReport.coordinates.lng}&zoom=15&size=800x600&maptype=roadmap&markers=color:red%7C${currentReport.coordinates.lat},${currentReport.coordinates.lng}&key=YOUR_API_KEY`;
-                    
-                    // For demo, create a canvas with coordinates
                     const fallbackCanvas = document.createElement('canvas');
                     fallbackCanvas.width = 800;
                     fallbackCanvas.height = 600;
                     const ctx = fallbackCanvas.getContext('2d');
                     
-                    // Draw placeholder
                     ctx.fillStyle = '#e5e7eb';
                     ctx.fillRect(0, 0, 800, 600);
                     ctx.fillStyle = '#1e3a8a';
@@ -3228,7 +1406,6 @@
         function processMapSnapshot(snapshotData, mapType) {
             currentReport.mapSnapshot = snapshotData;
             
-            // Add as a photo
             const photo = {
                 id: Date.now(),
                 src: snapshotData,
@@ -3359,7 +1536,6 @@
             if (confirm('Delete this photo?')) {
                 const photo = currentReport.photos[index];
                 
-                // Remove pin links to this photo
                 currentReport.layouts.forEach(layout => {
                     if (layout.pins) {
                         layout.pins = layout.pins.filter(p => p.linkedPhotoId !== photo.id);
@@ -3431,7 +1607,7 @@
             }
         }
 
-        // FIXED: Layout Management with proper zoom/pan
+        // Layout Management
         function adjustLayoutCount(delta) {
             const input = document.getElementById('layoutCount');
             let newValue = parseInt(input.value) + delta;
@@ -3443,12 +1619,10 @@
         function initializeLayouts() {
             layoutCount = parseInt(document.getElementById('layoutCount').value);
             
-            // Initialize layouts array if needed
             if (!currentReport.layouts) {
                 currentReport.layouts = [];
             }
             
-            // Initialize state for each layout
             for (let i = 0; i < layoutCount; i++) {
                 if (!layoutStates[i]) {
                     layoutStates[i] = {
@@ -3462,7 +1636,6 @@
                 }
             }
             
-            // Add or remove layouts to match count
             while (currentReport.layouts.length < layoutCount) {
                 currentReport.layouts.push({
                     id: Date.now() + Math.random(),
@@ -3516,7 +1689,6 @@
                         </div>
                         <input type="file" id="layoutInput-${index}" class="file-input" accept="image/*,.pdf,application/pdf" onchange="loadLayoutFile(${index}, this)">
                     ` : `
-                        <!-- FIXED: Small zoom controls OUTSIDE and at TOP of layout -->
                         <div class="zoom-controls-container" id="zoomControls-${index}">
                             <div class="zoom-controls">
                                 <button class="zoom-btn" onclick="zoomLayout(${index}, -0.2)" title="Zoom Out">
@@ -3562,7 +1734,6 @@
                             </button>
                         </div>
                         
-                        <!-- FIXED: Layout Viewport with Zoom/Pan -->
                         <div class="layout-viewport" id="viewport-${index}">
                             <div class="layout-canvas-wrapper" id="wrapper-${index}">
                                 <img class="layout-image" id="layoutImage-${index}" src="${layout.image}" alt="Layout ${index + 1}">
@@ -3577,7 +1748,6 @@
                 </div>
             `).join('');
             
-            // Initialize layouts with images
             currentReport.layouts.forEach((layout, index) => {
                 if (layout.image) {
                     initLayoutViewport(index);
@@ -3585,7 +1755,6 @@
             });
         }
 
-        // FIXED: Initialize layout viewport with proper zoom/pan and boundary constraints
         function initLayoutViewport(index) {
             const layout = currentReport.layouts[index];
             const viewport = document.getElementById(`viewport-${index}`);
@@ -3594,7 +1763,6 @@
             
             if (!viewport || !wrapper || !img) return;
             
-            // Initialize state if not exists
             if (!layoutStates[index]) {
                 layoutStates[index] = {
                     zoom: 1,
@@ -3608,7 +1776,6 @@
             
             const state = layoutStates[index];
             
-            // Calculate initial fit-to-screen zoom
             img.onload = function() {
                 const viewportRect = viewport.getBoundingClientRect();
                 const imgWidth = img.naturalWidth;
@@ -3616,13 +1783,12 @@
                 
                 const scaleX = viewportRect.width / imgWidth;
                 const scaleY = viewportRect.height / imgHeight;
-                const initialZoom = Math.min(scaleX, scaleY, 1); // Don't zoom in beyond 100%
+                const initialZoom = Math.min(scaleX, scaleY, 1);
                 
                 state.zoom = initialZoom;
                 state.panX = (viewportRect.width - imgWidth * initialZoom) / 2;
                 state.panY = (viewportRect.height - imgHeight * initialZoom) / 2;
                 
-                // Constrain initial position
                 constrainPan(index, imgWidth, imgHeight);
                 
                 updateLayoutTransform(index);
@@ -3633,9 +1799,8 @@
                 img.onload();
             }
             
-            // Mouse events for panning
             viewport.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.pin-marker')) return; // Don't drag if clicking a pin
+                if (e.target.closest('.pin-marker')) return;
                 state.isDragging = true;
                 state.lastMouseX = e.clientX;
                 state.lastMouseY = e.clientY;
@@ -3654,7 +1819,6 @@
                 state.lastMouseX = e.clientX;
                 state.lastMouseY = e.clientY;
                 
-                // Apply constraints
                 const img = document.getElementById(`layoutImage-${index}`);
                 if (img && img.naturalWidth) {
                     constrainPan(index, img.naturalWidth, img.naturalHeight);
@@ -3668,7 +1832,6 @@
                 viewport.style.cursor = 'grab';
             });
             
-            // Touch events for mobile
             viewport.addEventListener('touchstart', (e) => {
                 if (e.target.closest('.pin-marker')) return;
                 if (e.touches.length === 1) {
@@ -3703,9 +1866,8 @@
                 state.isDragging = false;
             });
             
-            // Click to place pin
             viewport.addEventListener('click', (e) => {
-                if (state.isDragging) return; // Don't place pin if dragging
+                if (state.isDragging) return;
                 
                 const rect = wrapper.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / state.zoom;
@@ -3714,14 +1876,12 @@
                 const imgWidth = img.naturalWidth;
                 const imgHeight = img.naturalHeight;
                 
-                // Check if click is within image bounds
                 if (x >= 0 && x <= imgWidth && y >= 0 && y <= imgHeight) {
                     handleLayoutClick(index, x, y, imgWidth, imgHeight);
                 }
             });
         }
 
-        // FIXED: Constrain panning to keep image within viewport
         function constrainPan(index, imgWidth, imgHeight) {
             const state = layoutStates[index];
             const viewport = document.getElementById(`viewport-${index}`);
@@ -3731,13 +1891,11 @@
             const scaledWidth = imgWidth * state.zoom;
             const scaledHeight = imgHeight * state.zoom;
             
-            // Calculate boundaries
             const minPanX = Math.min(0, viewportRect.width - scaledWidth);
             const maxPanX = Math.max(0, viewportRect.width - scaledWidth);
             const minPanY = Math.min(0, viewportRect.height - scaledHeight);
             const maxPanY = Math.max(0, viewportRect.height - scaledHeight);
             
-            // Apply constraints
             state.panX = Math.max(minPanX, Math.min(maxPanX, state.panX));
             state.panY = Math.max(minPanY, Math.min(maxPanY, state.panY));
         }
@@ -3755,7 +1913,6 @@
                 zoomDisplay.textContent = `${Math.round(state.zoom * 100)}%`;
             }
             
-            // Update pin positions
             renderLayoutPins(index);
         }
 
@@ -3763,23 +1920,19 @@
             const state = layoutStates[index];
             const newZoom = Math.max(0.1, Math.min(5, state.zoom + delta));
             
-            // Get viewport dimensions
             const viewport = document.getElementById(`viewport-${index}`);
             const img = document.getElementById(`layoutImage-${index}`);
             if (!viewport || !img) return;
             
             const viewportRect = viewport.getBoundingClientRect();
             
-            // Zoom towards center
             const centerX = viewportRect.width / 2;
             const centerY = viewportRect.height / 2;
             
-            // Adjust pan to zoom towards center
             state.panX = centerX - (centerX - state.panX) * (newZoom / state.zoom);
             state.panY = centerY - (centerY - state.panY) * (newZoom / state.zoom);
             state.zoom = newZoom;
             
-            // Apply constraints after zoom
             constrainPan(index, img.naturalWidth, img.naturalHeight);
             
             updateLayoutTransform(index);
@@ -3805,14 +1958,12 @@
             state.panX = (viewportRect.width - imgWidth * initialZoom) / 2;
             state.panY = (viewportRect.height - imgHeight * initialZoom) / 2;
             
-            // Apply constraints
             constrainPan(index, imgWidth, imgHeight);
             
             updateLayoutTransform(index);
             showToast('View reset to fit');
         }
 
-        // FIXED: Handle layout click with accurate coordinates
         function handleLayoutClick(index, x, y, imgWidth, imgHeight) {
             const layout = currentReport.layouts[index];
             
@@ -3857,21 +2008,18 @@
             document.getElementById('linkPhotoModal').classList.add('active');
         }
 
-        // FIXED: Finalize pin with proper state update
         function finalizePin(layoutIndex, pin) {
             const layout = currentReport.layouts[layoutIndex];
             if (!layout.pins) layout.pins = [];
             
             layout.pins.push(pin);
             
-            // Clear photo selection if pin was linked to a photo
             if (pin.linkedPhotoId && selectedPhotoIndex !== null) {
                 selectedPhotoIndex = null;
                 document.getElementById('selectedPhotoInfo').style.display = 'none';
                 renderPhotos();
             }
             
-            // Re-render to show updated pins and list
             renderAllLayouts();
             
             const linkInfo = pin.linkedPhotoId ? ' (linked to photo)' : '';
@@ -3880,7 +2028,6 @@
             pendingPin = null;
         }
 
-        // FIXED: Render pins with proper positioning
         function renderLayoutPins(index) {
             const layout = currentReport.layouts[index];
             const pinsLayer = document.getElementById(`pinsLayer-${index}`);
@@ -3945,7 +2092,6 @@
             });
         }
 
-        // FIXED: Load layout file with HIGH RESOLUTION rendering (scale 3.0 for 300 DPI equivalent)
         async function loadLayoutFile(index, input) {
             if (!input.files || !input.files[0]) return;
             
@@ -3966,17 +2112,15 @@
                     layout.pdfData = arrayBuffer;
                     layout.pdfPages = [];
                     
-                    // FIXED: Increased scale from 2.0 to 3.0 for higher resolution (300 DPI equivalent)
                     for (let i = 1; i <= numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 3.0 }); // Increased from 2.0 to 3.0
+                        const viewport = page.getViewport({ scale: 3.0 });
                         
                         const pageCanvas = document.createElement('canvas');
                         const pageCtx = pageCanvas.getContext('2d');
                         pageCanvas.width = viewport.width;
                         pageCanvas.height = viewport.height;
                         
-                        // Enable high quality rendering
                         pageCtx.imageSmoothingEnabled = true;
                         pageCtx.imageSmoothingQuality = 'high';
                         
@@ -3986,8 +2130,7 @@
                             background: 'white'
                         }).promise;
                         
-                        // Use maximum quality for JPEG output
-                        layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.98)); // Increased quality from 0.95 to 0.98
+                        layout.pdfPages.push(pageCanvas.toDataURL('image/jpeg', 0.98));
                     }
                     
                     layout.image = layout.pdfPages[0];
@@ -4009,7 +2152,6 @@
                 
                 layout.hasContent = true;
                 
-                // Reset zoom state for new image
                 layoutStates[index] = {
                     zoom: 1,
                     panX: 0,
@@ -4041,7 +2183,6 @@
                 layout.currentPage = newPage;
                 layout.image = layout.pdfPages[newPage - 1];
                 
-                // Reset view for new page
                 layoutStates[index] = {
                     zoom: 1,
                     panX: 0,
@@ -4076,7 +2217,6 @@
                 currentReport.layouts.splice(index, 1);
                 delete layoutStates[index];
                 
-                // Reindex remaining layouts
                 currentReport.layouts.forEach((layout, idx) => {
                     layout.index = idx;
                 });
@@ -4098,58 +2238,9 @@
             showToast('Pin deleted');
         }
 
-        function exportLayout(index) {
-            const layout = currentReport.layouts[index];
-            if (!layout || !layout.image) {
-                showToast('No plan drawing to export');
-                return;
-            }
-            
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            const img = new Image();
-            img.onload = function() {
-                exportCanvas.width = img.naturalWidth || img.width;
-                exportCanvas.height = img.naturalHeight || img.height;
-                exportCtx.drawImage(img, 0, 0);
-                
-                if (layout.pins) {
-                    layout.pins.forEach((pin, idx) => {
-                        const x = pin.x * exportCanvas.width;
-                        const y = pin.y * exportCanvas.height;
-                        
-                        exportCtx.save();
-                        exportCtx.translate(x, y);
-                        exportCtx.rotate(-45 * Math.PI / 180);
-                        exportCtx.beginPath();
-                        exportCtx.arc(0, -15, 15, 0, 2 * Math.PI);
-                        exportCtx.fillStyle = pin.color;
-                        exportCtx.fill();
-                        exportCtx.strokeStyle = 'white';
-                        exportCtx.lineWidth = 3;
-                        exportCtx.stroke();
-                        exportCtx.restore();
-                        
-                        exportCtx.fillStyle = 'white';
-                        exportCtx.font = 'bold 16px Arial';
-                        exportCtx.textAlign = 'center';
-                        exportCtx.fillText(idx + 1, x, y - 10);
-                    });
-                }
-                
-                const link = document.createElement('a');
-                link.download = `PLCIS_Layout${index + 1}_${currentReport.projectName || 'Drawing'}_${new Date().toISOString().split('T')[0]}.png`;
-                link.href = exportCanvas.toDataURL('image/png');
-                link.click();
-                showToast('Annotated layout exported!');
-            };
-            img.src = layout.image;
-        }
-
         function selectPinType(type) {
             currentPinType = type;
-            renderAllLayouts(); // Re-render to update button states
+            renderAllLayouts();
         }
 
         function getAllPins() {
@@ -4165,7 +2256,6 @@
             return allPins;
         }
 
-        // Link Photo Modal Functions
         function closeLinkPhotoModal() {
             document.getElementById('linkPhotoModal').classList.remove('active');
             pendingPin = null;
@@ -4412,173 +2502,270 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with photo details and fitted layouts - ENSURES LAYOUTS SHOW
-        function previewReport(report = currentReport) {
+        // FIXED: Preview Report with Server-Side Pin Rendering
+        async function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
             
-            // FIXED: Include photo descriptions in report with detailed info
-            const photosHtml = report.photos.map((photo, idx) => {
-                const linkedPin = getAllPinsFromReport(report).find(p => p.linkedPhotoId === photo.id);
-                return `
-                <div style="margin-bottom: 15px; break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                    <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e2e8f0;">
-                        <strong>Photo ${idx + 1}</strong>
-                        ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin</span>` : ''}
-                    </div>
-                    <div style="padding: 10px;">
-                        <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto;">
-                        <div class="photo-print-details" style="margin-top: 8px; font-size: 9pt; color: #333; padding: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
-                            <strong style="color: var(--primary);">Description:</strong> ${photo.description || 'No description provided'}<br>
-                            ${photo.tags && photo.tags.length > 0 ? `<strong style="color: var(--primary);">Tags:</strong> ${photo.tags.join(', ')}<br>` : ''}
-                            ${photo.coordinates ? `<strong style="color: var(--primary);">GPS:</strong> ${photo.coordinates.lat.toFixed(6)}, ${photo.coordinates.lng.toFixed(6)}<br><small>Accuracy: ${photo.coordinates.accuracy || 'N/A'}m | ${photo.coordinates.timestamp}</small>` : ''}
+            showLoading(true);
+            
+            try {
+                // Render layouts with pins drawn on canvas
+                const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
+                let layoutsHtml = '';
+                
+                if (layoutsWithContent.length > 0) {
+                    const layoutPromises = layoutsWithContent.map(async (layout, idx) => {
+                        const originalIndex = report.layouts.indexOf(layout);
+                        const pins = layout.pins || [];
+                        
+                        // Create canvas with pins drawn on it
+                        const canvas = await createLayoutCanvasWithPins(layout);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        
+                        let pinsTable = '';
+                        if (pins.length > 0) {
+                            pinsTable = `
+                                <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 15px; break-inside: avoid;">
+                                    <tr style="background: #1e3a8a; color: white;">
+                                        <th style="padding: 6px; text-align: center; width: 40px;">Pin</th>
+                                        <th style="padding: 6px;">Type</th>
+                                        <th style="padding: 6px;">Description</th>
+                                        <th style="padding: 6px; text-align: center; width: 60px;">Photo</th>
+                                    </tr>
+                                    ${pins.map(pin => {
+                                        const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
+                                        return `
+                                            <tr>
+                                                <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">
+                                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 10px; line-height: 20px;">${pins.indexOf(pin) + 1}</div>
+                                                </td>
+                                                <td style="border: 1px solid #e2e8f0; padding: 6px;">${pinTypes[pin.type].label}</td>
+                                                <td style="border: 1px solid #e2e8f0; padding: 6px;">${pin.description || 'N/A'}</td>
+                                                <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">
+                                                    ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </table>
+                            `;
+                        }
+                        
+                        return `
+                            <div class="print-layout-container" style="margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 15px; page-break-inside: avoid;">
+                                <h3 style="color: #1e3a8a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; font-size: 12pt;">
+                                    Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
+                                </h3>
+                                <div style="text-align: center; margin-bottom: 10px; background: #f8fafc; padding: 10px;">
+                                    <img src="${dataUrl}" 
+                                         style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0; display: block; margin: 0 auto;"
+                                         alt="Layout ${originalIndex + 1} with pins">
+                                </div>
+                                ${pinsTable}
+                            </div>
+                        `;
+                    });
+                    
+                    const layoutResults = await Promise.all(layoutPromises);
+                    layoutsHtml = layoutResults.join('');
+                } else {
+                    layoutsHtml = '<p style="color: #64748b; font-style: italic;">No site plans uploaded.</p>';
+                }
+                
+                // Photos HTML
+                const photosHtml = report.photos.map((photo, idx) => {
+                    const linkedPin = getAllPinsFromReport(report).find(p => p.linkedPhotoId === photo.id);
+                    return `
+                    <div style="margin-bottom: 15px; break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                        <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e2e8f0;">
+                            <strong>Photo ${idx + 1}</strong>
+                            ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin</span>` : ''}
+                        </div>
+                        <div style="padding: 10px;">
+                            <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto;">
+                            <div class="photo-print-details" style="margin-top: 8px; font-size: 9pt; color: #333; padding: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                                <strong style="color: var(--primary);">Description:</strong> ${photo.description || 'No description provided'}<br>
+                                ${photo.tags && photo.tags.length > 0 ? `<strong style="color: var(--primary);">Tags:</strong> ${photo.tags.join(', ')}<br>` : ''}
+                                ${photo.coordinates ? `<strong style="color: var(--primary);">GPS:</strong> ${photo.coordinates.lat.toFixed(6)}, ${photo.coordinates.lng.toFixed(6)}<br><small>Accuracy: ${photo.coordinates.accuracy || 'N/A'}m | ${photo.coordinates.timestamp}</small>` : ''}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `}).join('');
-            
-            // FIXED: Generate HTML for all layouts with content - ENSURES IMAGES DISPLAY
-            let layoutsHtml = '';
-            const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
-            
-            if (layoutsWithContent.length > 0) {
-                layoutsHtml = layoutsWithContent.map((layout, idx) => {
-                    const originalIndex = report.layouts.indexOf(layout);
-                    const pins = layout.pins || [];
-                    
-                    let pinsTable = '';
-                    if (pins.length > 0) {
-                        pinsTable = `
-                            <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 15px; break-inside: avoid;">
-                                <tr style="background: #1e3a8a; color: white;">
-                                    <th style="padding: 6px; text-align: center; width: 40px;">Pin</th>
-                                    <th style="padding: 6px;">Type</th>
-                                    <th style="padding: 6px;">Description</th>
-                                    <th style="padding: 6px; text-align: center; width: 60px;">Photo</th>
+                `}).join('');
+                
+                content.innerHTML = `
+                    <div class="a4-preview">
+                        <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
+                            <h1 style="color: #1e3a8a; margin: 0; font-size: 16pt;">🏗️ CONSTRUCTION SITE REPORT</h1>
+                            <div style="color: #64748b; font-size: 9pt; margin-top: 5px;">
+                                ProjectLink Construction Intelligence System (PLCIS)
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                            <table style="width: 100%; font-size: 10pt;">
+                                <tr>
+                                    <td style="padding: 4px 0; width: 120px;"><strong>Project:</strong></td>
+                                    <td>${report.projectName}</td>
+                                    <td style="padding: 4px 0; width: 120px;"><strong>Date:</strong></td>
+                                    <td>${report.date}</td>
                                 </tr>
-                                ${pins.map(pin => {
-                                    const linkedPhoto = pin.linkedPhotoId ? report.photos.find(p => p.id === pin.linkedPhotoId) : null;
-                                    return `
-                                        <tr>
-                                            <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">
-                                                <div style="width: 20px; height: 20px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 10px; line-height: 20px;">${pins.indexOf(pin) + 1}</div>
-                                            </td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 6px;">${pinTypes[pin.type].label}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 6px;">${pin.description || 'N/A'}</td>
-                                            <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">
-                                                ${linkedPhoto ? `<span style="color: var(--success);">✓ ${report.photos.indexOf(linkedPhoto) + 1}</span>` : '-'}
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join('')}
+                                <tr>
+                                    <td style="padding: 4px 0;"><strong>Location:</strong></td>
+                                    <td>${report.location}</td>
+                                    <td style="padding: 4px 0;"><strong>Weather:</strong></td>
+                                    <td>${report.weather}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 4px 0;"><strong>Engineer:</strong></td>
+                                    <td>${report.engineer || 'N/A'}</td>
+                                    <td style="padding: 4px 0;"><strong>Role:</strong></td>
+                                    <td>${report.role ? roleConfig[report.role].name : 'N/A'}</td>
+                                </tr>
                             </table>
-                        `;
+                        </div>
+                        
+                        ${report.coordinates ? `
+                        <div style="background: #eff6ff; padding: 10px; border-left: 4px solid #1e3a8a; margin-bottom: 15px; font-family: monospace; font-size: 9pt;">
+                            <strong>📍 GPS Coordinates:</strong> ${report.coordinates.lat.toFixed(6)}, ${report.coordinates.lng.toFixed(6)}<br>
+                            <small>Accuracy: ${report.coordinates.accuracy || 'N/A'}m | Source: ${report.coordinates.source || 'Unknown'} | ${report.coordinates.timestamp}</small>
+                        </div>
+                        ` : ''}
+                        
+                        <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">📝 Work Activities</h2>
+                        <p style="line-height: 1.5; margin-bottom: 12px; font-size: 10pt;">${report.activities || 'No activities recorded.'}</p>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">⚠️ Issues & Observations</h2>
+                                <p style="line-height: 1.5; font-size: 10pt;">${report.issues || 'No issues reported.'}</p>
+                            </div>
+                            <div style="flex: 1;">
+                                <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">➡️ Next Steps</h2>
+                                <p style="line-height: 1.5; font-size: 10pt;">${report.nextSteps || 'No next steps defined.'}</p>
+                            </div>
+                        </div>
+                        
+                        ${layoutsWithContent.length > 0 ? `
+                        <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px; page-break-before: always;">📐 Site Plans (${layoutsWithContent.length} Layouts)</h2>
+                        ${layoutsHtml}
+                        ` : ''}
+                        
+                        ${report.photos.length > 0 ? `
+                        <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px; page-break-before: always;">📸 Site Photographs (${report.photos.length})</h2>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            ${photosHtml}
+                        </div>
+                        ` : ''}
+                        
+                        ${report.mapSnapshot ? `
+                        <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px;">🗺️ Map Snapshot</h2>
+                        <div style="text-align: center;">
+                            <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 300px; border: 1px solid #e2e8f0;">
+                        </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 30px; padding-top: 12px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 8pt;">
+                            <p><strong>PLCIS Report ID:</strong> ${report.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
+                            <p style="margin-top: 5px;">This report was generated electronically and is valid without signature.</p>
+                        </div>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+                
+            } catch (error) {
+                console.error('Error generating preview:', error);
+                showToast('Error generating preview. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // NEW: Function to create canvas with pins drawn on it
+        async function createLayoutCanvasWithPins(layout) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Set canvas size to match image
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    
+                    // Draw the base image
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Draw pins
+                    if (layout.pins && layout.pins.length > 0) {
+                        layout.pins.forEach((pin, idx) => {
+                            const x = pin.x * canvas.width;
+                            const y = pin.y * canvas.height;
+                            
+                            // Draw pin marker
+                            ctx.save();
+                            ctx.translate(x, y);
+                            
+                            // Pin head (rotated square for marker shape)
+                            ctx.save();
+                            ctx.rotate(-45 * Math.PI / 180);
+                            ctx.beginPath();
+                            ctx.arc(0, -15, 15, 0, 2 * Math.PI);
+                            ctx.fillStyle = pin.color;
+                            ctx.fill();
+                            ctx.strokeStyle = 'white';
+                            ctx.lineWidth = 3;
+                            ctx.stroke();
+                            ctx.restore();
+                            
+                            // Pin number
+                            ctx.fillStyle = 'white';
+                            ctx.font = 'bold 14px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(idx + 1, 0, -15);
+                            
+                            // Photo indicator
+                            if (pin.linkedPhotoId) {
+                                ctx.beginPath();
+                                ctx.arc(12, 5, 8, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#f59e0b';
+                                ctx.fill();
+                                ctx.strokeStyle = 'white';
+                                ctx.lineWidth = 2;
+                                ctx.stroke();
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 10px Arial';
+                                ctx.fillText('📷', 12, 5);
+                            }
+                            
+                            ctx.restore();
+                        });
                     }
                     
-                    // FIXED: Ensure layout image displays with proper styling and crossOrigin handling
-                    return `
-                        <div style="margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 8px; padding: 15px; page-break-inside: avoid; max-width: 100%;">
-                            <h3 style="color: #1e3a8a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; font-size: 12pt;">
-                                Site Plan - Layout ${originalIndex + 1} ${pins.length > 0 ? `(${pins.length} pins)` : ''}
-                            </h3>
-                            <div style="text-align: center; margin-bottom: 10px; background: #f8fafc; padding: 10px;">
-                                <img src="${layout.image}" 
-                                     style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0; display: block; margin: 0 auto;" 
-                                     crossorigin="anonymous"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                                     onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
-                                <div style="display: none; padding: 20px; color: #dc2626; font-weight: bold;">
-                                    <i class="fas fa-exclamation-triangle"></i> Layout image failed to load. Please re-upload the layout.
-                                </div>
-                            </div>
-                            ${pinsTable}
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                layoutsHtml = '<p style="color: #64748b; font-style: italic;">No site plans uploaded.</p>';
-            }
-            
-            content.innerHTML = `
-                <div class="a4-preview">
-                    <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h1 style="color: #1e3a8a; margin: 0; font-size: 16pt;">🏗️ CONSTRUCTION SITE REPORT</h1>
-                        <div style="color: #64748b; font-size: 9pt; margin-top: 5px;">
-                            ProjectLink Construction Intelligence System (PLCIS)
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                        <table style="width: 100%; font-size: 10pt;">
-                            <tr>
-                                <td style="padding: 4px 0; width: 120px;"><strong>Project:</strong></td>
-                                <td>${report.projectName}</td>
-                                <td style="padding: 4px 0; width: 120px;"><strong>Date:</strong></td>
-                                <td>${report.date}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0;"><strong>Location:</strong></td>
-                                <td>${report.location}</td>
-                                <td style="padding: 4px 0;"><strong>Weather:</strong></td>
-                                <td>${report.weather}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0;"><strong>Engineer:</strong></td>
-                                <td>${report.engineer || 'N/A'}</td>
-                                <td style="padding: 4px 0;"><strong>Role:</strong></td>
-                                <td>${report.role ? roleConfig[report.role].name : 'N/A'}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    ${report.coordinates ? `
-                    <div style="background: #eff6ff; padding: 10px; border-left: 4px solid #1e3a8a; margin-bottom: 15px; font-family: monospace; font-size: 9pt;">
-                        <strong>📍 GPS Coordinates:</strong> ${report.coordinates.lat.toFixed(6)}, ${report.coordinates.lng.toFixed(6)}<br>
-                        <small>Accuracy: ${report.coordinates.accuracy || 'N/A'}m | Source: ${report.coordinates.source || 'Unknown'} | ${report.coordinates.timestamp}</small>
-                    </div>
-                    ` : ''}
-                    
-                    <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">📝 Work Activities</h2>
-                    <p style="line-height: 1.5; margin-bottom: 12px; font-size: 10pt;">${report.activities || 'No activities recorded.'}</p>
-                    
-                    <div style="display: flex; gap: 15px;">
-                        <div style="flex: 1;">
-                            <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">⚠️ Issues & Observations</h2>
-                            <p style="line-height: 1.5; font-size: 10pt;">${report.issues || 'No issues reported.'}</p>
-                        </div>
-                        <div style="flex: 1;">
-                            <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 15px 0 10px;">➡️ Next Steps</h2>
-                            <p style="line-height: 1.5; font-size: 10pt;">${report.nextSteps || 'No next steps defined.'}</p>
-                        </div>
-                    </div>
-                    
-                    ${layoutsWithContent.length > 0 ? `
-                    <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px; page-break-before: always;">📐 Site Plans (${layoutsWithContent.length} Layouts)</h2>
-                    ${layoutsHtml}
-                    ` : ''}
-                    
-                    ${report.photos.length > 0 ? `
-                    <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px; page-break-before: always;">📸 Site Photographs (${report.photos.length})</h2>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        ${photosHtml}
-                    </div>
-                    ` : ''}
-                    
-                    ${report.mapSnapshot ? `
-                    <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px;">🗺️ Map Snapshot</h2>
-                    <div style="text-align: center;">
-                        <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 300px; border: 1px solid #e2e8f0;">
-                    </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 30px; padding-top: 12px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 8pt;">
-                        <p><strong>PLCIS Report ID:</strong> ${report.id || 'N/A'} | Generated: ${new Date().toLocaleString()}</p>
-                        <p style="margin-top: 5px;">This report was generated electronically and is valid without signature.</p>
-                    </div>
-                </div>
-            `;
-            
-            modal.classList.add('active');
+                    resolve(canvas);
+                };
+                
+                img.onerror = function() {
+                    // If image fails to load, create a placeholder canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 800;
+                    canvas.height = 600;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#f0f0f0';
+                    ctx.fillRect(0, 0, 800, 600);
+                    ctx.fillStyle = '#999';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Layout image unavailable', 400, 300);
+                    resolve(canvas);
+                };
+                
+                img.src = layout.image;
+            });
         }
 
         function getAllPinsFromReport(report) {
@@ -4721,7 +2908,6 @@
             document.getElementById('layoutCount').value = layoutCount;
             currentLayoutIndex = 0;
             
-            // Reset layout states
             layoutStates = {};
             
             renderAllLayouts();
