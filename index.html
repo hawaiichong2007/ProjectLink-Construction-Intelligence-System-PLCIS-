@@ -202,8 +202,8 @@
         /* Drawing Controls */
         .drawing-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
 
-        /* Zoom Controls */
-        .zoom-controls-container { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem; padding: 0.25rem; background: #f1f5f9; border-radius: 6px; border: 1px solid var(--border); width: fit-content; position: absolute; top: -40px; right: 0; z-index: 100; }
+        /* Zoom Controls - FIXED: Outside layout viewport */
+        .zoom-controls-container { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem; padding: 0.25rem; background: #f1f5f9; border-radius: 6px; border: 1px solid var(--border); width: fit-content; position: relative; z-index: 100; }
         .zoom-controls { display: flex; gap: 2px; }
         .zoom-btn { width: 28px; height: 28px; border: none; border-radius: 4px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s; }
         .zoom-btn:hover { background: var(--primary); color: white; }
@@ -456,7 +456,7 @@
         .pin-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; margin-bottom: 4px; }
         .pin-marker:hover .pin-tooltip { opacity: 1; }
 
-        /* Print Styles - A4 Optimized */
+        /* Print Styles - A4 Optimized - FIXED for high resolution layouts */
         @media print {
             @page { size: A4; margin: 10mm; }
             
@@ -495,14 +495,24 @@
             /* Ensure images don't break across pages badly */
             img { max-width: 100% !important; }
             
-            /* Layout specific print styles */
+            /* Layout specific print styles - FIXED: Each layout on separate page */
             .print-layout-container { 
                 page-break-before: always; 
                 margin-bottom: 20px;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
             }
             
             .print-layout-container:first-of-type {
                 page-break-before: auto;
+            }
+            
+            /* Ensure high resolution images print clearly */
+            .print-layout-container img {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+                max-width: 100% !important;
+                max-height: 180mm !important;
             }
         }
     </style>
@@ -681,9 +691,6 @@
                         </button>
                         <button class="map-btn" onclick="openMapPicker('google')">
                             <i class="fab fa-google"></i> Google Maps
-                        </button>
-                        <button class="map-btn" onclick="openMapPicker('onemap')">
-                            <i class="fas fa-map"></i> OneMap (SG)
                         </button>
                         <button class="map-btn" onclick="openMapPicker('manual')">
                             <i class="fas fa-keyboard"></i> Manual Entry
@@ -964,7 +971,7 @@
         </div>
     </div>
 
-    <!-- Map Picker Modal - FIXED ONEMAP -->
+    <!-- Map Picker Modal -->
     <div id="mapModal" class="modal">
         <div class="modal-content map-modal-content">
             <div class="modal-header">
@@ -975,9 +982,6 @@
             <div class="map-tabs">
                 <button class="map-tab active" onclick="switchMapTab('google')">
                     <i class="fab fa-google"></i> Google Maps
-                </button>
-                <button class="map-tab" onclick="switchMapTab('onemap')">
-                    <i class="fas fa-map"></i> OneMap Singapore
                 </button>
             </div>
             
@@ -994,14 +998,6 @@
                         allowfullscreen="" 
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-                
-                <!-- OneMap Panel using MiniMap API -->
-                <div id="oneMapPanel" class="map-panel">
-                    <iframe id="oneMapFrame" class="map-iframe" 
-                        src="https://www.onemap.gov.sg/minimap/mm.html?mapStyle=Default&zoomLevel=15&marker=latLng:1.3147264,103.80988615!colour:red" 
-                        allowfullscreen>
                     </iframe>
                 </div>
             </div>
@@ -1316,8 +1312,6 @@
             
             if (type === 'google') {
                 switchMapTab('google');
-            } else if (type === 'onemap') {
-                switchMapTab('onemap');
             }
         }
 
@@ -2502,7 +2496,7 @@
             }, 300);
         }
 
-        // FIXED: Preview Report with Server-Side Pin Rendering
+        // FIXED: Preview Report with Pin Icons and High Resolution
         async function previewReport(report = currentReport) {
             const modal = document.getElementById('pdfModal');
             const content = document.getElementById('pdfPreviewContent');
@@ -2510,7 +2504,7 @@
             showLoading(true);
             
             try {
-                // Render layouts with pins drawn on canvas
+                // Render layouts with pins drawn on canvas at HIGH RESOLUTION
                 const layoutsWithContent = (report.layouts || []).filter(l => l.hasContent && l.image);
                 let layoutsHtml = '';
                 
@@ -2519,9 +2513,9 @@
                         const originalIndex = report.layouts.indexOf(layout);
                         const pins = layout.pins || [];
                         
-                        // Create canvas with pins drawn on it
-                        const canvas = await createLayoutCanvasWithPins(layout);
-                        const dataUrl = canvas.toDataURL('image/png');
+                        // Create canvas with pins drawn on it at HIGH RESOLUTION
+                        const canvas = await createLayoutCanvasWithPins(layout, true); // true = high resolution
+                        const dataUrl = canvas.toDataURL('image/png', 1.0); // Maximum quality
                         
                         let pinsTable = '';
                         if (pins.length > 0) {
@@ -2538,7 +2532,9 @@
                                         return `
                                             <tr>
                                                 <td style="border: 1px solid #e2e8f0; padding: 6px; text-align: center;">
-                                                    <div style="width: 20px; height: 20px; border-radius: 50%; background: ${pin.color}; margin: 0 auto; color: white; font-weight: bold; font-size: 10px; line-height: 20px;">${pins.indexOf(pin) + 1}</div>
+                                                    <div style="width: 24px; height: 24px; border-radius: 50% 50% 50% 0; background: ${pin.color}; transform: rotate(-45deg); margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                                        <span style="transform: rotate(45deg); color: white; font-weight: bold; font-size: 10px;">${pins.indexOf(pin) + 1}</span>
+                                                    </div>
                                                 </td>
                                                 <td style="border: 1px solid #e2e8f0; padding: 6px;">${pinTypes[pin.type].label}</td>
                                                 <td style="border: 1px solid #e2e8f0; padding: 6px;">${pin.description || 'N/A'}</td>
@@ -2559,7 +2555,7 @@
                                 </h3>
                                 <div style="text-align: center; margin-bottom: 10px; background: #f8fafc; padding: 10px;">
                                     <img src="${dataUrl}" 
-                                         style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0; display: block; margin: 0 auto;"
+                                         style="max-width: 100%; max-height: 200mm; height: auto; border: 1px solid #e2e8f0; display: block; margin: 0 auto; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
                                          alt="Layout ${originalIndex + 1} with pins">
                                 </div>
                                 ${pinsTable}
@@ -2583,7 +2579,7 @@
                             ${linkedPin ? `<span style="color: var(--success); margin-left: 10px;"><i class="fas fa-thumbtack"></i> Linked to Pin</span>` : ''}
                         </div>
                         <div style="padding: 10px;">
-                            <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto;">
+                            <img src="${photo.src}" style="max-width: 100%; max-height: 200px; display: block; margin: 0 auto; image-rendering: -webkit-optimize-contrast;">
                             <div class="photo-print-details" style="margin-top: 8px; font-size: 9pt; color: #333; padding: 8px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
                                 <strong style="color: var(--primary);">Description:</strong> ${photo.description || 'No description provided'}<br>
                                 ${photo.tags && photo.tags.length > 0 ? `<strong style="color: var(--primary);">Tags:</strong> ${photo.tags.join(', ')}<br>` : ''}
@@ -2661,7 +2657,7 @@
                         ${report.mapSnapshot ? `
                         <h2 style="color: #1e3a8a; font-size: 12pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 15px;">🗺️ Map Snapshot</h2>
                         <div style="text-align: center;">
-                            <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 300px; border: 1px solid #e2e8f0;">
+                            <img src="${report.mapSnapshot}" style="max-width: 100%; max-height: 300px; border: 1px solid #e2e8f0; image-rendering: -webkit-optimize-contrast;">
                         </div>
                         ` : ''}
                         
@@ -2682,8 +2678,8 @@
             }
         }
 
-        // NEW: Function to create canvas with pins drawn on it
-        async function createLayoutCanvasWithPins(layout) {
+        // FIXED: Function to create canvas with PIN ICONS drawn on it
+        async function createLayoutCanvasWithPins(layout, highRes = false) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
@@ -2692,54 +2688,76 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    // Set canvas size to match image
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                    // Set canvas size to match image - USE HIGH RESOLUTION
+                    const scaleFactor = highRes ? 2 : 1; // 2x for high resolution
+                    canvas.width = img.naturalWidth * scaleFactor;
+                    canvas.height = img.naturalHeight * scaleFactor;
+                    
+                    // Enable high quality image rendering
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // Scale context for high resolution
+                    ctx.scale(scaleFactor, scaleFactor);
                     
                     // Draw the base image
                     ctx.drawImage(img, 0, 0);
                     
-                    // Draw pins
+                    // Draw pins as PIN ICONS (map marker style)
                     if (layout.pins && layout.pins.length > 0) {
                         layout.pins.forEach((pin, idx) => {
-                            const x = pin.x * canvas.width;
-                            const y = pin.y * canvas.height;
+                            const x = pin.x * img.naturalWidth;
+                            const y = pin.y * img.naturalHeight;
                             
-                            // Draw pin marker
+                            // Draw pin marker (map pin style)
                             ctx.save();
                             ctx.translate(x, y);
                             
-                            // Pin head (rotated square for marker shape)
-                            ctx.save();
-                            ctx.rotate(-45 * Math.PI / 180);
+                            // Pin shadow
                             ctx.beginPath();
-                            ctx.arc(0, -15, 15, 0, 2 * Math.PI);
+                            ctx.ellipse(0, 2, 8, 4, 0, 0, 2 * Math.PI);
+                            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                            ctx.fill();
+                            
+                            // Pin head (teardrop shape)
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0);
+                            ctx.bezierCurveTo(-12, -12, -12, -24, 0, -30);
+                            ctx.bezierCurveTo(12, -24, 12, -12, 0, 0);
+                            ctx.closePath();
                             ctx.fillStyle = pin.color;
                             ctx.fill();
                             ctx.strokeStyle = 'white';
                             ctx.lineWidth = 3;
                             ctx.stroke();
-                            ctx.restore();
+                            
+                            // Inner circle
+                            ctx.beginPath();
+                            ctx.arc(0, -18, 8, 0, 2 * Math.PI);
+                            ctx.fillStyle = 'white';
+                            ctx.fill();
                             
                             // Pin number
-                            ctx.fillStyle = 'white';
-                            ctx.font = 'bold 14px Arial';
+                            ctx.fillStyle = pin.color;
+                            ctx.font = 'bold 12px Arial';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
-                            ctx.fillText(idx + 1, 0, -15);
+                            ctx.fillText(idx + 1, 0, -18);
                             
                             // Photo indicator
                             if (pin.linkedPhotoId) {
                                 ctx.beginPath();
-                                ctx.arc(12, 5, 8, 0, 2 * Math.PI);
+                                ctx.arc(10, -5, 7, 0, 2 * Math.PI);
                                 ctx.fillStyle = '#f59e0b';
                                 ctx.fill();
                                 ctx.strokeStyle = 'white';
                                 ctx.lineWidth = 2;
                                 ctx.stroke();
+                                
+                                // Camera icon
                                 ctx.fillStyle = 'white';
-                                ctx.font = 'bold 10px Arial';
-                                ctx.fillText('📷', 12, 5);
+                                ctx.font = '10px Arial';
+                                ctx.fillText('📷', 10, -5);
                             }
                             
                             ctx.restore();
@@ -2752,15 +2770,15 @@
                 img.onerror = function() {
                     // If image fails to load, create a placeholder canvas
                     const canvas = document.createElement('canvas');
-                    canvas.width = 800;
-                    canvas.height = 600;
+                    canvas.width = highRes ? 1600 : 800;
+                    canvas.height = highRes ? 1200 : 600;
                     const ctx = canvas.getContext('2d');
                     ctx.fillStyle = '#f0f0f0';
-                    ctx.fillRect(0, 0, 800, 600);
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.fillStyle = '#999';
-                    ctx.font = '16px Arial';
+                    ctx.font = highRes ? '32px Arial' : '16px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText('Layout image unavailable', 400, 300);
+                    ctx.fillText('Layout image unavailable', canvas.width / 2, canvas.height / 2);
                     resolve(canvas);
                 };
                 
